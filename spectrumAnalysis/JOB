@@ -1,0 +1,9 @@
+/home/ntlhui/fiona/field/radioCollarBackups/21Jun2015Validation/RUN_000504/
+curr_run: 504
+freq_em: 1000
+pulse_ms: 20
+lin_scale: 1
+map_d: 128
+alpha_c_thres: 500
+num_col: 4
+f_drift: -3000
