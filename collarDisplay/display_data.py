@@ -79,9 +79,9 @@ for i in xrange(1, num_col + 1):
 data = np.genfromtxt(filename, delimiter=',', names=names)
 coldata = [[0 for x in range(len(data['lat']))] for x in range(num_col)]
 # Modify values
-lat = [x / 10000000 for x in data['lat']]
-lon = [x / 10000000 for x in data['lon']]
-alt = [x / 1000 for x in data['alt']]
+lat = [x / 10000000.0 for x in data['lat']]
+lon = [x / 10000000.0 for x in data['lon']]
+alt = [x / 1000.0 for x in data['alt']]
 for i in xrange(1, num_col + 1):
 	colname = 'col' + str(i)
 	coldata[i-1] = [x / 1000 for x in data[colname]]
@@ -117,15 +117,15 @@ for i in xrange(1, num_col + 1):
 	ax.set_xlabel('Easting')
 	ax.set_ylabel('Northing')
 	ax.set_title('Run %d, Collar at %0.3f MHz\nUTM Zone: %d %s' % (run_num,
-		collars[i - 1] / 1000000, zonenum, zone))
+		collars[i - 1] / 1000000.0, zonenum, zone))
 	ax.set_aspect('equal')
 	plot.xticks(rotation='vertical')
 
 	plot.savefig('%s/RUN_%06d_COL_%0.3f.png' % (output_path, run_num,
-		collars[i - 1] / 1000000), bbox_inches = 'tight')
+		collars[i - 1] / 1000000.0), bbox_inches = 'tight')
 	print('Collar at %0.3f MHz: %s/RUN_%06d_COL_%0.3f.png' %
-		(collars[i - 1] / 1000000, output_path, run_num,
-		collars[i - 1] / 1000000))
+		(collars[i - 1] / 1000000.0, output_path, run_num,
+		collars[i - 1] / 1000000.0))
 	# plot.show(block=False)
 	plot.close()
 
@@ -145,8 +145,8 @@ if(kml_output):
 		plot.axis('off')
 		plot.savefig('tmp.png', bbox_inches = 'tight')
 		print('Collar at %0.3f MHz: %s/RUN_%06d_COL_%0.3ftx.png' %
-			(collars[i - 1] / 1000000, output_path, run_num,
-			collars[i - 1] / 1000000))
+			(collars[i - 1] / 1000000.0, output_path, run_num,
+			collars[i - 1] / 1000000.0))
 		# plot.show(block=False)
 		plot.close()
 
@@ -163,11 +163,11 @@ if(kml_output):
 
 		new_image = Image.fromarray(image_data_new)
 		new_image.save('%s/RUN_%06d_COL%0.3ftx.png' % (output_path, run_num,
-			collars[i - 1] / 1000000))
+			collars[i - 1] / 1000000.0))
 		os.remove('tmp.png')
 
 		f = open('%s/RUN_%06d_COL%0.3f.kml' % (output_path, run_num,
-			collars[i - 1] / 1000000), 'w')
+			collars[i - 1] / 1000000.0), 'w')
 		f.write("""<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
   <Folder>
@@ -188,5 +188,5 @@ if(kml_output):
       </LatLonBox>
     </GroundOverlay>
   </Folder>
-</kml>""" % (run_num, run_num, collars[i - 1] / 1000000, '%s/RUN_%06d_COL%0.3ftx.png' % (output_path, run_num, collars[i - 1] / 1000000),north, south, east, west))
+</kml>""" % (run_num, run_num, collars[i - 1] / 1000000.0, '%s/RUN_%06d_COL%0.3ftx.png' % (output_path, run_num, collars[i - 1] / 1000000.0),north, south, east, west))
 		f.close()
