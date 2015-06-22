@@ -184,6 +184,7 @@ void clean_up_memmory() {
 	free(data);
 	free(in_phase);
 	free(quadrature);
+	fclose(fftStream);
 }
 
 double **zero_mat_f(int m, int n) {
