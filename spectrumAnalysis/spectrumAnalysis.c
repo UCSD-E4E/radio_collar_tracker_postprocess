@@ -103,6 +103,9 @@ double *fft_abs;
 FILE *fileStream;
 fftw_complex aux_cpx;
 
+
+FILE *fftStream;
+
 void init_buffers();
 
 void clean_up_memmory();
@@ -242,6 +245,8 @@ unsigned char **zero_mat_c(int m, int n) {
 
 void load_files() {
 
+	fftStream = fopen("fft.txt", "w");
+
 	// -----------------------------------------------------------
 	// JOB file Loading
 	// -----------------------------------------------------------
@@ -353,6 +358,11 @@ void run_fft() {
 		                              pul_num_sam;
 		fft_abs[i + pul_num_sam / 2]    = cabs(fft_out[i]) / pul_num_sam;
 	}
+
+	for (int i = 0; i < pul_num_sam; i++) {
+		fprintf(fftStream, "%f\t", fft_abs[i]);
+	}
+	fprintf(fftStream, "\n");
 }
 
 void analysis() {
@@ -513,7 +523,7 @@ void analysis() {
 				noise_pwr /= intAux;
 
 				// SNR caculation
-				pulse_snr[l][cur_fr] = 10 * log10( signal_pwr / noise_pwr );
+				pulse_snr[l][cur_fr] = 10 * log10(signal_pwr / noise_pwr);
 
 			}
 		}
