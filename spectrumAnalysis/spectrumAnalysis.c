@@ -246,7 +246,7 @@ unsigned char **zero_mat_c(int m, int n) {
 
 void load_files() {
 
-	fftStream = fopen("fft.txt", "w");
+	fftStream = fopen("/home/ntlhui/fiona/fft.txt", "w");
 
 	// -----------------------------------------------------------
 	// JOB file Loading
@@ -360,10 +360,6 @@ void run_fft() {
 		fft_abs[i + pul_num_sam / 2]    = cabs(fft_out[i]) / pul_num_sam;
 	}
 
-	for (int i = 0; i < pul_num_sam; i++) {
-		fprintf(fftStream, "%f\t", fft_abs[i]);
-	}
-	fprintf(fftStream, "\n");
 }
 
 void analysis() {
@@ -381,6 +377,13 @@ void analysis() {
 			exit(1);
 		}
 		fclose(fileStream);
+
+		fprintf(fftStream, "-1,");
+		for (int i = pul_num_sam / 2; i < pul_num_sam; i++) {
+			fprintf(fftStream, "%f,",
+			        ((i - 1.f) / pul_num_sam - 0.5) * f_samp + center_freq);
+		}
+		fprintf(fftStream, "\n");
 
 		// Parsing each frame fron the current raw file
 		for (int j = 0; j < num_fra_p_file; j++) {
@@ -405,6 +408,8 @@ void analysis() {
 			// Gain Parsing
 			gain[j + i * num_fra_p_file] = data[(j + 1) * file_frame_size - 1];
 		}
+
+
 
 		// Looping thru each frame of the current file loaded
 		for (int j = 0; j < num_fra_p_file; j++) {
@@ -447,6 +452,11 @@ void analysis() {
 				}
 
 				run_fft();
+				fprintf(fftStream, "%d,", k);
+				for (int i = pul_num_sam / 2; i < pul_num_sam; i++) {
+					fprintf(fftStream, "%f,", fft_abs[i]);
+				}
+				fprintf(fftStream, "\n");
 
 				// Getting peak for each band of each collar and defining next jump size flag
 				intAux = 0;
