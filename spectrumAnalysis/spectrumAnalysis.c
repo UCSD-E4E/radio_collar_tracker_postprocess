@@ -246,7 +246,8 @@ unsigned char **zero_mat_c(int m, int n) {
 
 void load_files() {
 
-	fftStream = fopen("/home/ntlhui/fiona/fft.txt", "w");
+	fftStream =
+	    fopen("/home/e4e/nathan/radio_collar_tracker/spectrumAnalysis/fft.txt", "w");
 
 	// -----------------------------------------------------------
 	// JOB file Loading
@@ -380,10 +381,13 @@ void analysis() {
 
 		fprintf(fftStream, "-1,");
 		for (int i = pul_num_sam / 2; i < pul_num_sam; i++) {
-			fprintf(fftStream, "%f,",
+			fprintf(fftStream, "%f",
 			        ((i - 1.f) / pul_num_sam - 0.5) * f_samp + center_freq);
+			if (i != pul_num_sam - 1) {
+				fprintf(fftStream, ",");
+			}
 		}
-		fprintf(fftStream, "\n");
+		fprintf(fftStream, "\r\n");
 
 		// Parsing each frame fron the current raw file
 		for (int j = 0; j < num_fra_p_file; j++) {
@@ -454,9 +458,12 @@ void analysis() {
 				run_fft();
 				fprintf(fftStream, "%d,", k);
 				for (int i = pul_num_sam / 2; i < pul_num_sam; i++) {
-					fprintf(fftStream, "%f,", fft_abs[i]);
+					fprintf(fftStream, "%f", fft_abs[i]);
+					if (i != pul_num_sam - 1) {
+						fprintf(fftStream, ",");
+					}
 				}
-				fprintf(fftStream, "\n");
+				fprintf(fftStream, "\r\n");
 
 				// Getting peak for each band of each collar and defining next jump size flag
 				intAux = 0;
