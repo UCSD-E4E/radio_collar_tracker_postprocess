@@ -186,7 +186,6 @@ void clean_up_memmory() {
 	free(data);
 	free(in_phase);
 	free(quadrature);
-	fclose(fftStream);
 }
 
 double **zero_mat_f(int m, int n) {
@@ -552,7 +551,6 @@ void analysis() {
 	}
 
 	fftStream = fopen("fftheader.txt", "w");
-	fprintf(fftStream, "-1,");
 	for (int i = pul_num_sam / 2; i < pul_num_sam; i++) {
 		fprintf(fftStream, "%f",
 		        ((i - 1.f) / pul_num_sam - 0.5) * f_samp + center_freq);
@@ -560,7 +558,7 @@ void analysis() {
 			fprintf(fftStream, ",");
 		}
 	}
-	fprintf(fftStream, "%d\n", num_files);
+	fprintf(fftStream, "\n%d\n", num_files);
 	fprintf(fftStream, "%f\n", minFFT);
 	fprintf(fftStream, "%f\n", maxFFT);
 	fclose(fftStream);
