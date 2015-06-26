@@ -5,7 +5,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plot
 from mpl_toolkits.mplot3d import axes3d
 
-data = np.genfromtxt("/home/e4e/fiona/output00.txt", delimiter=',')
+data = np.genfromtxt("output00.txt", delimiter=',')
 
 # get first row
 
@@ -15,7 +15,7 @@ Z = [(row[1:]) for row in data[1:]]
 Y = [row[0] for row in data[1:]]
 
 for i in range(20):
-	data = np.genfromtxt("/home/e4e/fiona/output%2d" % i, delimiter=',')
+	data = np.genfromtxt("output%2d" % i, delimiter=',')
 	for row in data:
 		Y.append(row[0])
 		Z.append(row[1:])
