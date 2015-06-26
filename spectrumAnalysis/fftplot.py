@@ -9,17 +9,18 @@ X_labels = np.genfromtxt("fftheader.txt", delimiter=',', skip_footer=3)
 data = np.genfromtxt("fftheader.txt", delimiter=',', skip_header=1)
 minFFT = data[1]
 maxFFT = data[2]
-numFiles = data[0]
+numFiles = 56
 # get first row
 
 print("Got header\n")
 
-for i in range(int(numFiles)):
+# for i in range(int(numFiles)):
+for i in range(1):
 	print("Getting data from file %d..."%(i))
-	data = np.genfromtxt("output%02d.txt"%(i), delimiter=',')
+	outputfile = open("test%02d.txt"%(i), "r")
 	print("done\n")
-	Y_labels = [row[0] for row in data]
-	Z = [(row[1:]) for row in data]
+	Y_labels = [line.strip().split(',')[0] for line in outputfile]
+	Z = [float(i) for i in [line.strip().split(',')[1:] for line in outputfile]]
 	print("Converting axes...")
 	X = [X_labels[x] for x in range(len(X_labels)) for y in range(len(Y_labels))]
 	Y = [Y_labels[y] for x in range(len(X_labels)) for y in range(len(Y_labels))]
