@@ -247,9 +247,6 @@ unsigned char **zero_mat_c(int m, int n) {
 
 void load_files() {
 
-	fftStream =
-	    fopen("fft.txt",
-	          "w");
 
 	// -----------------------------------------------------------
 	// JOB file Loading
@@ -367,7 +364,17 @@ void run_fft() {
 }
 
 void analysis() {
-	for (int i = file_num; i < file_num + 1; i++) {
+	fftStream = fopen("fftheader.txt", "w");
+	fprintf(fftStream, "-1,");
+	for (int i = pul_num_sam / 2; i < pul_num_sam; i++) {
+		fprintf(fftStream, "%f",
+		        ((i - 1.f) / pul_num_sam - 0.5) * f_samp + center_freq);
+		if (i != pul_num_sam - 1) {
+			fprintf(fftStream, ",");
+		}
+	}
+	fclose(fftStream);
+	for (int i = 0; i < num_files; i++) {
 
 		// File Progress Display
 		printf("File %i/%i...\n", i + 1, num_files);
@@ -381,16 +388,8 @@ void analysis() {
 			exit(1);
 		}
 		fclose(fileStream);
-
-		fprintf(fftStream, "-1,");
-		for (int i = pul_num_sam / 2; i < pul_num_sam; i++) {
-			fprintf(fftStream, "%f",
-			        ((i - 1.f) / pul_num_sam - 0.5) * f_samp + center_freq);
-			if (i != pul_num_sam - 1) {
-				fprintf(fftStream, ",");
-			}
-		}
-		fprintf(fftStream, "\r\n");
+		sprintf(aux_path, "output%02d.txt", i);
+		fftStream = fopen(aux_path, "w");
 
 		// Parsing each frame fron the current raw file
 		for (int j = 0; j < num_fra_p_file; j++) {
@@ -548,6 +547,7 @@ void analysis() {
 
 			}
 		}
+		fclose(fftStream);
 	}
 
 	// -----------------------------------------------------------
