@@ -16,7 +16,7 @@ for i in range(int(numFiles)):
 	data = np.genfromtxt("output%02d.txt"%(i), delimiter=',')
 	Y_labels = [row[0] for row in data]
 	Z = [(row[1:]) for row in data]
-	X = [X_labels(x) for x in range(len(X_labels)) for y in range(len(Y_labels))]
-	Y = [Y_labels(y) for x in range(len(X_labels)) for y in range(len(Y_labels))]
+	X = [X_labels[x] for x in range(len(X_labels)) for y in range(len(Y_labels))]
+	Y = [Y_labels[y] for x in range(len(X_labels)) for y in range(len(Y_labels))]
 	sc = plot.scatter(X, Y, Z, vmin = minFFT, vmax = maxFFT)
 	plot.savefig("output%02d.png"%(i), bbox_inches='tight')
