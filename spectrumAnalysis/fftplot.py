@@ -5,20 +5,16 @@ mpl.use('Agg')
 import matplotlib.pyplot as plot
 from mpl_toolkits.mplot3d import axes3d
 
-data = np.genfromtxt("fft.txt", delimiter=',')
-
+X = np.genfromtxt("fftheader.txt", delimiter=',', skip_footer=3)
+data = np.genfromtxt("fftheader.txt", delimiter=',', skip_header=1)
+minFFT = data[1]
+maxFFT = data[2]
+numFiles = data[0]
 # get first row
 
-X = data[0][1:]
-
-Z = [(row[1:]) for row in data[1:]]
-Y = [row[0] for row in data[1:]]
-
-X, Y = np.meshgrid(X, Y)
-
-fig = plot.figure()
-ax = fig.gca(projection='3d')
-
-ax.plot_surface(X, Y, np.array(Z))
-
-plot.savefig("fftout.png", bbox_inches='tight')
+for i in range(int(numFiles)):
+	data = np.genfromtxt("output%02d.txt"%(i), delimiter=',')
+	Y = [row[0] for row in data]
+	Z = [(row[1:]) for row in data]
+	sc = plot.scatter(X, Y, Z, vmin = minFFT, vmax = maxFFT)
+	plot.savefig("output%02d.png"%(i), bbox_inches='tight')
