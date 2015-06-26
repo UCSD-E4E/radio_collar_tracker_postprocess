@@ -248,7 +248,7 @@ unsigned char **zero_mat_c(int m, int n) {
 void load_files() {
 
 	fftStream =
-	    fopen("/home/ntlhui/workspace/radio_collar_tracker/spectrumAnalysis/fft.txt",
+	    fopen("fft.txt",
 	          "w");
 
 	// -----------------------------------------------------------
