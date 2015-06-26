@@ -75,6 +75,7 @@ int min_jump                = 0;
 int aux1                    = 0;
 int aux2                    = 0;
 int aux3                    = 0;
+int file_num = 0;
 
 // Global Buffers
 int *dem_goal_f             = NULL;
@@ -247,7 +248,8 @@ unsigned char **zero_mat_c(int m, int n) {
 void load_files() {
 
 	fftStream =
-	    fopen("/home/e4e/nathan/radio_collar_tracker/spectrumAnalysis/fft.txt", "w");
+	    fopen("/home/ntlhui/workspace/radio_collar_tracker/spectrumAnalysis/fft.txt",
+	          "w");
 
 	// -----------------------------------------------------------
 	// JOB file Loading
@@ -269,6 +271,7 @@ void load_files() {
 	alpha_c_thres   = loadParameter(1);
 	num_col         = loadParameter(1);
 	f_drift         = loadParameter(1);
+	file_num        = loadParameter(1);
 	fclose(fileStream);
 	// -----------------------------------------------------------
 	col_f = (unsigned int *)malloc(num_col * sizeof(unsigned int));
@@ -364,7 +367,7 @@ void run_fft() {
 }
 
 void analysis() {
-	for (int i = 0; i < num_files; i++) {
+	for (int i = file_num; i < file_num + 1; i++) {
 
 		// File Progress Display
 		printf("File %i/%i...\n", i + 1, num_files);

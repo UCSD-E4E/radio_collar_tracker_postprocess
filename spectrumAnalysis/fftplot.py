@@ -5,7 +5,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plot
 from mpl_toolkits.mplot3d import axes3d
 
-data = np.genfromtxt("output00", delimiter=',')
+data = np.genfromtxt("fft.txt", delimiter=',')
 
 # get first row
 
@@ -13,13 +13,6 @@ X = data[0][1:]
 
 Z = [(row[1:]) for row in data[1:]]
 Y = [row[0] for row in data[1:]]
-
-for i in range(20):
-	data = np.genfromtxt("output%2d" % i, delimiter=',')
-	print("File %2d\n" % i)
-	for row in data:
-		Y.append(row[0])
-		Z.append(row[1:])
 
 X, Y = np.meshgrid(X, Y)
 
