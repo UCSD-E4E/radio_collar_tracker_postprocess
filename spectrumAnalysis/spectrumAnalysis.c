@@ -4,6 +4,7 @@
 #include <complex.h>
 #include <fftw3.h>
 #include <limits.h>
+#include <float.h>
 
 #define PI                      3.14159265359
 
@@ -364,16 +365,10 @@ void run_fft() {
 }
 
 void analysis() {
-	fftStream = fopen("fftheader.txt", "w");
-	fprintf(fftStream, "-1,");
-	for (int i = pul_num_sam / 2; i < pul_num_sam; i++) {
-		fprintf(fftStream, "%f",
-		        ((i - 1.f) / pul_num_sam - 0.5) * f_samp + center_freq);
-		if (i != pul_num_sam - 1) {
-			fprintf(fftStream, ",");
-		}
-	}
-	fclose(fftStream);
+	double maxFFT = DBL_MIN;
+	double minFFT = DBL_MAX;
+
+
 	for (int i = 0; i < num_files; i++) {
 
 		// File Progress Display
@@ -461,6 +456,12 @@ void analysis() {
 				fprintf(fftStream, "%d,", k);
 				for (int i = pul_num_sam / 2; i < pul_num_sam; i++) {
 					fprintf(fftStream, "%f", fft_abs[i]);
+					if (fft_abs[i] > maxFFT) {
+						maxFFT = fft_abs[i];
+					}
+					if (fft_abs[i] < minFFT) {
+						minFFT = fft_abs[i];
+					}
 					if (i != pul_num_sam - 1) {
 						fprintf(fftStream, ",");
 					}
@@ -549,6 +550,20 @@ void analysis() {
 		}
 		fclose(fftStream);
 	}
+
+	fftStream = fopen("fftheader.txt", "w");
+	fprintf(fftStream, "-1,");
+	for (int i = pul_num_sam / 2; i < pul_num_sam; i++) {
+		fprintf(fftStream, "%f",
+		        ((i - 1.f) / pul_num_sam - 0.5) * f_samp + center_freq);
+		if (i != pul_num_sam - 1) {
+			fprintf(fftStream, ",");
+		}
+	}
+	fprintf(fftStream, "%d\n", num_files);
+	fprintf(fftStream, "%f\n", minFFT);
+	fprintf(fftStream, "%f\n", maxFFT);
+	fclose(fftStream);
 
 	// -----------------------------------------------------------
 	// Storing results
