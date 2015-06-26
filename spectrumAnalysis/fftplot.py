@@ -16,6 +16,7 @@ Y = [row[0] for row in data[1:]]
 
 for i in range(20):
 	data = np.genfromtxt("output%2d" % i, delimiter=',')
+	print("File %2d\n" % i)
 	for row in data:
 		Y.append(row[0])
 		Z.append(row[1:])
