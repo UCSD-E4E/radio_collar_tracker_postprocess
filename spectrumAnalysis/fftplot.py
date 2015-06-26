@@ -5,7 +5,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plot
 from mpl_toolkits.mplot3d import axes3d
 
-data = np.genfromtxt("output00.txt", delimiter=',')
+data = np.genfromtxt("output00", delimiter=',')
 
 # get first row
 
