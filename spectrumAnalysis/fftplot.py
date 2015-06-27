@@ -15,10 +15,7 @@ numFiles = data[0]
 
 print("Got header\n")
 
-filecounter = 0
-
 for i in range(int(numFiles)):
-# for i in range(1):
 	print("Getting data from file %d..."%(i))
 	outputfile = open("output%02d.txt"%(i), "r")
 	print("done")
@@ -42,7 +39,6 @@ for i in range(int(numFiles)):
 		ll = ['%.0f' % a for a in xx]
 		plot.xticks(xx, ll)
 		plot.xticks(rotation='vertical')
-		plot.savefig("output_%010d.png"%(filecounter), bbox_inches='tight')
-		filecounter += 1
+		plot.savefig("output_%010d.png"%(int(time)), bbox_inches='tight')
 		# break
 	outputfile.close()
