@@ -15,16 +15,19 @@ numFiles = data[0]
 
 print("Got header\n")
 
+filecounter = 0
+
 for i in range(int(numFiles)):
 # for i in range(1):
 	print("Getting data from file %d..."%(i))
 	outputfile = open("output%02d.txt"%(i), "r")
-	print("done\n")
+	print("done")
 	for line in outputfile:
 		print("Getting line...")
 		time = line.strip().split(',')[0]
+		print("Got time %d" % (int(time)))
 		fft = [float(data) for data in line.strip().split(',')[1:]]
-		print("done\n")
+		print("done")
 
 		print("Plotting...")
 		plot.cla()
@@ -39,6 +42,7 @@ for i in range(int(numFiles)):
 		ll = ['%.0f' % a for a in xx]
 		plot.xticks(xx, ll)
 		plot.xticks(rotation='vertical')
-		plot.savefig("output%10d.png"%(int(time)), bbox_inches='tight')
+		plot.savefig("output_%010d.png"%(filecounter), bbox_inches='tight')
+		filecounter++
 		# break
 	outputfile.close()
