@@ -64,9 +64,13 @@ ax = plot.gca()
 ax.set_ylim(bottom=minFFT, top=maxFFT)
 ax.set_title("Frequency: %f"%(X_label[freq_index]))
 
-fft = [data[1] for data in queue]
-time = [data[0] for data in queue]
+fft = []
+time = []
 
+while not queue.empty():
+	data = queue.get()
+	fft.append(data[1])
+	time.append(data[0])
 
 plt = plot.scatter(time, fft)
 xx, locs = plot.xticks()
