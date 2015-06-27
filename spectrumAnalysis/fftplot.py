@@ -15,8 +15,8 @@ numFiles = data[0]
 
 print("Got header\n")
 
-# for i in range(int(numFiles)):
-for i in range(1):
+for i in range(int(numFiles)):
+# for i in range(1):
 	print("Getting data from file %d..."%(i))
 	outputfile = open("test%02d.txt"%(i), "r")
 	print("done\n")
@@ -27,11 +27,12 @@ for i in range(1):
 		print("done\n")
 
 		print("Plotting...")
+		plot.cla()
 		plt = plot.plot(X_labels, fft)
 		ax = plot.gca()
-		ax.set_xlim(left=minFFT, right=maxFFT)
+		# ax.set_xlim(left=minFFT, right=maxFFT)
 		ax.set_title("Time: %8d"%(int(time)))
 		plot.xticks(rotation='vertical')
 		plot.savefig("output%08d.png"%(int(time)), bbox_inches='tight')
-		break
+		# break
 	outputfile.close()
