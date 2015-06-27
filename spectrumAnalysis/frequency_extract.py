@@ -50,9 +50,9 @@ numFiles = data[0]
 print("Got header")
 
 print("Running processes...")
-p = Pool(8)
+p = Pool(1)
 
-p.map(procFile, range(int(numFiles)))
+p.map(procFile, range(int(0)))
 
 
 print("Plotting...")
