@@ -43,6 +43,6 @@ for i in range(int(numFiles)):
 		plot.xticks(xx, ll)
 		plot.xticks(rotation='vertical')
 		plot.savefig("output_%010d.png"%(filecounter), bbox_inches='tight')
-		filecounter++
+		filecounter += 1
 		# break
 	outputfile.close()
