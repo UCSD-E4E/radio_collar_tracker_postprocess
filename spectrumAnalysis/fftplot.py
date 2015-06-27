@@ -32,6 +32,7 @@ for i in range(int(numFiles)):
 		ax = plot.gca()
 		# ax.set_xlim(left=minFFT, right=maxFFT)
 		ax.set_title("Time: %8d"%(int(time)))
+		ax.get_xaxis().get_major_formatter().set_useOffset(False)
 		plot.xticks(rotation='vertical')
 		plot.savefig("output%08d.png"%(int(time)), bbox_inches='tight')
 		# break
