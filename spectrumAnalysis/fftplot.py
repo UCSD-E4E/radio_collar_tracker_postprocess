@@ -11,7 +11,7 @@ def procFile(i):
 	print("done")
 	for line in outputfile:
 		print("Getting line...")
-		time = float(line.strip().split(',')[0]) / 2048000.0
+		time = float(line.strip().split(',')[0]) / 2048000.0 * 1000
 		print("Got time %.3f" % (time))
 		fft = [float(data) for data in line.strip().split(',')[1:]]
 		print("done")
