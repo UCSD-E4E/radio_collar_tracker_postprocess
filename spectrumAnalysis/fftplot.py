@@ -15,8 +15,8 @@ numFiles = data[0]
 
 print("Got header\n")
 
-for i in range(int(numFiles)):
-# for i in range(1):
+# for i in range(int(numFiles)):
+for i in range(1):
 	print("Getting data from file %d..."%(i))
 	outputfile = open("test%02d.txt"%(i), "r")
 	print("done\n")
