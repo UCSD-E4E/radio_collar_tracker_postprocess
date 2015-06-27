@@ -498,9 +498,9 @@ void analysis() {
 				} else if (jump < min_jump) {
 					jump = min_jump;
 				}
-				jump = min_jump
+				jump = min_jump;
 
-				       k += jump;
+				k += jump;
 			}
 			for (int l = 0; l < num_col; l++) {
 
