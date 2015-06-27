@@ -32,5 +32,5 @@ for i in range(int(numFiles)):
 		ax.set_xlim(left=minFFT, right=maxFFT)
 		ax.set_title("Time: %8d"%time)
 		plot.xticks(rotation='vertical')
-		plot.savefig("output%08d.png"%(time))
+		plot.savefig("output%08d.png"%(int(time)))
 	outputfile.close()
