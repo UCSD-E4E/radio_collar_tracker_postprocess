@@ -57,7 +57,7 @@ p.map(procFile, range(int(numFiles)))
 
 print("Plotting...")
 plot.cla()
-fig = plot.figure(i)
+fig = plot.figure()
 fig.set_size_inches(8, 6)
 fig.set_dpi(72)
 ax = plot.gca()
