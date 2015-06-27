@@ -453,7 +453,7 @@ void analysis() {
 
 				run_fft();
 				fprintf(fftStream, "%.3f,",
-				        (k + sld_fft_stps * j + i * sld_fft_stps * num_fra_p_file) / 1000.f);
+				        (k + sld_fft_stps * j + i * sld_fft_stps * num_fra_p_file) / 2048000.f);
 				for (int i = 0; i < pul_num_sam; i++) {
 					fprintf(fftStream, "%f", fft_abs[i]);
 					if (fft_abs[i] > maxFFT) {

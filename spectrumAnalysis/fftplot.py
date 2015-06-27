@@ -11,7 +11,7 @@ def procFile(i):
 	print("done")
 	for line in outputfile:
 		print("Getting line...")
-		time = float(line.strip().split(',')[0]) / 2048000.0 * 1000
+		time = float(line.strip().split(',')[0])
 		print("Got time %.3f" % (time))
 		fft = [float(data) for data in line.strip().split(',')[1:]]
 		print("done")
@@ -23,7 +23,7 @@ def procFile(i):
 		fig.set_dpi(72)
 		plt = plot.plot(X_labels, fft)
 		ax = plot.gca()
-		# ax.set_xlim(left=minFFT, right=maxFFT)
+		ax.set_ylim(bottom=minFFT, top=maxFFT)
 		ax.set_title("Time: %f"%(time))
 		xx, locs = plot.xticks()
 		ll = ['%.0f' % a for a in xx]
