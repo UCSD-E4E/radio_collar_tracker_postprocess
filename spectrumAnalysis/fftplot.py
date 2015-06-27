@@ -28,11 +28,15 @@ for i in range(int(numFiles)):
 
 		print("Plotting...")
 		plot.cla()
+		fig = plot.figure(i)
+		fig.set_size_inches(8, 6)
+		fig.set_dpi(72)
 		plt = plot.plot(X_labels, fft)
 		ax = plot.gca()
 		# ax.set_xlim(left=minFFT, right=maxFFT)
 		ax.set_title("Time: %8d"%(int(time)))
 		ax.get_xaxis().get_major_formatter().set_useOffset(False)
+		ax.get_yaxis().get_major_formatter().set_useOffset(False)
 		plot.xticks(rotation='vertical')
 		plot.savefig("output%08d.png"%(int(time)), bbox_inches='tight')
 		# break
