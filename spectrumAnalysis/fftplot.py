@@ -24,8 +24,8 @@ for i in range(int(numFiles)):
 	print("done")
 	for line in outputfile:
 		print("Getting line...")
-		time = line.strip().split(',')[0]
-		print("Got time %d" % (int(time)))
+		time = float(line.strip().split(',')[0]) / 2048000.0
+		print("Got time %.3f" % (time))
 		fft = [float(data) for data in line.strip().split(',')[1:]]
 		print("done")
 
@@ -37,7 +37,7 @@ for i in range(int(numFiles)):
 		plt = plot.plot(X_labels, fft)
 		ax = plot.gca()
 		# ax.set_xlim(left=minFFT, right=maxFFT)
-		ax.set_title("Time: %d"%(int(time)))
+		ax.set_title("Time: %f"%(time))
 		xx, locs = plot.xticks()
 		ll = ['%.0f' % a for a in xx]
 		plot.xticks(xx, ll)
