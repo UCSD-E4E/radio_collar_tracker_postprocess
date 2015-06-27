@@ -30,7 +30,7 @@ for i in range(int(numFiles)):
 		plt = plot.plot(X_labels, fft)
 		ax = plot.gca()
 		ax.set_xlim(left=minFFT, right=maxFFT)
-		ax.set_title("Time: %8d"%time)
+		ax.set_title("Time: %8d"%(int(time)))
 		plot.xticks(rotation='vertical')
 		plot.savefig("output%08d.png"%(int(time)))
 	outputfile.close()
