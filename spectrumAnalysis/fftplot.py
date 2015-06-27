@@ -36,7 +36,7 @@ for i in range(int(numFiles)):
 		# ax.set_xlim(left=minFFT, right=maxFFT)
 		ax.set_title("Time: %8d"%(int(time)))
 		xx, locs = plot.xticks()
-		ll = ['%.3f' % a for a in xx]
+		ll = ['%.0f' % a for a in xx]
 		plot.xticks(xx, ll)
 		plot.xticks(rotation='vertical')
 		plot.savefig("output%08d.png"%(int(time)), bbox_inches='tight')
