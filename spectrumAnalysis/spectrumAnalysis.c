@@ -453,7 +453,7 @@ void analysis() {
 
 				run_fft();
 				fprintf(fftStream, "%d,", k);
-				for (int i = pul_num_sam / 2; i < pul_num_sam; i++) {
+				for (int i = 0; i < pul_num_sam; i++) {
 					fprintf(fftStream, "%f", fft_abs[i]);
 					if (fft_abs[i] > maxFFT) {
 						maxFFT = fft_abs[i];
@@ -498,8 +498,9 @@ void analysis() {
 				} else if (jump < min_jump) {
 					jump = min_jump;
 				}
+				jump = min_jump
 
-				k += jump;
+				       k += jump;
 			}
 			for (int l = 0; l < num_col; l++) {
 
@@ -551,7 +552,7 @@ void analysis() {
 	}
 
 	fftStream = fopen("fftheader.txt", "w");
-	for (int i = pul_num_sam / 2; i < pul_num_sam; i++) {
+	for (int i = 0; i < pul_num_sam; i++) {
 		fprintf(fftStream, "%f",
 		        ((i - 1.f) / pul_num_sam - 0.5) * f_samp + center_freq);
 		if (i != pul_num_sam - 1) {
