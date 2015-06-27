@@ -29,7 +29,7 @@ def procFile(i):
 		ll = ['%.0f' % a for a in xx]
 		plot.xticks(xx, ll)
 		plot.xticks(rotation='vertical')
-		plot.savefig("output_%010d.png"%(int(time)), bbox_inches='tight')
+		plot.savefig("output_%010d.png"%(int(time * 1000)), bbox_inches='tight')
 		# break
 	outputfile.close()
 	return
