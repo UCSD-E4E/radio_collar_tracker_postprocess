@@ -53,8 +53,8 @@ fig = plot.figure()
 fig.set_size_inches(8, 6)
 fig.set_dpi(72)
 ax = plot.gca()
-ax.set_ylim(bottom=minFFT, top=maxFFT)
-ax.set_xlim(left=172100000, right=172300000)
+# ax.set_ylim(bottom=minFFT, top=maxFFT)
+# ax.set_xlim(left=172100000, right=172300000)
 
 peaks = [0] * length
 
@@ -66,7 +66,7 @@ for i in range(int(numFiles)):
 		if fft[j] > peaks[j]:
 			peaks[j] = fft[j]
 
-plt = plot.plot(X_label, fft)
+plt = plot.plot(X_label, peaks)
 xx, locs = plot.xticks()
 ll = ['%.0f' % a for a in xx]
 plot.xticks(xx, ll)
