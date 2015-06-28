@@ -56,7 +56,7 @@ print("Got header")
 print("Running processes...")
 p = Pool(8)
 
-p.map(procFile, range(numFiles))
+p.map(procFile, range(int(numFiles)))
 
 # All files done
 
@@ -73,7 +73,7 @@ ax.set_title("Frequency: %f"%(X_label[freq_index]))
 fft = []
 time = []
 
-for i in range(numFiles):
+for i in range(int(numFiles)):
 	datafile = open("fft_%09d_%03d.txt"%(target_frequency, i), "r")
 	for line in datafile:
 		fft.append(line.strip().split(",")[1])
