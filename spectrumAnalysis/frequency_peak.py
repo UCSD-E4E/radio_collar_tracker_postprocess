@@ -15,14 +15,14 @@ def procFile(i):
 	# print("Getting data from file %d..."%(i))
 	outputfile = open("output%02d.txt"%(int(i)), "r")
 	filestream = open("fftpeak_%03d.txt"%(i), "w")
-	peaks = [] * length
+	peaks = [0] * length
 	for line in outputfile:
 		fft = [float(data) for data in line.strip().split(',')[1:]]
 		for j in range(length):
 			if fft[j] > peaks[j]:
 				peaks[j] = fft[j]
 	for j in range(length):
-		filestream.write("%.3f\t" % (time, fft[freq_index]))
+		filestream.write("%.3f\t" % (peaks[j]))
 	outputfile.close()
 	filestream.close()
 	return
@@ -31,7 +31,10 @@ X_labels = np.genfromtxt("fftheader.txt", delimiter=',', skip_footer=3)
 X_label = [float(label) for label in X_labels]
 
 data = np.genfromtxt("fftheader.txt", skip_header=1)
+minFFT = data[1]
+maxFFT = data[2]
 numFiles = data[0]
+# numFiles = 1
 length = len(X_label)
 
 print("Got header")
@@ -40,6 +43,7 @@ print("Running processes...")
 p = Pool(8)
 
 p.map(procFile, range(int(numFiles)))
+# procFile(0)
 
 # All files done
 
@@ -50,20 +54,21 @@ fig.set_size_inches(8, 6)
 fig.set_dpi(72)
 ax = plot.gca()
 ax.set_ylim(bottom=minFFT, top=maxFFT)
+ax.set_xlim(left=172100000, right=172300000)
 
 peaks = [0] * length
 
 for i in range(int(numFiles)):
-	datafile = open("fft_%09d_%03d.txt"%(target_frequency, i), "r")
+	datafile = open("fftpeak_%03d.txt"%(i), "r")
 	line = datafile.next()
-	fft = [float(data) for data in line.strip().split(',')]
+	fft = [float(data) for data in line.strip().split('\t')]
 	for j in range(length):
 		if fft[j] > peaks[j]:
 			peaks[j] = fft[j]
 
-plt = plot.scatter(X_label, fft)
+plt = plot.plot(X_label, fft)
 xx, locs = plot.xticks()
 ll = ['%.0f' % a for a in xx]
 plot.xticks(xx, ll)
 plot.xticks(rotation='vertical')
-plot.savefig("peaks.png"%(int(X_label[freq_index])), bbox_inches='tight')
+plot.savefig("peaks.png", bbox_inches='tight')
