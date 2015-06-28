@@ -54,7 +54,7 @@ fig.set_size_inches(8, 6)
 fig.set_dpi(72)
 ax = plot.gca()
 # ax.set_ylim(bottom=minFFT, top=maxFFT)
-# ax.set_xlim(left=172100000, right=172300000)
+ax.set_xlim(left=172100000, right=172300000)
 
 peaks = [0] * length
 
