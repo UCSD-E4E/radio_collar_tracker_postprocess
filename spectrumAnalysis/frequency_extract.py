@@ -13,7 +13,7 @@ freq_index = 0
 
 def procFile(i):
 	print("Getting data from file %d..."%(i))
-	outputfile = open("output%02d.txt"%(i), "r")
+	outputfile = open("output%02d.txt"%(int(i)), "r")
 	for line in outputfile:
 		print("Getting line...")
 		time = float(line.strip().split(',')[0])
@@ -50,10 +50,10 @@ numFiles = data[0]
 print("Got header")
 
 print("Running processes...")
-p = Pool(1)
+p = Pool(8)
 
-p.map(procFile, range(int(0)))
-
+p.map(procFile, range(numFiles))
+# procFile(0)
 
 print("Plotting...")
 plot.cla()
