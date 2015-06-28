@@ -44,6 +44,8 @@ p = Pool(8)
 
 p.map(procFile, range(int(numFiles)))
 # procFile(0)
+# for i in range(int(numFiles)):
+# 	procFile(i)
 
 # All files done
 
@@ -54,7 +56,7 @@ fig.set_size_inches(8, 6)
 fig.set_dpi(72)
 ax = plot.gca()
 # ax.set_ylim(bottom=minFFT, top=maxFFT)
-ax.set_xlim(left=172100000, right=172300000)
+# ax.set_xlim(left=172100000, right=172300000)
 
 peaks = [0] * length
 
@@ -66,7 +68,7 @@ for i in range(int(numFiles)):
 		if fft[j] > peaks[j]:
 			peaks[j] = fft[j]
 
-plt = plot.plot(X_label, peaks)
+plt = plot.plot(peaks)
 xx, locs = plot.xticks()
 ll = ['%.0f' % a for a in xx]
 plot.xticks(xx, ll)
