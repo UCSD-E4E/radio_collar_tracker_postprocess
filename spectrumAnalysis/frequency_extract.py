@@ -10,20 +10,23 @@ from Queue import PriorityQueue
 
 queue = PriorityQueue()
 freq_index = 0
+target_frequency = 0
 
 def procFile(i):
-	print("Getting data from file %d..."%(i))
+	# print("Getting data from file %d..."%(i))
 	outputfile = open("output%02d.txt"%(int(i)), "r")
+	filestream = open("fft_%09d_%03d.txt"%(target_frequency, i), "w")
 	for line in outputfile:
-		print("Getting line...")
+		# print("Getting line...")
 		time = float(line.strip().split(',')[0])
-		print("Got time %.3f" % (time))
+		# print("Got time %.3f" % (time))
 		fft = [float(data) for data in line.strip().split(',')[1:]]
 
-		queue.put((time, fft[freq_index]))
+		filestream.write("%.3f,%f\n" % (time, fft[freq_index]))
 
 		# break
 	outputfile.close()
+	filestream.close()
 	return
 
 # Parse arguments
@@ -42,6 +45,7 @@ if float(args.frequency) < X_label[0] or float(args.frequency) > X_label[len(X_l
 while float(args.frequency) > X_label[freq_index]:
 	freq_index += 1
 print("Using frequency %.3f" % (X_label[freq_index]))
+target_frequency = X_label[freq_index]
 data = np.genfromtxt("fftheader.txt", skip_header=1)
 minFFT = data[1]
 maxFFT = data[2]
@@ -53,7 +57,9 @@ print("Running processes...")
 p = Pool(8)
 
 p.map(procFile, range(numFiles))
-# procFile(0)
+
+# All files done
+
 
 print("Plotting...")
 plot.cla()
@@ -67,10 +73,11 @@ ax.set_title("Frequency: %f"%(X_label[freq_index]))
 fft = []
 time = []
 
-while not queue.empty():
-	data = queue.get()
-	fft.append(data[1])
-	time.append(data[0])
+for i in range(numFiles):
+	datafile = open("fft_%09d_%03d.txt"%(target_frequency, i), "r")
+	for line in datafile:
+		fft.append(line.strip().split(",")[1])
+		time.append(line.strip().split(",")[0])
 
 plt = plot.scatter(time, fft)
 xx, locs = plot.xticks()
