@@ -555,7 +555,7 @@ void analysis() {
 	fftStream = fopen("fftheader.txt", "w");
 	for (int i = 0; i < pul_num_sam; i++) {
 		fprintf(fftStream, "%f",
-		        (i / pul_num_sam - 0.5) * f_samp + center_freq);
+		        (double(i) / pul_num_sam - 0.5) * f_samp + center_freq);
 		if (i != pul_num_sam - 1) {
 			fprintf(fftStream, ",");
 		}
