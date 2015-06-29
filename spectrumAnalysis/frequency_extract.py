@@ -39,7 +39,7 @@ args = parser.parse_args()
 X_labels = np.genfromtxt("fftheader.txt", delimiter=',', skip_footer=3)
 X_label = [float(label) for label in X_labels]
 
-freq_index = args.frequency
+freq_index = int(args.frequency)
 print("Using frequency %.3f" % (X_label[freq_index]))
 target_frequency = X_label[freq_index]
 data = np.genfromtxt("fftheader.txt", skip_header=1)
