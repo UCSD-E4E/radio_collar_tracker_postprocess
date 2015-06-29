@@ -63,7 +63,6 @@ fig = plot.figure()
 fig.set_size_inches(8, 6)
 fig.set_dpi(72)
 ax = plot.gca()
-ax.set_ylim(bottom=minFFT, top=maxFFT)
 ax.set_title("Frequency: %f"%(X_label[freq_index]))
 
 fft = []
@@ -75,6 +74,7 @@ for i in range(int(numFiles)):
 		fft.append(line.strip().split(",")[1])
 		time.append(line.strip().split(",")[0])
 
+ax.set_ylim(bottom=minFFT, top=np.amax(fft))
 plt = plot.plot(time, fft)
 xx, locs = plot.xticks()
 ll = ['%.0f' % a for a in xx]
