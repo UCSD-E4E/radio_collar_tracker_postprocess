@@ -33,6 +33,7 @@ def procFile(i):
 parser = argparse.ArgumentParser(description='Extracts a specific frequency'
 	' from the exported FFT data')
 parser.add_argument('frequency', help='Frequency to extract')
+parser.add_argument('max', help='max amplitude')
 args = parser.parse_args()
 
 
@@ -74,7 +75,7 @@ for i in range(int(numFiles)):
 		fft.append(line.strip().split(",")[1])
 		time.append(line.strip().split(",")[0])
 
-ax.set_ylim(bottom=minFFT, top=np.amax(fft))
+ax.set_ylim(bottom=minFFT, top=float(args.max))
 plt = plot.plot(time, fft)
 xx, locs = plot.xticks()
 ll = ['%.0f' % a for a in xx]
