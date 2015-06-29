@@ -75,7 +75,7 @@ for i in range(int(numFiles)):
 		fft.append(line.strip().split(",")[1])
 		time.append(line.strip().split(",")[0])
 
-plt = plot.scatter(time, fft)
+plt = plot.plot(time, fft)
 xx, locs = plot.xticks()
 ll = ['%.0f' % a for a in xx]
 plot.xticks(xx, ll)
