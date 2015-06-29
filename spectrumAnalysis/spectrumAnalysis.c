@@ -312,11 +312,15 @@ void load_files() {
 	// Derived Parameters Calculation
 	pul_num_sam         = ceil(f_samp * pulse_ms / 1000);
 	bin_em              = ceil(pul_num_sam * freq_em / f_samp);
+	FILE* collarbinStream = fopen("collarbin.txt", "w");
 	for (int i = 0; i < num_col; i++) {
 		dem_goal_f[i]   = col_f[i] - center_freq;
 		fft_bin[i]      = (int)ceil(pul_num_sam / 2 + ((double)pul_num_sam) * ((
 		                                double)dem_goal_f[i]) / f_samp + 1);
+		fprintf(collarbinStream, "%d\n", fft_bin[i]);
 	}
+	fclose(collarbinStream);
+
 	data_frame_size     = (int)((float)timeout_interrupt * ((float)f_samp / 500));
 	file_frame_size     = data_frame_size + EXTRA_DATA_SIZE;
 	frame_size          = data_frame_size / 2;
