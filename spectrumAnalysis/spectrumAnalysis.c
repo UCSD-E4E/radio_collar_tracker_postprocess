@@ -268,7 +268,6 @@ void load_files() {
 	alpha_c_thres   = loadParameter(1);
 	num_col         = loadParameter(1);
 	f_drift         = loadParameter(1);
-	file_num        = loadParameter(1);
 	fclose(fileStream);
 	// -----------------------------------------------------------
 	col_f = (unsigned int *)malloc(num_col * sizeof(unsigned int));
