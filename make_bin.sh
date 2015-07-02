@@ -8,6 +8,7 @@ chmod +x build*
 ./build-spectrumAnalysis
 
 cd ${cwd}
+${cwd}/collarDisplay/install.sh
 cp ${cwd}/collarDetect/altFilter.py $HOME/rct/bin/
 cp ${cwd}/CurrentCode/PostProcessC/spectrumAnalysis $HOME/rct/bin/
 cp ${cwd}/CLI_GUI/cas.sh $HOME/rct/bin/
