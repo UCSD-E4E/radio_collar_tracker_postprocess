@@ -67,7 +67,7 @@ int pul_num_sam             = 0;
 int bin_em                  = 0;
 int data_frame_size         = 0;
 int file_frame_size         = 0;
-int file_lenght             = 0;
+int file_length             = 0;
 int sld_fft_stps            = 0;
 int ttl_n_fr                = 0;
 int max_jump                = 0;
@@ -152,7 +152,7 @@ void init_buffers() {
 	                               FFTW_MEASURE);
 	fft_abs     = (double *)malloc(pul_num_sam * sizeof(double));
 	gain        = (char *)malloc(num_fra_p_file * num_files * sizeof(char));
-	data        = (char *)malloc(file_lenght * sizeof(char));
+	data        = (char *)malloc(file_length * sizeof(char));
 	pulse_snr   = zero_mat_f(num_col, ttl_n_fr);
 	gps_pos     = zero_mat_i(ttl_n_fr, 3);
 	frame       = zero_mat_c(num_fra_p_file, data_frame_size);
@@ -189,13 +189,13 @@ double **zero_mat_f(int m, int n) {
 
 	// Memmory Allocation
 	mat = (double **)calloc(m, sizeof(double *));
-	for(int i = 0; i < m; i++) {
+	for (int i = 0; i < m; i++) {
 		mat[i] = (double *)calloc(n, sizeof(double));
 	}
 
 	// Initializing values (0)
-	for(int i = 0; i < m; i++)
-		for(int j = 0; j < n; j++) {
+	for (int i = 0; i < m; i++)
+		for (int j = 0; j < n; j++) {
 			mat[i][j] = 0;
 		}
 
@@ -208,13 +208,13 @@ int **zero_mat_i(int m, int n) {
 
 	// Memmory Allocation
 	mat = (int **)calloc(m, sizeof(int *));
-	for(int i = 0; i < m; i++) {
+	for (int i = 0; i < m; i++) {
 		mat[i] = (int *)calloc(n, sizeof(int));
 	}
 
 	// Initializing values (0)
-	for(int i = 0; i < m; i++)
-		for(int j = 0; j < n; j++) {
+	for (int i = 0; i < m; i++)
+		for (int j = 0; j < n; j++) {
 			mat[i][j] = 0;
 		}
 
@@ -227,13 +227,13 @@ unsigned char **zero_mat_c(int m, int n) {
 
 	// Memmory Allocation
 	mat = (unsigned char **)calloc(m, sizeof(unsigned char *));
-	for(int i = 0; i < m; i++) {
+	for (int i = 0; i < m; i++) {
 		mat[i] = (unsigned char *)calloc(n, sizeof(unsigned char));
 	}
 
 	// Initializing values (0)
-	for(int i = 0; i < m; i++)
-		for(int j = 0; j < n; j++) {
+	for (int i = 0; i < m; i++)
+		for (int j = 0; j < n; j++) {
 			mat[i][j] = 0;
 		}
 
@@ -247,12 +247,12 @@ void load_files() {
 	// -----------------------------------------------------------
 	fileStream  = fopen(JOB_FILE_NAME, "r");
 	// RAW data path loading
-	if(fscanf(fileStream, "%s", raw_data_path) == 0) {
+	if (fscanf(fileStream, "%s", raw_data_path) == 0) {
 		fprintf(stderr, "ERROR Reading Data Config File!\n");
 		exit(1);
 	}
 	// Jumping to the next line of the file
-	if(fgets(aux_path, STD_STR_SZ, fileStream) == NULL);
+	if (fgets(aux_path, STD_STR_SZ, fileStream) == NULL);
 	// Numeric parameters loading
 	curr_run        = loadParameter(1);
 	freq_em         = loadParameter(1);
@@ -271,7 +271,7 @@ void load_files() {
 	// COL file Loading
 	// -----------------------------------------------------------
 	fileStream  = fopen(COL_FILE_NAME, "r");
-	for(int i = 0; i < num_col; i++) {
+	for (int i = 0; i < num_col; i++) {
 		col_f[i] = loadParameter(0) + f_drift;
 	}
 	fclose(fileStream);
@@ -305,7 +305,7 @@ void load_files() {
 	// Derived Parameters Calculation
 	pul_num_sam         = ceil(f_samp * pulse_ms / 1000);
 	bin_em              = ceil(pul_num_sam * freq_em / f_samp);
-	for(int i = 0; i < num_col; i++) {
+	for (int i = 0; i < num_col; i++) {
 		dem_goal_f[i]   = col_f[i] - center_freq;
 		fft_bin[i]      = (int)ceil(pul_num_sam / 2 + ((double)pul_num_sam) * ((
 		                                double)dem_goal_f[i]) / f_samp + 1);
@@ -313,14 +313,14 @@ void load_files() {
 	data_frame_size     = (int)((float)timeout_interrupt * ((float)f_samp / 500));
 	file_frame_size     = data_frame_size + EXTRA_DATA_SIZE;
 	frame_size          = data_frame_size / 2;
-	file_lenght         = file_frame_size * num_fra_p_file;
+	file_length         = file_frame_size * num_fra_p_file;
 	sld_fft_stps        = frame_size - pul_num_sam;
 	ttl_n_fr            = num_fra_p_file * num_files;
 	max_jump            = (int)ceil(((double)(MAX_SLICING_FACTOR * pul_num_sam)) /
 	                                1000);
 	min_jump            = (int)ceil(((double)(MIN_SLICING_FACTOR * pul_num_sam)) /
 	                                1000);
-	for(int i = 0; i < max_gain_index; i++) {
+	for (int i = 0; i < max_gain_index; i++) {
 		valid_gain_values[i] = pow(10, ((double)gain_values[i]) / 100.0);
 	}
 
@@ -328,16 +328,16 @@ void load_files() {
 
 int loadParameter(int comma) {
 
-	if(fgets(fileBuffer, STD_STR_SZ, fileStream) == NULL) {
+	if (fgets(fileBuffer, STD_STR_SZ, fileStream) == NULL) {
 		fprintf(stderr, "ERROR Reading Data Config File!\n");
 		exit(1);
 	}
-	if(comma) {
+	if (comma) {
 		intAux = 0;
-		while(fileBuffer[intAux] != ':') {
+		while (fileBuffer[intAux] != ':') {
 			intAux++;
 		}
-		if(intAux >= STD_STR_SZ) {
+		if (intAux >= STD_STR_SZ) {
 			fprintf(stderr, "ERROR Reading Data Config File!\n");
 			exit(1);
 		}
@@ -348,7 +348,7 @@ int loadParameter(int comma) {
 
 void run_fft() {
 	fftw_execute(fft_plan);
-	for(int i = 0; i < pul_num_sam / 2; i++) {
+	for (int i = 0; i < pul_num_sam / 2; i++) {
 		fft_abs[i]                  = cabs(fft_out[i + pul_num_sam / 2]) /
 		                              pul_num_sam;
 		fft_abs[i + pul_num_sam / 2]    = cabs(fft_out[i]) / pul_num_sam;
@@ -356,7 +356,7 @@ void run_fft() {
 }
 
 void analysis() {
-	for(int i = 0; i < num_files; i++) {
+	for (int i = 0; i < num_files; i++) {
 
 		// File Progress Display
 		printf("File %i/%i...\n", i + 1, num_files);
@@ -365,23 +365,23 @@ void analysis() {
 		sprintf(aux_path, "%s%s%06d_%06d", raw_data_path, RAW_FILE_PREFIX, curr_run,
 		        i + 1);
 		fileStream = fopen(aux_path, "r");
-		if(fread(data, 1, file_lenght, fileStream) != file_lenght) {
+		if (fread(data, 1, file_length, fileStream) != file_length) {
 			fprintf(stderr, "ERROR Reading RAW File!\n");
 			exit(1);
 		}
 		fclose(fileStream);
 
 		// Parsing each frame fron the current raw file
-		for(int j = 0; j < num_fra_p_file; j++) {
+		for (int j = 0; j < num_fra_p_file; j++) {
 
 			// Radio data Parsing
-			for(int k = 0; k < data_frame_size; k++) {
+			for (int k = 0; k < data_frame_size; k++) {
 				frame[j][k] = (unsigned char)data[k + j * file_frame_size];
 			}
 
 			// GPS data Parsing
 			intAux = i * num_fra_p_file + j;
-			for(int k = 0; k < 4; k++) {
+			for (int k = 0; k < 4; k++) {
 				aux1 = ((int)data[(j + 1) * file_frame_size - EXTRA_DATA_SIZE + 0 + k]) &
 				       0xFF;
 				aux2 = ((int)data[(j + 1) * file_frame_size - EXTRA_DATA_SIZE + 4 + k]) & 0xFF;
@@ -396,14 +396,14 @@ void analysis() {
 		}
 
 		// Looping thru each frame of the current file loaded
-		for(int j = 0; j < num_fra_p_file; j++) {
+		for (int j = 0; j < num_fra_p_file; j++) {
 
 			cur_fr      = j + i * num_fra_p_file;
 			cur_gain    = valid_gain_values[(int)gain[j + i * num_fra_p_file]];
 
 			// Getting complex signal
 			cpxAux = 0;
-			for(int k = 0; k < frame_size; k++) {
+			for (int k = 0; k < frame_size; k++) {
 				in_phase[k]     = ((double)frame[j][2 * k] - 128) / 128;
 				quadrature[k]   = ((double)frame[j][2 * k + 1] - 128) / 128;
 				signal_cpx[k]   = in_phase[k] / cur_gain + I * quadrature[k] / cur_gain;
@@ -412,13 +412,13 @@ void analysis() {
 
 			// Removing DC
 			cpxAux /= frame_size;
-			for(int k = 0; k < frame_size; k++) {
+			for (int k = 0; k < frame_size; k++) {
 				signal_cpx[k] -= cpxAux;
 			}
 
 			int k               = 0;
 			int jump            = 1;
-			for(int l = 0; l < num_col; l++) {
+			for (int l = 0; l < num_col; l++) {
 				pre_corr[l] = INT_MIN;
 				cur_corr[l] = INT_MIN;
 				max_corr[l] = INT_MIN;
@@ -428,10 +428,10 @@ void analysis() {
 			printf("Frame %05d/%05d Process Running. (%.2f%%)\n", (cur_fr + 1), ttl_n_fr,
 			       dblAux1);
 
-			while(k < sld_fft_stps) {
+			while (k < sld_fft_stps) {
 
 				// Slicing
-				for(int l = 0; l < pul_num_sam; l++) {
+				for (int l = 0; l < pul_num_sam; l++) {
 					fft_in[l] = signal_cpx[k + l];
 				}
 
@@ -439,42 +439,42 @@ void analysis() {
 
 				// Getting peak for each band of each collar and defining next jump size flag
 				intAux = 0;
-				for(int l = 0; l < num_col; l++) {
+				for (int l = 0; l < num_col; l++) {
 					cur_corr[l] = (double)INT_MIN;
-					for(int m = fft_bin[l] - bin_em; m <= fft_bin[l] + bin_em; m++)
-						if(m > -1 && m < pul_num_sam && fft_abs[m] > cur_corr[l]) {
+					for (int m = fft_bin[l] - bin_em; m <= fft_bin[l] + bin_em; m++)
+						if (m > -1 && m < pul_num_sam && fft_abs[m] > cur_corr[l]) {
 							cur_corr[l] = fft_abs[m];
 						}
-					if(cur_corr[l] > max_corr[l]) {
+					if (cur_corr[l] > max_corr[l]) {
 						max_corr[l] = cur_corr[l];
 						max_corr_index[l] = k;
 					}
-					if(cur_corr[l] > pre_corr[l]) {
+					if (cur_corr[l] > pre_corr[l]) {
 						intAux = 1;
 					}
 					pre_corr[l] = cur_corr[l];
 				}
 
 				// Defining next jump size
-				if(intAux) {
+				if (intAux) {
 					jump = floor(jump / 2);
 				} else {
 					jump = floor(jump * 2);
 				}
 
 				// Ensuring jump size is within limits
-				if(jump > max_jump) {
+				if (jump > max_jump) {
 					jump = max_jump;
-				} else if(jump < min_jump) {
+				} else if (jump < min_jump) {
 					jump = min_jump;
 				}
 
 				k += jump;
 			}
-			for(int l = 0; l < num_col; l++) {
+			for (int l = 0; l < num_col; l++) {
 
 				// Slicing
-				for(int m = 0; m < pul_num_sam; m++) {
+				for (int m = 0; m < pul_num_sam; m++) {
 					fft_in[m] = signal_cpx[max_corr_index[l] + m];
 				}
 
@@ -483,29 +483,29 @@ void analysis() {
 				// Defining noise and singal ranges
 				aux1 = fft_bin[l] - bin_em;
 				aux2 = fft_bin[l] + bin_em;
-				if(aux1 < 0) {
+				if (aux1 < 0) {
 					aux1 = 0;
 				}
-				if(aux2 > pul_num_sam - 1) {
+				if (aux2 > pul_num_sam - 1) {
 					aux2 = pul_num_sam - 1;
 				}
 
 				// Signal Power Calculation
 				signal_pwr = INT_MIN;
-				for(int m = aux1; m <= aux2; m++)
-					if(fft_abs[m] > signal_pwr) {
+				for (int m = aux1; m <= aux2; m++)
+					if (fft_abs[m] > signal_pwr) {
 						signal_pwr = fft_abs[m];
 					}
 				signal_pwr = pow(signal_pwr, 2);
-				if(signal_pwr < 0) {
+				if (signal_pwr < 0) {
 					signal_pwr = 0;
 				}
 
 				// Noise Power Calculation
 				noise_pwr   = 0;
 				intAux      = 0;
-				for(int m = 0; m < pul_num_sam; m++) {
-					if(m < aux1 || m > aux2) {
+				for (int m = 0; m < pul_num_sam; m++) {
+					if (m < aux1 || m > aux2) {
 						noise_pwr += pow(fft_abs[m], 2);
 						intAux++;
 					}
@@ -529,13 +529,13 @@ void analysis() {
 	fileStream = fopen(aux_path, "w+");
 
 	// File writing
-	for(int i = 0; i < ttl_n_fr; i++) {
-		for(int j = 0; j < 3; j++) {
+	for (int i = 0; i < ttl_n_fr; i++) {
+		for (int j = 0; j < 3; j++) {
 			fprintf(fileStream, "%d,", gps_pos[i][j]);
 		}
 		fprintf(fileStream, "%d,", gain_values[(int)gain[i]]);
 		fprintf(fileStream, "%f,", valid_gain_values[(int)gain[i]]);
-		for(int j = 0; j < num_col - 1; j++) {
+		for (int j = 0; j < num_col - 1; j++) {
 			fprintf(fileStream, "%d,", (int)(1000 * pulse_snr[j][i]));
 		}
 		fprintf(fileStream, "%d\n", (int)(1000 * pulse_snr[num_col - 1][i]));
