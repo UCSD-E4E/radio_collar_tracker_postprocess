@@ -13,7 +13,7 @@ if [ $# -ne 1 ]; then
 fi
 
 # read -e -p "Enter Raw Data directory: " dir
-dir=$3
+dir=$1
 if ! [[ -d $dir ]]; then
 	echo "Invalid arguments! Usage: cas.sh run flight_alt data_dir"
 	echo ""
