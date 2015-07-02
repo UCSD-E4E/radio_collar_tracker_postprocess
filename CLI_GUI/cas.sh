@@ -18,8 +18,6 @@ if ! [[ -d $dir ]]; then
 	echo "Invalid arguments! Usage: cas.sh run flight_alt data_dir"
 	echo ""
 	echo "run             Run number"
-	echo "flight_alt      Flight altitude in meters above launch"
-	echo "data_dir        Directory of data on local filesystem"
 	exit 1
 fi
 dir=$(echo $dir | sed "s%~%$HOME%")
