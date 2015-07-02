@@ -1,14 +1,15 @@
-REPO_DIR=$(pwd)
+#!/bin/bash
+cwd=$(pwd)
 if [ ! -d "$HOME/rct/bin/" ] ; then
 	mkdir -p $HOME/rct/bin/
 fi
-cd $(REPO_DIR)/CurrentCode/PostProcessC/
+cd ${cwd}/CurrentCode/PostProcessC/
 chmod +x build*
 ./build-spectrumAnalysis
 
-cd $(REPO_DIR)
-cp $(REPO_DIR)/collarDetect/altFilter.py $HOME/rct/bin/
-cp $(REPO_DIR)/CurrentCode/PostProcessC/spectrumAnalysis $HOME/rct/bin/
-cp $(REPO_DIR)/CLI_GUI/cas.sh $HOME/rct/bin/
-cp $(REPO_DIR)/CLI_GUI/get_run_num.py $HOME/rct/bin/
+cd ${cwd}
+cp ${cwd}/collarDetect/altFilter.py $HOME/rct/bin/
+cp ${cwd}/CurrentCode/PostProcessC/spectrumAnalysis $HOME/rct/bin/
+cp ${cwd}/CLI_GUI/cas.sh $HOME/rct/bin/
+cp ${cwd}/CLI_GUI/get_run_num.py $HOME/rct/bin/
 chmod +x $HOME/rct/bin/*
