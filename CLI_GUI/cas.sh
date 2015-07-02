@@ -15,28 +15,8 @@ if [ $# -ne 3 ]; then
 	echo "data_dir        Location of data on local filesystem"
 	exit 1
 fi
-# read -p "Enter run number: " run
-run=$1
-re='^[0-9]+$'
-if ! [[ $run =~ $re ]] ; then
-	echo "Invalid arguments! Usage: cas.sh run flight_alt data_dir"
-	echo ""
-	echo "run             Run number"
-	echo "flight_alt      Flight altitude in meters above launch"
-	echo "data_dir        Directory of data on local filesystem"
-	exit 1
-fi
-# read -p "Enter flight altitude: " alt
-alt=$2
-re='^[0-9]+([.][0-9]+)?$'
-if ! [[ $alt =~ $re ]] ; then
-	echo "Invalid arguments! Usage: cas.sh run flight_alt data_dir"
-	echo ""
-	echo "run             Run number"
-	echo "flight_alt      Flight altitude in meters above launch"
-	echo "data_dir        Directory of data on local filesystem"
-	exit 1
-fi
+
+
 # read -e -p "Enter Raw Data directory: " dir
 dir=$3
 if ! [[ -d $dir ]]; then
@@ -48,6 +28,12 @@ if ! [[ -d $dir ]]; then
 	exit 1
 fi
 dir=$(echo $dir | sed "s%~%$HOME%")
+
+run=$(get_run_num.py $dir)
+echo $run
+
+# read -p "Enter flight altitude: " alt
+alt='30'
 if [[ -w JOB ]]; then
 	rm JOB
 fi
@@ -67,7 +53,7 @@ echo "lin_scale: 1" >> JOB
 echo "map_d: 128" >> JOB
 echo "alpha_c_thres: 500" >> JOB
 echo "num_col: "$num_col >> JOB
-echo "f_drift: -3000" >> JOB
+echo "f_drift: 11000" >> JOB
 if [ -e "spectrumAnalysis" ]
 then
 	./spectrumAnalysis > /dev/null
@@ -82,9 +68,4 @@ else
 fi
 runFile=$(ls | grep -E RUN_[[:digit:]]\+$run.csv$)
 ./altFilter.py $alt $runFile
-./finalAnalysis > /dev/null
-metaFile=$(ls | grep -E META_[[:digit:]]\+$run.csv)
-./spectraCollarID $num_col $runFile $metaFile
-
-
-
+./display_data.py $runFile
