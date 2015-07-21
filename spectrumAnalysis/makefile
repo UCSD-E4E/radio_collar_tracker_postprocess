@@ -1,4 +1,0 @@
-.PHONY: clean
-
-spectrumAnalysis: spectrumAnalysis.c
-	gcc spectrumAnalysis.c -Wall -o spectrumAnalysis -lfftw3_threads -lfftw3 -lm -lpthread -std=c99 -g
