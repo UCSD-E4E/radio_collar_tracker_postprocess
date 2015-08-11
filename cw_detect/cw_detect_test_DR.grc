@@ -331,7 +331,7 @@
     </param>
     <param>
       <key>file</key>
-      <value>/media/ntlhui/1_5TB1/sdrsharp_data/SDRSharp_20150713_110357Z_172475kHz_IQ.wav</value>
+      <value>/media/ntlhui/1_5TB1/sdrsharp_data/SDRSharp_20150711_203801Z_172084kHz_IQ.wav</value>
     </param>
     <param>
       <key>_coordinate</key>
@@ -382,7 +382,7 @@
     </param>
     <param>
       <key>cutoff_freq</key>
-      <value>50e3</value>
+      <value>5e3</value>
     </param>
     <param>
       <key>decim</key>
