@@ -13,6 +13,7 @@ clean:
 	-rm tester
 	-rm -rf html
 	-rm -rf latex
+	-rm -rf top_block.py
 
 tester.o: tester.c cw_detect.h
 	gcc $(CFLAGS) tester.c
