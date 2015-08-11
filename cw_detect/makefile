@@ -3,7 +3,7 @@ CFLAGS = -std=gnu99 -c -Wall -g
 CPPFLAGS = -std=c++11 -c -Wall -g
 .PHONY: clean all docs
 
-all: Sample.o FileLoader.o
+all: Sample.o FileLoader.o BFO.o
 
 cw_detect.o: cw_detect.c cw_detect.h
 	gcc $(CFLAGS) cw_detect.c
@@ -28,3 +28,6 @@ docs:
 
 FileLoader.o: FileLoader.cpp
 	gcc FileLoader.cpp $(CPPFLAGS)
+
+BFO.o: BFO.cpp
+	gcc BFO.cpp $(CPPFLAGS)
