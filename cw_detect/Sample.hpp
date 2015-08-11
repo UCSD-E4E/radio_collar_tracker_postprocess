@@ -40,7 +40,7 @@ private:
 	complex<float> sample;
 public:
 	/**
-	 * Creates a new RFSample, with it's own copy of the complex sample.
+	 * Creates a new RFSample, with its own copy of the complex sample.
 	 *
 	 * @param index	The index of this sample in the stream, starting at 0
 	 * @param sample_rate	The sampling rate of this stream.
