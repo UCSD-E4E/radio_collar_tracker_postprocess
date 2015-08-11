@@ -8,6 +8,13 @@ Sample::Sample(int index, int sample_rate) {
 	this->sample_rate = sample_rate;
 }
 
+int Sample::getIndex(){
+	return this->index;
+}
+
+int Sample::getSampleRate(){
+	return this->sample_rate;
+}
 
 
 CRFSample::CRFSample(int index, int sample_rate,
@@ -20,14 +27,14 @@ CRFSample::CRFSample(int index, int sample_rate, float i,
 	this->sample = complex<float>(i, q);
 }
 
-complex<float> CRFSample::get_data() {
+complex<float> CRFSample::getData() {
 	return complex<float>(sample);
 }
 
-void CRFSample::set_data(complex<float> new_data) {
+void CRFSample::setData(complex<float> new_data) {
 	this->sample = complex<float>(new_data);
 }
 
-void CRFSample::set_data(float i, float q) {
+void CRFSample::setData(float i, float q) {
 	this->sample = complex<float>(i, q);
 }

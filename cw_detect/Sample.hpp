@@ -22,6 +22,14 @@ public:
 	 * Creates a Sample object with a specified index and sampling rate
 	 */
 	Sample(int index, int sample_rate);
+	/**
+	 * Returns the index of this sample.
+	 */
+	int getIndex();
+	/**
+	 * Returns the sampling rate of the associated signal
+	 */
+	int getSampleRate();
 };
 
 /**
@@ -56,7 +64,7 @@ public:
 	 *
 	 * @return	The complex value represented by this sample
 	 */
-	complex<float> get_data();
+	complex<float> getData();
 
 	/**
 	 * Sets the internal data to reflect the value of the new data provided.
@@ -65,7 +73,7 @@ public:
 	 *
 	 * @param new_data	The new data this object should reflect.
 	 */
-	void set_data(complex<float> new_data);
+	void setData(complex<float> new_data);
 
 	/**
 	 * Sets the interal data to reflect the value of the new data provided.
@@ -75,7 +83,7 @@ public:
 	 * @param i The in-phase or real part of the complex value.
 	 * @param q The quadrature or imaginary part of the complex value.
 	 */
-	void set_data(float i, float q);
+	void setData(float i, float q);
 };
 
 #endif // __SAMPLE_H_
