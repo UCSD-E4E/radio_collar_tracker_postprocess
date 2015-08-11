@@ -41,15 +41,16 @@ void RFFileLoader::run() {
 			while (file_stream.read((char*)buffer, 2)) {
 				// Load into queue if space
 				signal_queue_mutex.lock();
-				while(signal_queue.size() >= QUEUE_SIZE_MAX){
+				while (signal_queue.size() >= QUEUE_SIZE_MAX) {
 					signal_queue_mutex.unlock();
 					// wait
 					// TODO force using posix wait
 					signal_queue_mutex.lock();
 				}
 
-				signal_queue.emplace(index, sample_rate, buffer[0] / 128.0 - 0.5,
-						buffer[1] / 128.0 - 0.5);
+				CRFSample* new_sample = new CRFSample(index, sample_rate,
+				                                      buffer[0] / 128.0 - 0.5, buffer[1] / 128.0 - 0.5);
+				signal_queue.push(new_sample);
 				signal_queue_mutex.unlock();
 
 				// close stream
@@ -67,16 +68,17 @@ void RFFileLoader::run() {
 	}
 }
 
-RFFileLoader::RFFileLoader(int sample_rate) : sample_rate(sample_rate), run_state(true) {
+RFFileLoader::RFFileLoader(int sample_rate) : sample_rate(sample_rate),
+	run_state(true) {
 	// Start worker thread associated with this class
 	thread class_thread(&RFFileLoader::run, this);
 }
 
-void RFFileLoader::addFile(string filename){
+void RFFileLoader::addFile(string filename) {
 	// Check file is good
 	struct stat buffer;
 	stat(filename.c_str(), &buffer);
-	if(!S_ISREG(buffer.st_mode)){
+	if (!S_ISREG(buffer.st_mode)) {
 		cerr << "Failed to open file!" << endl;
 	}
 	// Add to queue
@@ -86,17 +88,17 @@ void RFFileLoader::addFile(string filename){
 	// clean up
 }
 
-RFFileLoader::~RFFileLoader(){
+RFFileLoader::~RFFileLoader() {
 	run_state = false;
 	class_thread.join();
 }
 
-CRFSample RFFileLoader::getNextSample(){
+CRFSample* RFFileLoader::getNextSample() {
 	signal_queue_mutex.lock();
-	if(signal_queue.empty()){
+	if (signal_queue.empty()) {
 		return NULL;
 	}
-	CRFSample retval = signal_queue.front();
+	CRFSample* retval = signal_queue.front();
 	signal_queue.pop();
 	signal_queue_mutex.unlock();
 	return retval;

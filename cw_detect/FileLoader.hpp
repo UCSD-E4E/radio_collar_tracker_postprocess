@@ -26,9 +26,9 @@ private:
 	 */
 	queue<string> file_queue;
 	/**
-	 * Signal sample queue
+	 * Signal sample queue, containing pointers to CRFSample objects
 	 */
-	queue<CRFSample> signal_queue;
+	queue<CRFSample*> signal_queue;
 	/**
 	 * Thread function
 	 */
@@ -72,11 +72,12 @@ public:
 	 */
 	void addFile(string filename);
 	/**
-	 * Returns the next signal sample in the queue.  If none exist, return NULL
+	 * Returns a pointer to the next signal sample in the queue.  If none
+	 * exist, return NULL
 	 *
-	 * @return	the next sample, or if NULL if none exist.
+	 * @return	pointer to the next sample, or if NULL if none exist.
 	 */
-	CRFSample getNextSample();
+	CRFSample* getNextSample();
 };
 
 #endif //__FILE_LOADER_H_
