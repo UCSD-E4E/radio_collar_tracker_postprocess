@@ -93,6 +93,9 @@ RFFileLoader::~RFFileLoader(){
 
 CRFSample RFFileLoader::getNextSample(){
 	signal_queue_mutex.lock();
+	if(signal_queue.empty()){
+		return NULL;
+	}
 	CRFSample retval = signal_queue.front();
 	signal_queue.pop();
 	signal_queue_mutex.unlock();

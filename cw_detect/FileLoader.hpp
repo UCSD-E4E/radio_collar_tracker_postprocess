@@ -72,7 +72,9 @@ public:
 	 */
 	void addFile(string filename);
 	/**
-	 * Returns the next signal sample in the queue.
+	 * Returns the next signal sample in the queue.  If none exist, return NULL
+	 *
+	 * @return	the next sample, or if NULL if none exist.
 	 */
 	CRFSample getNextSample();
 };
