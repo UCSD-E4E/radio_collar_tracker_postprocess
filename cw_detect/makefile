@@ -10,16 +10,9 @@ cw_detect.o: cw_detect.c cw_detect.h
 
 clean:
 	-rm *.o
-	-rm tester
 	-rm -rf html
 	-rm -rf latex
 	-rm -rf top_block.py
-
-tester.o: tester.c cw_detect.h
-	gcc $(CFLAGS) tester.c
-
-tester: tester.o cw_detect.o
-	gcc tester.o cw_detect.o -o tester $(LFLAGS)
 
 Sample.o: Sample.cpp Sample.hpp
 	gcc Sample.cpp $(CPPFLAGS)
