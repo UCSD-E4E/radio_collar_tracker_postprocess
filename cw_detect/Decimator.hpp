@@ -31,7 +31,7 @@ class Decimator{
 		/**
 		 * Function pointer to the function that returns the next sample
 		 */
-		CRTSample* (*next_sample)();
+		CRFSample* (*next_sample)();
 		/**
 		 * Thread body
 		 */
