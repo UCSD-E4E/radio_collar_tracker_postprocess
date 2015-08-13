@@ -3,7 +3,7 @@ CFLAGS = -std=gnu99 -c -Wall -g
 CPPFLAGS = -std=c++11 -c -Wall -g
 .PHONY: clean all docs
 
-all: Sample.o FileLoader.o BFO.o LPF.o
+all: Sample.o FileLoader.o BFO.o LPF.o Decimator.o FileWriter.o
 
 cw_detect.o: cw_detect.c cw_detect.h
 	gcc $(CFLAGS) cw_detect.c
@@ -28,3 +28,9 @@ BFO.o: BFO.cpp
 
 LPF.o: LPF.cpp
 	gcc LPF.cpp $(CPPFLAGS)
+
+Decimator.o: Decimator.cpp
+	gcc Decimator.cpp $(CPPFLAGS)
+
+FileWriter.o: FileWriter.cpp
+	gcc FileWriter.cpp $(CPPFLAGS)
