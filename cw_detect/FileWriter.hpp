@@ -113,7 +113,7 @@ class FileWriter{
 		/**
 		 * Sets the meta file suffix for this FileWriter object
 		 *
-		 * @oaram str	Suffix for meta files.
+		 * @param str	Suffix for meta files.
 		 */
 		void setMetaSuffix(string str);
 		/**
