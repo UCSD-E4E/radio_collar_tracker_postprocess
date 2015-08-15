@@ -1,9 +1,10 @@
-LFLAGS = -lfftw3_threads -lfftw3 -lm -lpthread
+LFLAGS = -pthread -lm -Wl,--no-as-needed
 CFLAGS = -std=gnu99 -c -Wall -g
-CPPFLAGS = -std=c++11 -c -Wall -g
+CPPFLAGS = -std=c++11 -c -Wall -g -pthread -Wl,--no-as-needed
 .PHONY: clean all docs
 
-all: Sample.o FileLoader.o BFO.o LPF.o Decimator.o FileWriter.o
+all: Starter
+	-mkdir test
 
 cw_detect.o: cw_detect.c cw_detect.h
 	gcc $(CFLAGS) cw_detect.c
@@ -13,24 +14,32 @@ clean:
 	-rm -rf html
 	-rm -rf latex
 	-rm -rf top_block.py
+	-rm -rf Starter
+	-rm -rf test
 
 Sample.o: Sample.cpp Sample.hpp
-	gcc Sample.cpp $(CPPFLAGS)
+	g++ Sample.cpp $(CPPFLAGS)
 
 docs:
 	doxygen Doxyfile
 
-FileLoader.o: FileLoader.cpp
-	gcc FileLoader.cpp $(CPPFLAGS)
+FileLoader.o: FileLoader.cpp Sample.hpp FileLoader.hpp
+	g++ FileLoader.cpp $(CPPFLAGS)
 
-BFO.o: BFO.cpp
-	gcc BFO.cpp $(CPPFLAGS)
+BFO.o: BFO.cpp Sample.hpp BFO.hpp
+	g++ BFO.cpp $(CPPFLAGS)
 
-LPF.o: LPF.cpp
-	gcc LPF.cpp $(CPPFLAGS)
+LPF.o: LPF.cpp Sample.hpp LPF.hpp
+	g++ LPF.cpp $(CPPFLAGS)
 
-Decimator.o: Decimator.cpp
-	gcc Decimator.cpp $(CPPFLAGS)
+Decimator.o: Decimator.cpp Decimator.hpp Sample.hpp
+	g++ Decimator.cpp $(CPPFLAGS)
 
-FileWriter.o: FileWriter.cpp
-	gcc FileWriter.cpp $(CPPFLAGS)
+FileWriter.o: FileWriter.cpp Sample.hpp FileWriter.hpp
+	g++ FileWriter.cpp $(CPPFLAGS)
+
+Starter.o: Starter.cpp Sample.hpp FileWriter.hpp FileLoader.hpp
+	g++ Starter.cpp $(CPPFLAGS)
+
+Starter: Starter.o FileLoader.o Sample.o FileWriter.o
+	g++ Starter.o FileLoader.o Sample.o FileWriter.o $(LFLAGS) -o Starter
