@@ -28,6 +28,9 @@ int main(int argc, char** argv){
 	file_loader->addFile("test.raw");
 	cout << "Starter: Signaling Termination" << endl;
 	file_loader->sendTerminating();
+	cout << "Starter: Waiting for pipeline to finish" << endl;
+	while(!file_writer->hasTerminating()){
+	}
 	cout << "Starter: Deleting classes" << endl;
 	delete file_writer;
 	delete file_loader;

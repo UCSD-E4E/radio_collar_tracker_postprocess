@@ -3,6 +3,11 @@ CFLAGS = -std=gnu99 -c -Wall -g
 CPPFLAGS = -std=c++11 -c -Wall -g -pthread -Wl,--no-as-needed
 .PHONY: clean all docs
 
+test: Starter
+	-rm -rf test
+	mkdir test
+	./Starter
+
 all: Starter
 	-mkdir test
 

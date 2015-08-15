@@ -69,6 +69,10 @@ class FileWriter{
 		 * Thread state variable
 		 */
 		bool run_state;
+		/**
+		 * Terminating sample flag
+		 */
+		bool has_terminating = false;
 	public:
 		/**
 		 * Constructs a default FileWriter with the specified sampling rate,

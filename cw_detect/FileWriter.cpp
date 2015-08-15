@@ -51,6 +51,10 @@ void FileWriter::start(){
 	class_thread = new thread(&FileWriter::run, this);
 }
 
+bool FileWriter::hasTerminating(){
+	return has_terminating;
+}
+
 void FileWriter::run(){
 	cout << "FileWriter: Starting" << endl;
 	ofstream fout;
@@ -73,12 +77,13 @@ void FileWriter::run(){
 		}
 		if(sample->isTerminating()){
 			cout << "FileWriter: Got terminating sample!" << endl;
+			has_terminating = true;
 			break;
 		}
 		cout << "FileWriter: Got sample " << sample->getIndex() << endl;
 		sbuf[0] = sample->getData().real();
 		sbuf[1] = sample->getData().imag();
-		if(file_len + 2 * sizeof(float) > block_length){
+		if(block_length != 0 && file_len + 2 * sizeof(float) > block_length){
 			// TODO update file
 			fout.close();
 			sprintf(fname_buf, "%s/%s%06d_%06d%s", output_dir.c_str(),
@@ -86,6 +91,7 @@ void FileWriter::run(){
 					data_suffix.c_str());
 			fout.open(fname_buf, ios::out | ios::binary);
 			file_len = 0;
+			file_num++;
 			cout << "FileWriter: New File: " << fname_buf << endl;
 		}
 		fout.write(reinterpret_cast<char*>(sbuf), 2 * sizeof(float));

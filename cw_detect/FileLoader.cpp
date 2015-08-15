@@ -52,7 +52,6 @@ void RFFileLoader::run() {
 				// Load into queue if space
 				while (signal_queue.size() >= QUEUE_SIZE_MAX) {
 					// wait
-					cout << "FileLoader: Output Queue Full!" << endl;
 					// TODO force using posix wait
 				}
 
