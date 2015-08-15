@@ -19,7 +19,7 @@ using namespace std;
  *
  * @author NATHAN HUI
  */
-class RFFileLoader {
+class RFFileLoader: public SampleFactory {
 private:
 	/**
 	 * Internal file queue
@@ -36,7 +36,7 @@ private:
 	/**
 	 * The thread object associated by this class
 	 */
-	thread class_thread;
+	thread* class_thread;
 	/**
 	 * Mutex for locking the file queue
 	 */
@@ -78,6 +78,10 @@ public:
 	 * @return	pointer to the next sample, or if NULL if none exist.
 	 */
 	CRFSample* getNextSample();
+	/**
+	 * Sends the terminating sample
+	 */
+	void sendTerminating();
 };
 
 #endif //__FILE_LOADER_H_

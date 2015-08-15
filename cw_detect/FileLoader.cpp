@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cstdint>
 #include <sys/stat.h>
+#include <stdexcept>
 using namespace std;
 
 #ifndef QUEUE_SIZE_MAX
@@ -23,7 +24,7 @@ void RFFileLoader::run() {
 		// Lock queue
 		file_queue_mutex.lock();
 		// check if empty
-		if (file_queue.empty()) {
+		if (!file_queue.empty()) {
 			// Get file
 			file_to_load = file_queue.front();
 			file_queue.pop();
@@ -49,13 +50,14 @@ void RFFileLoader::run() {
 				}
 
 				CRFSample* new_sample = new CRFSample(index, sample_rate,
-				                                      buffer[0] / 128.0 - 0.5, buffer[1] / 128.0 - 0.5);
+						buffer[0] / 128.0 - 0.5, buffer[1] / 128.0 - 0.5);
 				signal_queue.push(new_sample);
 				signal_queue_mutex.unlock();
+				index++;
 
-				// close stream
-				file_stream.close();
 			}
+			// close stream
+			file_stream.close();
 		} else {
 			// queue empty
 
@@ -66,20 +68,27 @@ void RFFileLoader::run() {
 			// TODO use conditional variable.  For now, just bash
 		}
 	}
+
+	// Send terminating signal
+	signal_queue_mutex.lock();
+	CRFSample* new_sample = new CRFSample(index, sample_rate, 0, 0);
+	new_sample->setTerminating();
+	signal_queue.push(new_sample);
+	signal_queue_mutex.unlock();
 }
 
 RFFileLoader::RFFileLoader(int sample_rate) : sample_rate(sample_rate),
 	run_state(true) {
-	// Start worker thread associated with this class
-	thread class_thread(&RFFileLoader::run, this);
-}
+		// Start worker thread associated with this class
+		this->class_thread = new thread(&RFFileLoader::run, this);
+	}
 
 void RFFileLoader::addFile(string filename) {
 	// Check file is good
 	struct stat buffer;
 	stat(filename.c_str(), &buffer);
 	if (!S_ISREG(buffer.st_mode)) {
-		cerr << "Failed to open file!" << endl;
+		throw invalid_argument("Failed to open file!");
 	}
 	// Add to queue
 	file_queue_mutex.lock();
@@ -89,8 +98,11 @@ void RFFileLoader::addFile(string filename) {
 }
 
 RFFileLoader::~RFFileLoader() {
+	this->class_thread->join();
+}
+
+void RFFileLoader::sendTerminating(){
 	run_state = false;
-	class_thread.join();
 }
 
 CRFSample* RFFileLoader::getNextSample() {
