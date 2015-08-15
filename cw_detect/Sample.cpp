@@ -16,6 +16,17 @@ int Sample::getSampleRate(){
 	return this->sample_rate;
 }
 
+void Sample::setTerminating(){
+	this->terminating = true;
+}
+
+void Sample::setNotTerminating(){
+	this->terminating = false;
+}
+
+bool Sample::isTerminating(){
+	return this->terminating;
+}
 
 CRFSample::CRFSample(int index, int sample_rate,
                      complex<float> sample): Sample(index, sample_rate) {
