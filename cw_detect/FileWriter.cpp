@@ -7,6 +7,7 @@
 #include <fstream>
 #include <cstdint>
 #include <stdexcept>
+#include <iostream>
 extern "C"{
 	#include <sys/stat.h>
 	#include <limits.h>
@@ -51,7 +52,7 @@ void FileWriter::start(){
 }
 
 void FileWriter::run(){
-	// TODO initialize file
+	cout << "FileWriter: Starting" << endl;
 	ofstream fout;
 	char sbuf[2];
 	char fname_buf[PATH_MAX + NAME_MAX];
@@ -71,8 +72,10 @@ void FileWriter::run(){
 			continue;
 		}
 		if(sample->isTerminating()){
+			cout << "FileWriter: Got terminating sample!" << endl;
 			break;
 		}
+		cout << "FileWriter: Got sample " << sample->getIndex() << endl;
 		sbuf[0] = sample->getData().real();
 		sbuf[1] = sample->getData().imag();
 		if(file_len + 2 * sizeof(float) > block_length){
@@ -83,18 +86,22 @@ void FileWriter::run(){
 					data_suffix.c_str());
 			fout.open(fname_buf, ios::out | ios::binary);
 			file_len = 0;
+			cout << "FileWriter: New File: " << fname_buf << endl;
 		}
 		fout.write(reinterpret_cast<char*>(sbuf), 2 * sizeof(float));
+		cout << "FileWriter: Wrote sample" << endl;
 		file_len += 2 * sizeof(float);
 	}
 	fout.close();
 
 	// Meta file
+	cout << "FileWriter: Writing Meta File" << endl;
 	sprintf(fname_buf, "%s/%s%06d%s", output_dir.c_str(), meta_prefix.c_str(),
 			run_num, meta_suffix.c_str());
 	fout.open(fname_buf, ios::out);
 	fout << "sample_rate: " << sample_rate << endl;
 	fout.close();
+	cout << "FileWriter: Ending thread" << endl;
 }
 
 
