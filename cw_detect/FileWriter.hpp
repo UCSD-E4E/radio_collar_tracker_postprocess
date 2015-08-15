@@ -11,11 +11,13 @@
 
 /**
  * This class provides a signal processign block that writes incoming data to
- * a set of files.  The filename is specified as 
+ * a set of files.  The filename is specified as
  * "[data_prefix][run_num][file_num][data_suffix]" in the specified directory.
- * A metafile is also saved with the filename 
- * "[meta_prefix][run_num][meta_suffix]" in the specified directory.  The 
- * size of each file wil not exceed the specified block length in bytes.
+ * A metafile is also saved with the filename
+ * "[meta_prefix][run_num][meta_suffix]" in the specified directory.  The
+ * size of each file will not exceed the specified block length in bytes.  The
+ * data will be stored as 32-bit floating point values stored as little-endian
+ * bytes, with in-phase values preceeding quadrature values.
  */
 class FileWriter{
 	private:
@@ -54,7 +56,7 @@ class FileWriter{
 		/**
 		 * Pointer to next sample runction
 		 */
-		CRFSample* (*next_sample)();
+		SampleFactory* previous_module;
 		/**
 		 * The sampling rate of the input source
 		 */
@@ -62,29 +64,29 @@ class FileWriter{
 		/**
 		 * The thread associated with this class
 		 */
-		thread class_thread;
+		thread* class_thread;
 		/**
 		 * Thread state variable
 		 */
 		bool run_state;
 	public:
 		/**
-		 * Constructs a default FileWriter with the specified sampling rate, 
-		 * queue callback, and run number.  Output directory defaults to 
+		 * Constructs a default FileWriter with the specified sampling rate,
+		 * queue callback, and run number.  Output directory defaults to
 		 * current working directory, and filenames default to
 		 * "RUN_[run_num]_[file_num]" for data files, and "META_[run_num]" for
 		 * meta files.
 		 *
 		 * @param sample_rate	Input sample rate for this block.
-		 * @param out_queue		Incoming stream of data callback.
+		 * @param previous		SampleFactory from which to get the next samples.
 		 * @param run_num		Run number for this class
 		 */
-		FileWriter(int sample_rate, CRFSample* (*out_queue)(), int run_num);
+		FileWriter(int sample_rate, SampleFactory* previous, int run_num);
 		/**
 		 * Constructs a default FileWriter with the specified configuration.
 		 *
 		 * @param sample_rate	Input sample rate for this block.
-		 * @param out_queue		Input sample callback.
+		 * @param previous		SampleFactory from which to get the next samples.
 		 * @param path			Output path to write files to.
 		 * @param data_prefix	Prefix for data files.
 		 * @param data_suffix	Suffix for data files.
@@ -93,7 +95,7 @@ class FileWriter{
 		 * @param block_length	Maximum length for each file.
 		 * @param run_num		Run number for this class.
 		 */
-		FileWriter(int sample_rate, CRFSample* (*out_queue)(), string path,
+		FileWriter(int sample_rate, SampleFactory* previous, string path,
 				string data_prefix, string data_suffix, string meta_prefix,
 				string meta_suffix, uint64_t block_length, int run_num);
 		/**
@@ -136,6 +138,14 @@ class FileWriter{
 		 * @param len	Maximum length in bytes for this object
 		 */
 		void setBlockLength(uint64_t len);
+		/**
+		 * Checks whether or not this module has received the terminating
+		 * sample.
+		 *
+		 * @return true if the terminating sample has been processed, false
+		 *         otherwise.
+		 */
+		bool hasTerminating();
 };
 
 #endif //__FILE_WRITER_H_
