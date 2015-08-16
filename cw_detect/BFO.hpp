@@ -25,9 +25,10 @@ private:
 	 */
 	int OSC_freq;
 	/**
-	 * Function pointer to the function that returns the next sample
+	 * Pointer to the SampleFactory object that sources te samples for this
+	 * module.
 	 */
-	CRFSample* (*next_sample)();
+	SampleFactory* previous_module;
 	/**
 	 * Thread body
 	 */
@@ -35,7 +36,7 @@ private:
 	/**
 	 * The thread object associated with this class
 	 */
-	thread class_thread;
+	thread* class_thread;
 	/**
 	 * The output queue
 	 */
@@ -48,6 +49,10 @@ private:
 	 * Run state variable
 	 */
 	bool run_state;
+	/**
+	 * Terminating symbol flag.
+	 */
+	bool has_terminating = false;
 public:
 	/**
 	 * Creates a BFO class and initializes the workflow associated with
@@ -56,10 +61,10 @@ public:
 	 *
 	 * @param sample_rate Sampling rate of the incoming queue
 	 * @param frequency	Frequency for the beat frequency oscillator
-	 * @param out_queue	Function that returns in sequence the signal to
-	 * 					modify.
+	 * @param previous	Pointer to a SampleFactory object from which to get the
+	 * 					next sample from.
 	 */
-	BFO(int sample_rate, int frequency, CRFSample * (*out_queue)());
+	BFO(int sample_rate, int frequency, SampleFactory* previous);
 	/**
 	 * Destrpys this BFO class and deactivates the workflow associated with
 	 * this class.
@@ -72,5 +77,15 @@ public:
 	 * @return the next processed sample, or NULL if none exist
 	 */
 	CRFSample* getNextSample();
+	/**
+	 * Checks whether or not this module has received and processed the
+	 * terminating sample.  If this module has received the terminating sample,
+	 * the thread will clean up and exit.  If this function returns true, there
+	 * is no guarantee that the thread has exited.
+	 *
+	 * @return	true if this module has received the terminating signal, false
+	 * 			otherwise.
+	 */
+	bool hasTerminating();
 };
 #endif	// __BFO_H_
