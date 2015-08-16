@@ -14,7 +14,7 @@ using namespace std;
  *
  * @author NATHAN HUI <nthui@gmail.com>
  */
-class BFO {
+class BFO: public SampleFactory {
 private:
 	/**
 	 * Sampling rate of the incoming stream in samples per second
