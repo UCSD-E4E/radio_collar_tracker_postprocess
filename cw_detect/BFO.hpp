@@ -51,7 +51,8 @@ private:
 public:
 	/**
 	 * Creates a BFO class and initializes the workflow associated with
-	 * this class.
+	 * this class. The BFO accepts samples at the specified sample rate,
+	 * and multiplies that signal by a sinusoid of the specified frequency.
 	 *
 	 * @param sample_rate Sampling rate of the incoming queue
 	 * @param frequency	Frequency for the beat frequency oscillator
