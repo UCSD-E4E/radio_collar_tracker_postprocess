@@ -81,7 +81,6 @@ class FileWriter{
 		 * "RUN_[run_num]_[file_num]" for data files, and "META_[run_num]" for
 		 * meta files.
 		 *
-		 * @param sample_rate	Input sample rate for this block.
 		 * @param previous		SampleFactory from which to get the next samples.
 		 * @param run_num		Run number for this class
 		 */
@@ -89,7 +88,6 @@ class FileWriter{
 		/**
 		 * Constructs a default FileWriter with the specified configuration.
 		 *
-		 * @param sample_rate	Input sample rate for this block.
 		 * @param previous		SampleFactory from which to get the next samples.
 		 * @param path			Output path to write files to.
 		 * @param data_prefix	Prefix for data files.
