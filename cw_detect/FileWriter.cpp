@@ -80,7 +80,6 @@ void FileWriter::run(){
 			has_terminating = true;
 			break;
 		}
-		cout << "FileWriter: Got sample " << sample->getIndex() << endl;
 		sbuf[0] = sample->getData().real();
 		sbuf[1] = sample->getData().imag();
 		if(block_length != 0 && file_len + 2 * sizeof(float) > block_length){
@@ -95,7 +94,6 @@ void FileWriter::run(){
 			cout << "FileWriter: New File: " << fname_buf << endl;
 		}
 		fout.write(reinterpret_cast<char*>(sbuf), 2 * sizeof(float));
-		cout << "FileWriter: Wrote sample" << endl;
 		file_len += 2 * sizeof(float);
 	}
 	fout.close();
