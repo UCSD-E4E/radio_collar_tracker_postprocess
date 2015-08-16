@@ -3,6 +3,7 @@
 #include <thread>
 #include <mutex>
 #include <queue>
+#include <iostream>
 
 using namespace std;
 
@@ -10,16 +11,16 @@ using namespace std;
 #define QUEUE_SIZE_MAX 1024000
 #endif // QUEUE_SIZE_MAX
 
-Decimator::Decimator(int sample_rate, int factor, CRFSample * (*out_queue)()): input_sample_rate(sample_rate), decimation_factor(factor), run_state(true) {
-	next_sample = out_queue;
+Decimator::Decimator(int sample_rate, int factor, SampleFactory* previous): input_sample_rate(sample_rate), decimation_factor(factor), run_state(true) {
+	previous_module = previous;
 	output_sample_rate = input_sample_rate / decimation_factor;
 	// Start worker thread associated with this class
-	thread class_thread(&Decimator::run, this);
+	class_thread = new thread(&Decimator::run, this);
 }
 
 Decimator::~Decimator(){
 	run_state = false;
-	class_thread.join();
+	class_thread->join();
 }
 
 CRFSample* Decimator::getNextSample(){
@@ -33,14 +34,26 @@ CRFSample* Decimator::getNextSample(){
 	return retval;
 }
 
+bool Decimator::hasTerminating(){
+	return has_terminating;
+}
+
 void Decimator::run(){
+	cout << "Decimator: Starting" << endl;
 	int counter = 0;
 	int index_counter = 0;
 	while(run_state){
-		CRFSample* sample = next_sample();
+		CRFSample* sample = previous_module->getNextSample();
 		if(!sample){
 			// TODO wait if necessary
 			continue;
+		}
+		if(sample->isTerminating()){
+			cout << "Decimator: Got terminating sample" << endl;
+			output_queue_mutex.lock();
+			output_queue.push(sample);
+			output_queue_mutex.unlock();
+			break;
 		}
 		if((counter % decimation_factor) == 0){
 			output_queue_mutex.lock();
@@ -59,6 +72,7 @@ void Decimator::run(){
 		counter++;
 		counter %= decimation_factor;
 	}
+	cout << "Decimator: Ending thread" << endl;
 }
 
 

@@ -14,7 +14,7 @@ using namespace std;
  *
  * @author NATHAN HUI <ntlhui@gmail.com>
  */
-class Decimator{
+class Decimator: public SampleFactory{
 	private:
 		/**
 		 * Sampling rate of the incoming stream in samples per second.
@@ -29,9 +29,9 @@ class Decimator{
 		 */
 		int output_sample_rate;
 		/**
-		 * Function pointer to the function that returns the next sample
+		 * Pointer to next sample source.
 		 */
-		CRFSample* (*next_sample)();
+		SampleFactory* previous_module;
 		/**
 		 * Thread body
 		 */
@@ -39,7 +39,7 @@ class Decimator{
 		/**
 		 * The thread object associated with this class
 		 */
-		thread class_thread;
+		thread* class_thread;
 		/**
 		 * Output queue
 		 */
@@ -52,6 +52,10 @@ class Decimator{
 		 * Run state variable
 		 */
 		bool run_state;
+		/**
+		 * Terminating sample flag
+		 */
+		bool has_terminating = false;
 	public:
 		/**
 		 * Creates a Decimator class and initializes the workflow associated 
@@ -61,10 +65,10 @@ class Decimator{
 		 *
 		 * @param sample_rate	Sampling rate of the incoming queue
 		 * @param factor		Decimating factor
-		 * @param out_queue		Function that returns in sequence the signal to
+		 * @param previous		Object that returns in sequence the signal to
 		 * 						modify.
 		 */
-		Decimator(int sample_rate, int factor, CRFSample* (*out_queue)());
+		Decimator(int sample_rate, int factor, SampleFactory* previous);
 
 		/**
 		 * Destroys this Decimator class and deactivates the workflow
@@ -79,6 +83,14 @@ class Decimator{
 		 * @return the next processed sample, or NULL if none exist.
 		 */
 		CRFSample* getNextSample();
+		/**
+		 * Checks whether or not this module has received the terminating
+		 * sample.
+		 *
+		 * @return true if the terminating sample has been processed, false
+		 * 			otherwise.
+		 */
+		bool hasTerminating();
 };
 
 #endif // __DECIM_H_
