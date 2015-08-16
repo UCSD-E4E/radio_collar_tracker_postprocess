@@ -69,7 +69,6 @@ void RFFileLoader::run() {
 		} else {
 			// queue empty
 
-			cout << "FileLoader: No files to process." << endl;
 
 			// wait
 			// TODO use conditional variable.  For now, just bash
