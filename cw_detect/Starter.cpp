@@ -21,7 +21,7 @@ int main(int argc, char** argv){
 	cout << "Starter: Loading classes" << endl;
 	RFFileLoader* file_loader = new RFFileLoader(2048000);
 	Decimator* decimator = new Decimator(2048000, 1000, file_loader);
-	FileWriter* file_writer = new FileWriter(2048000, decimator, 1);
+	FileWriter* file_writer = new FileWriter(decimator, 1);
 	file_writer->setMetaSuffix(".test");
 	file_writer->setDataSuffix(".test");
 	file_writer->setDataDir("./test/");
@@ -37,5 +37,6 @@ int main(int argc, char** argv){
 	delete file_writer;
 	delete decimator;
 	delete file_loader;
+	cout << "Starter: Ending thread" << endl;
 	return 0;
 }

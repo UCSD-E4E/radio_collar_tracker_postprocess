@@ -15,17 +15,15 @@ extern "C"{
 
 using namespace std;
 
-FileWriter::FileWriter(int sample_rate, SampleFactory* previous, int run_num)
-		: sample_rate(sample_rate){
+FileWriter::FileWriter(SampleFactory* previous, int run_num){
 	this->run_num = run_num;
 	this->previous_module = previous;
 	this->run_state = true;
 }
 
-FileWriter::FileWriter(int sample_rate, SampleFactory* previous, string path,
+FileWriter::FileWriter(SampleFactory* previous, string path,
 		string data_prefix, string data_suffix, string meta_prefix,
 		string meta_suffix, uint64_t block_length, int run_num){
-	this->sample_rate = sample_rate;
 	this->previous_module = previous;
 	this->output_dir = path;
 	this->data_prefix = data_prefix;
@@ -82,6 +80,7 @@ void FileWriter::run(){
 		}
 		sbuf[0] = sample->getData().real();
 		sbuf[1] = sample->getData().imag();
+		sample_rate = sample->getSampleRate();
 		if(block_length != 0 && file_len + 2 * sizeof(float) > block_length){
 			// TODO update file
 			fout.close();

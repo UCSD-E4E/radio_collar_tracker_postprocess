@@ -85,7 +85,7 @@ class FileWriter{
 		 * @param previous		SampleFactory from which to get the next samples.
 		 * @param run_num		Run number for this class
 		 */
-		FileWriter(int sample_rate, SampleFactory* previous, int run_num);
+		FileWriter(SampleFactory* previous, int run_num);
 		/**
 		 * Constructs a default FileWriter with the specified configuration.
 		 *
@@ -99,9 +99,9 @@ class FileWriter{
 		 * @param block_length	Maximum length for each file.
 		 * @param run_num		Run number for this class.
 		 */
-		FileWriter(int sample_rate, SampleFactory* previous, string path,
-				string data_prefix, string data_suffix, string meta_prefix,
-				string meta_suffix, uint64_t block_length, int run_num);
+		FileWriter(SampleFactory* previous, string path, string data_prefix, 
+				string data_suffix, string meta_prefix, string meta_suffix, 
+				uint64_t block_length, int run_num);
 		/**
 		 * Initializes this FileWriter object.
 		 */
