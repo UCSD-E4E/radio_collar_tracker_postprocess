@@ -8,6 +8,7 @@
 #include "FileWriter.hpp"
 #include "Sample.hpp"
 #include "Decimator.hpp"
+#include "BFO.hpp"
 #include <iostream>
 
 /**
@@ -20,6 +21,7 @@
 int main(int argc, char** argv){
 	cout << "Starter: Loading classes" << endl;
 	RFFileLoader* file_loader = new RFFileLoader(2048000);
+	BFO* bfo = new BFO(2048000, 2000, file_loader);
 	Decimator* decimator = new Decimator(2048000, 1000, file_loader);
 	FileWriter* file_writer = new FileWriter(decimator, 1);
 	file_writer->setMetaSuffix(".test");
@@ -36,6 +38,7 @@ int main(int argc, char** argv){
 	cout << "Starter: Deleting classes" << endl;
 	delete file_writer;
 	delete decimator;
+	delete bfo;
 	delete file_loader;
 	cout << "Starter: Ending thread" << endl;
 	return 0;
