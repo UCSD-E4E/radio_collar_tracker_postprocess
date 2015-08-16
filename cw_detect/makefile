@@ -1,15 +1,15 @@
 LFLAGS = -pthread -lm -Wl,--no-as-needed
 CFLAGS = -std=gnu99 -c -Wall -g
 CPPFLAGS = -std=c++11 -c -Wall -g -pthread -Wl,--no-as-needed
-.PHONY: clean all docs
+.PHONY: clean all docs test
+
+all: Starter
+	-mkdir test
 
 test: Starter
 	-rm -rf test
 	mkdir test
 	./Starter
-
-all: Starter
-	-mkdir test
 
 cw_detect.o: cw_detect.c cw_detect.h
 	gcc $(CFLAGS) cw_detect.c
@@ -46,5 +46,5 @@ FileWriter.o: FileWriter.cpp Sample.hpp FileWriter.hpp
 Starter.o: Starter.cpp Sample.hpp FileWriter.hpp FileLoader.hpp
 	g++ Starter.cpp $(CPPFLAGS)
 
-Starter: Starter.o FileLoader.o Sample.o FileWriter.o
-	g++ Starter.o FileLoader.o Sample.o FileWriter.o $(LFLAGS) -o Starter
+Starter: Starter.o FileLoader.o Sample.o FileWriter.o Decimator.o
+	g++ Starter.o FileLoader.o Sample.o FileWriter.o Decimator.o $(LFLAGS) -o Starter
