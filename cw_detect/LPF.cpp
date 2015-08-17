@@ -15,7 +15,7 @@ using namespace std;
 
 LPF::LPF(int sample_rate, SampleFactory* previous): sample_rate(sample_rate),
 	run_state(true) {
-	previous_module = previous
+	previous_module = previous;
 	// Start worker thread associated with this class
 	class_thread = new thread(&LPF::run, this);
 }
