@@ -48,6 +48,9 @@ void BFO::run() {
 		}
 		if(sample->isTerminating()){
 			cout << "BFO: Got terminating sample" << endl;
+			output_queue_mutex.lock();
+			output_queue.push(sample);
+			output_queue_mutex.unlock();
 			break;
 		}
 		// Generate oscillator IQ
