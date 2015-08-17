@@ -40,12 +40,17 @@ void LPF::run() {
 	cout << "LPF: Starting" << endl;
 	complex<float> ring_buf[TAP_LENGTH];
 	int ring_buf_index = 0;
+	int idle_counter = 0;
 	while (run_state) {
 		CRFSample* sample = previous_module->getNextSample();
 		if (!sample) {
 			// TODO wait if necessary
+			idle_counter++;
+			if(idle_counter % 1000 == 0){
+			}
 			continue;
 		}
+		idle_counter = 0;
 		if(sample->isTerminating()){
 			cout << "LPF: got terminating sample" << endl;
 			output_queue_mutex.lock();
@@ -59,9 +64,13 @@ void LPF::run() {
 		// Run filter
 		complex<float> sig_sample;
 		complex<float> lpf_tap_c;
-		for (int i = 0; i < TAP_LENGTH; i++) {
+		for (int i = 0; i < ring_buf_index + 1; i++) {
 			lpf_tap_c = complex<float>(LPF_TAPS[i], 0);
-			sig_sample += lpf_tap_c * ring_buf[(ring_buf_index - i) % TAP_LENGTH];
+			sig_sample += lpf_tap_c * ring_buf[ring_buf_index - i];
+		}
+		for(int i = ring_buf_index + 1; i < TAP_LENGTH; i++){
+			lpf_tap_c = complex<float>(LPF_TAPS[i], 0);
+			sig_sample += lpf_tap_c * ring_buf[TAP_LENGTH + ring_buf_index - i];
 		}
 		sample->setData(sig_sample);
 		// Queue sample
