@@ -1,6 +1,6 @@
 #include "LPF.hpp"
 #include "Sample.hpp"
-#include "LPF_TAPS.hpp"
+#include "20480_LPF_TAPS.hpp"
 #include <thread>
 #include <mutex>
 #include <queue>
