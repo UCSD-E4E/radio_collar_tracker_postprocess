@@ -42,12 +42,18 @@ void Decimator::run(){
 	cout << "Decimator: Starting" << endl;
 	int counter = 0;
 	int index_counter = 0;
+	int idle_counter = 0;
 	while(run_state){
 		CRFSample* sample = previous_module->getNextSample();
 		if(!sample){
 			// TODO wait if necessary
+			idle_counter++;
+			if(idle_counter % 1000 == 0){
+			}
 			continue;
 		}
+		cout << "Decimator: Idle for " << idle_counter << " loops" << endl;
+		idle_counter = 0;
 		if(sample->isTerminating()){
 			cout << "Decimator: Got terminating sample" << endl;
 			output_queue_mutex.lock();
