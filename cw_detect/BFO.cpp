@@ -5,6 +5,7 @@
 #include <complex>
 #include "Sample.hpp"
 #include <queue>
+#include <iostream>
 
 #ifndef QUEUE_SIZE_MAX
 #define QUEUE_SIZE_MAX 1024000
@@ -13,16 +14,16 @@
 using namespace std;
 
 BFO::BFO(int sample_rate, int frequency,
-         CRFSample * (*out_queue)()): sample_rate(sample_rate), OSC_freq(frequency),
+         SampleFactory* previous): sample_rate(sample_rate), OSC_freq(frequency),
 	run_state(true) {
-	next_sample = out_queue;
+	previous_module = previous;
 	// Start worker thread associated with this class
-	thread class_thread(&BFO::run, this);
+	class_thread = new thread(&BFO::run, this);
 }
 
 BFO::~BFO() {
 	run_state = false;
-	class_thread.join();
+	class_thread->join();
 }
 
 CRFSample* BFO::getNextSample() {
@@ -37,12 +38,17 @@ CRFSample* BFO::getNextSample() {
 }
 
 void BFO::run() {
+	cout << "BFO: Started" << endl;
 	while (run_state) {
 		// Get next sample
 		CRFSample* sample = next_sample();
 		if (!sample) {
 			// TODO wait if necessary
 			continue;
+		}
+		if(sample->isTerminating()){
+			cout << "BFO: Got terminating sample" << endl;
+			break;
 		}
 		// Generate oscillator IQ
 		double sig_time = sample->getIndex() / sample->getSampleRate();
@@ -53,14 +59,13 @@ void BFO::run() {
 		sig_sample *= bfo_sample;
 		sample->setData(sig_sample);
 		// Queue sample
-		output_queue_mutex.lock();
 		while (output_queue.size() >= QUEUE_SIZE_MAX) {
-			output_queue_mutex.unlock();
 			// TODO force wait using posix wait
-			output_queue_mutex.lock();
 		}
+		output_queue_mutex.lock();
 		output_queue.push(sample);
 		output_queue_mutex.unlock();
 	}
+	cout << "BFO: Ending thread" << endl;
 }
 
