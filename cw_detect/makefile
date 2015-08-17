@@ -45,5 +45,5 @@ FileWriter.o: FileWriter.cpp Sample.hpp FileWriter.hpp
 Starter.o: Starter.cpp Sample.hpp FileWriter.hpp FileLoader.hpp
 	g++ Starter.cpp $(CPPFLAGS)
 
-Starter: Starter.o FileLoader.o Sample.o FileWriter.o Decimator.o BFO.o
-	g++ Starter.o FileLoader.o Sample.o FileWriter.o Decimator.o BFO.o $(LFLAGS) -o Starter
+Starter: Starter.o FileLoader.o Sample.o FileWriter.o Decimator.o BFO.o LPF.o
+	g++ Starter.o FileLoader.o Sample.o FileWriter.o Decimator.o BFO.o LPF.o $(LFLAGS) -o Starter
