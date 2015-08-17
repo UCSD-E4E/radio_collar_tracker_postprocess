@@ -34,7 +34,7 @@ BFO.o: BFO.cpp Sample.hpp BFO.hpp
 	g++ BFO.cpp $(CPPFLAGS)
 
 LPF.o: LPF.cpp Sample.hpp LPF.hpp
-	g++ LPF.cpp $(CPPFLAGS)
+	g++ LPF.cpp $(CPPFLAGS) -O3
 
 Decimator.o: Decimator.cpp Decimator.hpp Sample.hpp
 	g++ Decimator.cpp $(CPPFLAGS)
