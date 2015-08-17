@@ -52,7 +52,6 @@ void Decimator::run(){
 			}
 			continue;
 		}
-		cout << "Decimator: Idle for " << idle_counter << " loops" << endl;
 		idle_counter = 0;
 		if(sample->isTerminating()){
 			cout << "Decimator: Got terminating sample" << endl;
