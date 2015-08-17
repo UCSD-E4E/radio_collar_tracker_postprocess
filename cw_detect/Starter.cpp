@@ -23,8 +23,9 @@ int main(int argc, char** argv){
 	cout << "Starter: Loading classes" << endl;
 	RFFileLoader* file_loader = new RFFileLoader(2048000);
 	BFO* bfo = new BFO(2048000, 2000, file_loader);
-	LPF* lpf = new LPF(2048000, bfo);
-	Decimator* decimator = new Decimator(2048000, 1000, lpf);
+	Decimator* pre_decimator = new Decimator(2048000, 100, bfo);
+	LPF* lpf = new LPF(20480, pre_decimator);
+	Decimator* decimator = new Decimator(20480, 100, lpf);
 	FileWriter* file_writer = new FileWriter(decimator, 1);
 	file_writer->setMetaSuffix(".test");
 	file_writer->setDataSuffix(".test");
