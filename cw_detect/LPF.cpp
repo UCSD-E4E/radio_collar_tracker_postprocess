@@ -4,6 +4,7 @@
 #include <thread>
 #include <mutex>
 #include <queue>
+#include <iostream>
 
 #ifndef QUEUE_SIZE_MAX
 #define QUEUE_SIZE_MAX 1024000
@@ -12,16 +13,16 @@
 
 using namespace std;
 
-LPF::LPF(int sample_rate, CRFSample * (*out_queue)()): sample_rate(sample_rate),
+LPF::LPF(int sample_rate, SampleFactory* previous): sample_rate(sample_rate),
 	run_state(true) {
-	next_sample = out_queue;
+	previous_module = previous
 	// Start worker thread associated with this class
-	thread class_thread(&LPF::run, this);
+	class_thread = new thread(&LPF::run, this);
 }
 
 LPF::~LPF() {
 	run_state = false;
-	class_thread.join();
+	class_thread->join();
 }
 
 CRFSample* LPF::getNextSample() {
@@ -36,13 +37,22 @@ CRFSample* LPF::getNextSample() {
 }
 
 void LPF::run() {
+	cout << "LPF: Starting" << endl;
 	complex<float> ring_buf[TAP_LENGTH];
 	int ring_buf_index = 0;
 	while (run_state) {
-		CRFSample* sample = next_sample();
+		CRFSample* sample = previous_module->getNextSample();
 		if (!sample) {
 			// TODO wait if necessary
 			continue;
+		}
+		if(sample->isTerminating()){
+			cout << "LPF: got terminating sample" << endl;
+			output_queue_mutex.lock();
+			output_queue.push(sample);
+			output_queue_mutex.unlock();
+			has_terminating = true;
+			break;
 		}
 		// Store into memory buffer
 		ring_buf[ring_buf_index] = sample->getData();
@@ -55,12 +65,10 @@ void LPF::run() {
 		}
 		sample->setData(sig_sample);
 		// Queue sample
-		output_queue_mutex.lock();
 		while (output_queue.size() >= QUEUE_SIZE_MAX) {
-			output_queue_mutex.unlock();
 			// TODO force wait using posix wait
-			output_queue_mutex.lock();
 		}
+		output_queue_mutex.lock();
 		output_queue.push(sample);
 		output_queue_mutex.unlock();
 		// Update ring buffer
@@ -68,4 +76,9 @@ void LPF::run() {
 		ring_buf_index %= TAP_LENGTH;
 
 	}
+	cout << "LPF: Ending thread" << endl;
+}
+
+bool LPF::hasTerminating(){
+	return has_terminating;
 }

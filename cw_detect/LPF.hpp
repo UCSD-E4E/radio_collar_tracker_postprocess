@@ -16,16 +16,16 @@ using namespace std;
  *
  * @author NATHAN HUI <ntlhui@gmail.com>
  */
-class LPF {
+class LPF: public SampleFactory {
 private:
 	/**
 	 * Internal sampling rate
 	 */
 	int sample_rate;
 	/**
-	 * Pointer to next sample function
+	 * Pointer to the SampleFactory object that supplies the next sample.
 	 */
-	CRFSample* (*next_sample)();
+	SampleFactory* previous_module;
 	/**
 	 * Thread body
 	 */
@@ -33,7 +33,7 @@ private:
 	/**
 	 * Thread associated with this class
 	 */
-	thread class_thread;
+	thread* class_thread;
 	/**
 	 * Output signal queue
 	 */
@@ -46,15 +46,19 @@ private:
 	 * Thread state variable
 	 */
 	bool run_state;
+	/**
+	 * Terminating sample flag
+	 */
+	bool has_terminating = false;
 public:
 	/**
 	 * Creates and initializes a new LPF object.
 	 *
 	 * @param sample_rate Sampling rate of the incoming queue
-	 * @param out_queue	Function that returns in sequence the signal to
-	 * 					modify.
+	 * @param previous	Pointer to a SampleFactory from which to source the
+	 * 					next samples to process.
 	 */
-	LPF(int sample_rate, CRFSample * (*out_queue)());
+	LPF(int sample_rate, SampleFactory* previous);
 	/**
 	 * Deactivates and destroys this LPF object.
 	 */
@@ -66,6 +70,14 @@ public:
 	 * @return the next processed sample, or NULL if none exist
 	 */
 	CRFSample* getNextSample();
+	/**
+	 * Checks whether or not this module has received and processed the
+	 * terminating sample.
+	 *
+	 * @return	true if this module has received the terminating sample, false
+	 * 			otherwise.
+	 */
+	bool hasTerminating();
 };
 
 #endif // __LPF_H_
