@@ -41,7 +41,7 @@ void BFO::run() {
 	cout << "BFO: Started" << endl;
 	while (run_state) {
 		// Get next sample
-		CRFSample* sample = next_sample();
+		CRFSample* sample = previous_module->getNextSample();
 		if (!sample) {
 			// TODO wait if necessary
 			continue;
