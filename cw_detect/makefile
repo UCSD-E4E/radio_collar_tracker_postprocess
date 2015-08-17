@@ -4,7 +4,6 @@ CPPFLAGS = -std=c++11 -c -Wall -g -pthread -Wl,--no-as-needed
 .PHONY: clean all docs test
 
 all: Starter
-	-mkdir test
 
 test: Starter
 	-rm -rf test
