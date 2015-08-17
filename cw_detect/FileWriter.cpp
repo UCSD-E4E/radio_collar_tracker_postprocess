@@ -60,6 +60,7 @@ void FileWriter::run(){
 	char fname_buf[PATH_MAX + NAME_MAX];
 	uint64_t file_len = 0;
 	int file_num = 1;
+	int idle_counter = 0;
 
 	sprintf(fname_buf, "%s/%s%06d_%06d%s", output_dir.c_str(),
 			data_prefix.c_str(), run_num, file_num, data_suffix.c_str());
@@ -71,8 +72,12 @@ void FileWriter::run(){
 		CRFSample* sample = previous_module->getNextSample();
 		if(!sample){
 			// TODO wait if necessary
+			idle_counter++;
+			if(idle_counter % 1000 == 0){
+			}
 			continue;
 		}
+		idle_counter = 0;
 		if(sample->isTerminating()){
 			cout << "FileWriter: Got terminating sample!" << endl;
 			has_terminating = true;
