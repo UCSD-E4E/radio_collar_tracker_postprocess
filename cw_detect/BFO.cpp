@@ -13,8 +13,8 @@
 
 using namespace std;
 
-BFO::BFO(int sample_rate, int frequency,
-         SampleFactory* previous): sample_rate(sample_rate), OSC_freq(frequency),
+BFO::BFO(int frequency,
+         SampleFactory* previous): OSC_freq(frequency),
 	run_state(true) {
 	previous_module = previous;
 	// Start worker thread associated with this class

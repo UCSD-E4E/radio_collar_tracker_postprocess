@@ -17,10 +17,6 @@ using namespace std;
 class BFO: public SampleFactory {
 private:
 	/**
-	 * Sampling rate of the incoming stream in samples per second
-	 */
-	int sample_rate;
-	/**
 	 * Frequency of the beat frequency oscillator.
 	 */
 	int OSC_freq;
@@ -59,12 +55,11 @@ public:
 	 * this class. The BFO accepts samples at the specified sample rate,
 	 * and multiplies that signal by a sinusoid of the specified frequency.
 	 *
-	 * @param sample_rate Sampling rate of the incoming queue
 	 * @param frequency	Frequency for the beat frequency oscillator
 	 * @param previous	Pointer to a SampleFactory object from which to get the
 	 * 					next sample from.
 	 */
-	BFO(int sample_rate, int frequency, SampleFactory* previous);
+	BFO(int frequency, SampleFactory* previous);
 	/**
 	 * Destrpys this BFO class and deactivates the workflow associated with
 	 * this class.
