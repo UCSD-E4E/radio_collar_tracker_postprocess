@@ -11,6 +11,9 @@
 #include "BFO.hpp"
 #include "LPF.hpp"
 #include <iostream>
+#include <unistd.h>
+#include <getopt.h>
+#include <cstdlib>
 
 /**
  * This is the main routine for this program.  This function initializes and
@@ -20,19 +23,49 @@
  * @param argv	Array of C strings representing arguments
  */
 int main(int argc, char** argv){
+	int opt;
+	string input_dir = "./";
+	string  output_dir = "./";
+	int runNum = -1;
+	int bfo_freq = 2000;
+
+	while ((opt=getopt(argc, argv, "hi:o:r:f:")) != -1){
+		switch (opt){
+			case 'h':
+			case '?':
+				// TODO: printUsage()
+				exit(0);
+			case 'i':
+				input_dir = optarg;
+				break;
+			case 'o':
+				output_dir = optarg;
+				break;
+			case 'r':
+				runNum = atoi(optarg);
+				break;
+			case 'f':
+				bfo_freq = atoi(optarg);
+		}
+	}
+
+	if(runNum < 0){
+		cerr << "Starter: ERROR bad runNum" << endl;
+		exit(-1);
+	}
+
 	cout << "Starter: Loading classes" << endl;
 	RFFileLoader* file_loader = new RFFileLoader(2048000);
-	BFO* bfo = new BFO(2048000, 2000, file_loader);
-	Decimator* pre_decimator = new Decimator(2048000, 100, bfo);
+	BFO* bfo = new BFO(bfo_freq, file_loader);
+	Decimator* pre_decimator = new Decimator(100, bfo);
 	LPF* lpf = new LPF(20480, pre_decimator);
-	Decimator* decimator = new Decimator(20480, 100, lpf);
-	FileWriter* file_writer = new FileWriter(decimator, 1);
-	file_writer->setMetaSuffix(".test");
-	file_writer->setDataSuffix(".test");
-	file_writer->setDataDir("./test/");
+	FileWriter* file_writer = new FileWriter(lpf, 1);
+	file_writer->setDataDir(input_dir);
 	file_writer->start();
 	cout << "Starter: Adding file" << endl;
-	file_loader->addFile("test.raw");
+	for(int i = optind; i < argc; i++){
+		file_loader->addFile(string(argv[i]));
+	}
 	cout << "Starter: Signaling Termination" << endl;
 	file_loader->sendTerminating();
 	cout << "Starter: Waiting for pipeline to finish" << endl;
@@ -40,7 +73,7 @@ int main(int argc, char** argv){
 	}
 	cout << "Starter: Deleting classes" << endl;
 	delete file_writer;
-	delete decimator;
+	delete pre_decimator;
 	delete lpf;
 	delete bfo;
 	delete file_loader;
