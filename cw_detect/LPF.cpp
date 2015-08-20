@@ -5,6 +5,7 @@
 #include <mutex>
 #include <queue>
 #include <iostream>
+#include <stdexcept>
 
 #ifndef QUEUE_SIZE_MAX
 #define QUEUE_SIZE_MAX 1024000
@@ -16,6 +17,9 @@ using namespace std;
 LPF::LPF(int sample_rate, SampleFactory* previous): sample_rate(sample_rate),
 	run_state(true) {
 	previous_module = previous;
+	if(sample_rate != SAMPLING_RATE){
+		throw invalid_argument("Sampling rates do not match!");
+	}
 	// Start worker thread associated with this class
 	class_thread = new thread(&LPF::run, this);
 }
@@ -58,6 +62,9 @@ void LPF::run() {
 			output_queue_mutex.unlock();
 			has_terminating = true;
 			break;
+		}
+		if(sample->getSampleRate() != SAMPLING_RATE){
+			throw domain_error("Sampling Rates don't match!");
 		}
 		// Store into memory buffer
 		ring_buf[ring_buf_index] = sample->getData();
