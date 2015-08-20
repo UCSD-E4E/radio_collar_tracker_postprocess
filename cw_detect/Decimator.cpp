@@ -11,9 +11,8 @@ using namespace std;
 #define QUEUE_SIZE_MAX 1024000
 #endif // QUEUE_SIZE_MAX
 
-Decimator::Decimator(int sample_rate, int factor, SampleFactory* previous): input_sample_rate(sample_rate), decimation_factor(factor), run_state(true) {
+Decimator::Decimator(int factor, SampleFactory* previous): decimation_factor(factor), run_state(true) {
 	previous_module = previous;
-	output_sample_rate = input_sample_rate / decimation_factor;
 	// Start worker thread associated with this class
 	class_thread = new thread(&Decimator::run, this);
 }
@@ -67,7 +66,7 @@ void Decimator::run(){
 				// TODO force wait using posix wait
 				output_queue_mutex.lock();
 			}
-			CRFSample* newSample = new CRFSample(index_counter, output_sample_rate, sample->getData());
+			CRFSample* newSample = new CRFSample(index_counter, sample->getSampleRate() / decimation_factor, sample->getData());
 			index_counter++;
 			output_queue.push(newSample);
 			output_queue_mutex.unlock();

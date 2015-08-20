@@ -17,17 +17,9 @@ using namespace std;
 class Decimator: public SampleFactory{
 	private:
 		/**
-		 * Sampling rate of the incoming stream in samples per second.
-		 */
-		int input_sample_rate;
-		/**
 		 * Decimation factor
 		 */
 		int decimation_factor;
-		/**
-		 * Sampling rate of the outgoing stream in samples per second.
-		 */
-		int output_sample_rate;
 		/**
 		 * Pointer to next sample source.
 		 */
@@ -68,7 +60,7 @@ class Decimator: public SampleFactory{
 		 * @param previous		Object that returns in sequence the signal to
 		 * 						modify.
 		 */
-		Decimator(int sample_rate, int factor, SampleFactory* previous);
+		Decimator(int factor, SampleFactory* previous);
 
 		/**
 		 * Destroys this Decimator class and deactivates the workflow
