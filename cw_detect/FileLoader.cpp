@@ -6,7 +6,8 @@
 #include <cstdint>
 #include <sys/stat.h>
 #include <stdexcept>
-#include <iostream>
+#include <fstream>
+
 using namespace std;
 
 #ifndef QUEUE_SIZE_MAX
@@ -47,8 +48,9 @@ void RFFileLoader::run() {
 				cerr << "FileLoader: ERROR: Failed to open file!" << endl;
 			}
 
-			// while read 2 into the buffer
-			while (file_stream.read((char*)buffer, 2)) {
+			while (file_stream.peek() != EOF){
+				// while read 2 into the buffer
+				file_stream.read(reinterpret_cast <char*> (buffer), 2);
 				// Load into queue if space
 				while (signal_queue.size() >= QUEUE_SIZE_MAX) {
 					// wait
@@ -57,7 +59,7 @@ void RFFileLoader::run() {
 
 				signal_queue_mutex.lock();
 				CRFSample* new_sample = new CRFSample(index, sample_rate,
-						buffer[0] / 128.0 - 0.5, buffer[1] / 128.0 - 0.5);
+						buffer[0] / 128.0 - 1.0, buffer[1] / 128.0 - 1.0);
 				signal_queue.push(new_sample);
 				signal_queue_mutex.unlock();
 				index++;
@@ -96,7 +98,7 @@ void RFFileLoader::addFile(string filename) {
 	struct stat buffer;
 	stat(filename.c_str(), &buffer);
 	if (!S_ISREG(buffer.st_mode)) {
-		throw invalid_argument("Failed to open file!");
+		throw invalid_argument("Failed to open file: " + filename);
 	}
 	// Add to queue
 	file_queue_mutex.lock();
