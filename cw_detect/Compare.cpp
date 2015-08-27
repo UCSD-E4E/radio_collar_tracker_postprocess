@@ -24,8 +24,8 @@
  */
 int main(int argc, char** argv){
 	int opt;
-	string input_dir = "./";
-	string output_dir = "./test/";
+	string input_dir = "/home/ntlhui/workspace/radio_collar_tracker_test/raw/";
+	string output_dir = "/home/ntlhui/workspace/radio_collar_tracker_test/output/";
 	int runNum = 10;
 	int bfo_freq = -11580;
 
@@ -68,7 +68,7 @@ int main(int argc, char** argv){
 	file_writer->start();
 	cout << "Starter: Adding file" << endl;
 	for(int i = 0; i < 1; i++){
-		file_loader->addFile(input_dir + "dr_data.raw");
+		file_loader->addFile(input_dir + "sweep.raw");
 	}
 	cout << "Starter: Signaling Termination" << endl;
 	file_loader->sendTerminating();

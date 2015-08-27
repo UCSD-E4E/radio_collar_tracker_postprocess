@@ -1,6 +1,7 @@
-LFLAGS = -pthread -lm -Wl,--no-as-needed
+LFLAGS = -pthread -lm -Wl,--no-as-needed -lsamplerate
 CFLAGS = -std=gnu99 -c -Wall -g
 CPPFLAGS = -std=c++11 -c -Wall -g -pthread -Wl,--no-as-needed -O0
+DEFAULT_LENGTH = 4000
 .PHONY: clean all docs test testFile
 
 all: Starter
@@ -25,7 +26,6 @@ clean:
 	-rm -rf latex
 	-rm -rf top_block.py
 	-rm -rf Starter
-	-rm -rf test
 	-rm -rf Compare
 	-rm -rf iqdump
 	-rm -rf magdump
@@ -38,6 +38,7 @@ clean:
 	-rm -rf mksample
 	-rm -rf DecimatorTester
 	-rm -rf *.raw
+	-rm -rf mksweep
 
 Sample.o: Sample.cpp Sample.hpp
 	g++ Sample.cpp $(CPPFLAGS)
@@ -76,9 +77,9 @@ iqdump: iqdump.cpp
 	g++ iqdump.cpp $(CPPFLAGS)
 	g++ iqdump.o $(LFLAGS) -o iqdump
 
-mkconstant: mkconstant.c
-	gcc mkconstant.c $(CFLAGS)
-	gcc mkconstant.o $(LFLAGS) -o mkconstant
+mkconstant: mkconstant.cpp
+	g++ mkconstant.cpp $(CPPFLAGS)
+	g++ mkconstant.o $(LFLAGS) -o mkconstant
 
 testFile: FileTester.cpp constant.raw FileLoader.o FileWriter.o Sample.o
 	g++ FileTester.cpp $(CPPFLAGS)
@@ -90,30 +91,44 @@ testBFO: BFOtester.cpp constant.raw FileLoader.o FileWriter.o Sample.o BFO.o
 	g++ BFOtester.o FileLoader.o FileWriter.o Sample.o BFO.o $(LFLAGS) -o BFOtester
 	./BFOtester
 
-mkstep: mkstep.c
-	gcc mkstep.c $(CFLAGS)
-	gcc mkstep.o $(LFLAGS) -o mkstep
+mkstep: mkstep.cpp
+	g++ mkstep.cpp $(CPPFLAGS)
+	g++ mkstep.o $(LFLAGS) -o mkstep
 
 testLPF: LPFTester.cpp impulse.raw FileLoader.o FileWriter.o Sample.o LPF.o
 	g++ LPFTester.cpp $(CPPFLAGS)
 	g++ LPFTester.o FileLoader.o FileWriter.o Sample.o LPF.o $(LFLAGS) -o LPFTester
 	./LPFTester
 
-mkimpulse: mkimpulse.c
-	gcc mkimpulse.c $(CFLAGS)
-	gcc mkimpulse.o $(LFLAGS) -o mkimpulse
+mkimpulse: mkimpulse.cpp
+	g++ mkimpulse.cpp $(CPPFLAGS)
+	g++ mkimpulse.o $(LFLAGS) -o mkimpulse
 
 magdump: magdump.cpp
 	g++ magdump.cpp $(CPPFLAGS)
 	g++ magdump.o $(LFLAGS) -o magdump
 
-mksample: mksample.c
-	gcc mksample.c $(CFLAGS)
-	gcc mksample.o $(LFLAGS) -o mksample
+mksample: mksample.cpp
+	g++ mksample.cpp $(CPPFLAGS)
+	g++ mksample.o $(LFLAGS) -o mksample
 
-testDecimator: DecimatorTester.cpp impulse.raw FileLoader.o FileWriter.o Sample.o Decimator.o
+testDecimator: DecimatorTester.cpp constant.raw FileLoader.o FileWriter.o Sample.o Decimator.o
 	g++ DecimatorTester.cpp $(CPPFLAGS)
 	g++ DecimatorTester.o FileLoader.o FileWriter.o Sample.o Decimator.o $(LFLAGS) -o DecimatorTester
 	./DecimatorTester
 
+constant.raw: mkconstant
+	./mkconstant $(DEFAULT_LENGTH)
 
+impulse.raw: mkimpulse
+	./mkimpulse $(DEFAULT_LENGTH)
+
+sample.raw: mksample
+	./mksample 10
+
+step.raw: mkstep
+	./mkstep $(DEFAULT_LENGTH)
+
+mksweep: mksweep.cpp
+	g++ mksweep.cpp $(CPPFLAGS)
+	g++ mksweep.o $(LFLAGS) -o mksweep

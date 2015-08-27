@@ -4,7 +4,7 @@
 #include <mutex>
 #include <queue>
 #include <iostream>
-#include <cmath>
+#include <samplerate.h>
 
 using namespace std;
 
@@ -44,19 +44,14 @@ void Decimator::run(){
 	int counter = 0;
 	int index_counter = 0;
 	int idle_counter = 0;
-	complex <float> delay_line[decimation_factor];
-	float sinc[decimation_factor];
 
-	// Generate sinc function
-	float B = (float) sample_freq / decimation_factor / 4; 
-	for(int i = 0; i < decimation_factor; i++){
-		float t = ((float)i - decimation_factor / 2) / sample_freq;
-		if(t == 0){
-			sinc[i] = 2.0 * B;
-			continue;
-		}
-		sinc[i] = 2.0 * B * sin(M_PI * 2 * B * t) / (M_PI * 2 * B * t);
-	}
+	int error;
+
+	float input_data[2 * decimation_factor];
+	float output_data[2];
+
+	SRC_STATE* src_state = src_new (SRC_SINC_FASTEST, 2, &error);
+	SRC_DATA src_data = {input_data, output_data, 100, 1, 0, 0, 0, 1.0 / decimation_factor};
 
 	while(run_state){
 		CRFSample* sample = previous_module->getNextSample();
@@ -68,8 +63,6 @@ void Decimator::run(){
 			continue;
 		}
 		idle_counter = 0;
-		// Add to delay line
-		delay_line[counter] = sample->getData();
 		if(sample->isTerminating()){
 			cout << "Decimator: Got terminating sample" << endl;
 			output_queue_mutex.lock();
@@ -77,11 +70,13 @@ void Decimator::run(){
 			output_queue_mutex.unlock();
 			break;
 		}
+		// Add data to delay line
+		input_data[counter * 2] = sample->getData().real();
+		input_data[counter * 2 + 1] = sample->getData().imag();
 		if((counter % decimation_factor) == (decimation_factor - 1)){
-			// Calculate value for sinc filter
-			complex <float> average;
-			for(int i = 0; i < decimation_factor; i++){
-				average += delay_line[i] * sinc[i];
+			// Get cecimation sample
+			if(src_process(src_state, &src_data)){
+				// Error!
 			}
 			output_queue_mutex.lock();
 			while(output_queue.size() >= QUEUE_SIZE_MAX){
@@ -89,7 +84,7 @@ void Decimator::run(){
 				// TODO force wait using posix wait
 				output_queue_mutex.lock();
 			}
-			CRFSample* newSample = new CRFSample(index_counter, sample->getSampleRate() / decimation_factor, average);
+			CRFSample* newSample = new CRFSample(index_counter, sample->getSampleRate() / decimation_factor, output_data[0], output_data[1]);
 			index_counter++;
 			output_queue.push(newSample);
 			output_queue_mutex.unlock();
