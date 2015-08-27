@@ -54,8 +54,8 @@ void BFO::run() {
 			break;
 		}
 		// Generate oscillator IQ
-		double sig_time = sample->getIndex() / sample->getSampleRate();
-		complex<float> bfo_sample(cos(OSC_freq * sig_time), sin(
+		double sig_time = (double)(sample->getIndex()) / sample->getSampleRate();
+		complex<float> bfo_sample(sin(OSC_freq * sig_time), cos(
 		                              OSC_freq * sig_time));
 		// Multiply sample
 		complex<float> sig_sample = sample->getData();
