@@ -48,6 +48,10 @@ class Decimator: public SampleFactory{
 		 * Terminating sample flag
 		 */
 		bool has_terminating = false;
+		/**
+		 * Sampling frequnecy of the incoming signal.
+		 */
+		int sample_freq;
 	public:
 		/**
 		 * Creates a Decimator class and initializes the workflow associated 
@@ -60,7 +64,7 @@ class Decimator: public SampleFactory{
 		 * @param previous		Object that returns in sequence the signal to
 		 * 						modify.
 		 */
-		Decimator(int factor, SampleFactory* previous);
+		Decimator(int sample_rate, int factor, SampleFactory* previous);
 
 		/**
 		 * Destroys this Decimator class and deactivates the workflow
