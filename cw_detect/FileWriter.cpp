@@ -56,7 +56,7 @@ bool FileWriter::hasTerminating(){
 void FileWriter::run(){
 	cout << "FileWriter: Starting" << endl;
 	ofstream fout;
-	char sbuf[2];
+	float sbuf[2];
 	char fname_buf[PATH_MAX + NAME_MAX];
 	uint64_t file_len = 0;
 	int file_num = 1;
