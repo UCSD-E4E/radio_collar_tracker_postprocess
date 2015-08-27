@@ -48,6 +48,10 @@ int main(int argc, char** argv){
 				bfo_freq = atoi(optarg);
 		}
 	}
+	cout << "Input Directory: " << input_dir << endl;
+	cout << "Output Directory: " << output_dir << endl;
+	cout << "Run Number: " << runNum << endl;
+	cout << "Frequency: " << bfo_freq << endl;
 
 	if(runNum < 0){
 		cerr << "Starter: ERROR bad runNum" << endl;
@@ -59,12 +63,12 @@ int main(int argc, char** argv){
 	BFO* bfo = new BFO(bfo_freq, file_loader);
 	Decimator* pre_decimator = new Decimator(100, bfo);
 	LPF* lpf = new LPF(20480, pre_decimator);
-	FileWriter* file_writer = new FileWriter(lpf, 1);
-	file_writer->setDataDir(input_dir);
+	FileWriter* file_writer = new FileWriter(lpf, runNum);
+	file_writer->setDataDir(output_dir);
 	file_writer->start();
 	cout << "Starter: Adding file" << endl;
 	for(int i = optind; i < argc; i++){
-		file_loader->addFile(string(argv[i]));
+		file_loader->addFile(input_dir + string(argv[i]));
 	}
 	cout << "Starter: Signaling Termination" << endl;
 	file_loader->sendTerminating();
