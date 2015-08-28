@@ -34,10 +34,8 @@ line_counter = 0
 
 while line != "":
     # Extract time
-    print("Got line %d" % line_counter)
     gps_time = float(line.split(',')[0].strip())
     if gps_time < (signal_index / sampling_freq) + start_time:
-        print("No samples!")
         line = gps_stream.readline()
         line_counter += 1
         continue
@@ -46,9 +44,9 @@ while line != "":
     longitude = int(line.split(',')[2].strip())
 
     # Throw out samples prior to this gps point
-    signal_bring_forward = gps_time - (signal_index / sampling_freq) + start_time 
-    samples_bring_forward = int(signal_bring_forward / sampling_freq)
-    signal_stream.read(4 * samples_bring_forward)
+    signal_bring_forward = gps_time - ((signal_index / sampling_freq) + start_time )
+    samples_bring_forward = int(signal_bring_forward * sampling_freq)
+    signal_stream.read(8 * samples_bring_forward)
     signal_index += samples_bring_forward
     
     # Get next second
@@ -71,12 +69,13 @@ while line != "":
     # Output GPS and signal amplitude
     if done:
         break
-    print("Signal Amplitude: %f" % max_amplitude)
     out_stream.write("%f,%d,%d,%f\n" % (gps_time, latitude, longitude, max_amplitude))
     line = gps_stream.readline()
     line_counter += 1
 
 # Close file
+print("Read %d lines of GPS data" % line_counter)
+print("Read %d samples, or %d bytes of signal data" % (signal_index, signal_index * 8))
 out_stream.close()
 signal_stream.close()
 gps_stream.close()
