@@ -3,12 +3,12 @@ import math
 import cmath
 import struct
 
-input_dir = '/home/ntlhui/workspace/radio_collar_tracker_test/RUN_TEST/'
-output_dir = '/home/ntlhui/workspace/radio_collar_tracker_test/RUN_TEST/'
+input_dir = '/home/ntlhui/workspace/radio_collar_tracker_test/RUN_VALIDATION/'
+output_dir = '/home/ntlhui/workspace/radio_collar_tracker_test/RUN_VALIDATION/'
 
-signal_file = '/RUN_TEST.out'
-gps_file = '/GPS_TEST'
-meta_file = '/META_TEST'
+signal_file = '/RUN_000045.out'
+gps_file = '/GPS_000045'
+meta_file = '/META_000045'
 
 # Import META file
 meta_file_stream = open(input_dir + meta_file, 'r')
@@ -25,7 +25,7 @@ gps_stream = open(input_dir + gps_file, 'r')
 signal_stream = open(input_dir + signal_file, 'rb')
 
 # Initialize output stream
-out_stream = open(output_dir + "/RUN_TEST.csv", 'w')
+out_stream = open(output_dir + "/RUN_000045.csv", 'w')
 
 line = gps_stream.readline()
 signal_index = 0
@@ -72,7 +72,7 @@ while line != "":
     if done:
         break
     print("Signal Amplitude: %f" % max_amplitude)
-    out_stream.write("%d,%d,%f\n" % (latitude, longitude, max_amplitude))
+    out_stream.write("%f,%d,%d,%f\n" % (gps_time, latitude, longitude, max_amplitude))
     line = gps_stream.readline()
     line_counter += 1
 
