@@ -11,10 +11,10 @@ parser = argparse.ArgumentParser(description='Processes RUN_XXXXXX.csv files '
         'from the Radio Collar Tracker software to generate maps of radio collar '
         'signal strength')
 
-filename = '/home/ntlhui/workspace/radio_collar_tracker_test/RUN_VALIDATION/test_GPS'
-output_path = '/home/ntlhui/workspace/radio_collar_tracker_test/RUN_VALIDATION/'
+filename = '/home/ntlhui/workspace/radio_collar_tracker_test/RUN_001075/GPS_001075'
+output_path = '/home/ntlhui/workspace/radio_collar_tracker_test/RUN_001075/'
 kml_output = False
-run_num = 45
+run_num = 1075
 num_col = 1
 
 # make list of columns
@@ -39,7 +39,7 @@ for i in range(len(data['lat'])):
 fig = plot.figure(i)
 fig.set_size_inches(8, 6)
 fig.set_dpi(72)
-sc = plot.scatter(lon, lat)
+sc = plot.scatter(data['lon'] / 1.e7, data['lat'] / 1.e7)
 plot.grid()
 ax = plot.gca()
 ax.get_xaxis().get_major_formatter().set_useOffset(False)
