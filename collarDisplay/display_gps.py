@@ -39,7 +39,7 @@ for i in range(len(data['lat'])):
 fig = plot.figure(i)
 fig.set_size_inches(8, 6)
 fig.set_dpi(72)
-sc = plot.scatter(data['lon'] / 1.e7, data['lat'] / 1.e7)
+sc = plot.scatter(lon, lat)
 plot.grid()
 ax = plot.gca()
 ax.get_xaxis().get_major_formatter().set_useOffset(False)
