@@ -1,6 +1,7 @@
 #!/bin/bash
 # Constant configuration
 GNU_RADIO_PIPELINE='/home/ntlhui/workspace/radio_collar_tracker/cw_detect/cw_detect_deploy.py'
+RAW_DATA_COMPILER='/home/ntlhui/workspace/radio_collar_tracker/raw_gps_analysis/raw_gps_analysis.py'
 # User supplied configuration
 data_dir='/home/ntlhui/workspace/radio_collar_tracker_test/RUN_001075/'
 run=1075
@@ -25,6 +26,7 @@ do
 	frequency=-48000
 	# Execute pipeline
 	${GNU_RADIO_PIPELINE} -f ${frequency} -i ${raw_file} -o `printf "%s%06d.raw" ${collar_file_prefix} ${i}`
+	${RAW_DATA_COMPILER} -i ${data_dir} -o ${data_dir} -r ${run} -c ${i}
 done
 
 # For each collar, make map
