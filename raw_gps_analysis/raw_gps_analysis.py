@@ -36,7 +36,7 @@ gain = float(meta_file_stream.readline().strip().split(':')[1].strip())
 # Initialize GPS stream
 gps_stream = open(input_dir + gps_file, 'r')
 
-# INitialize Signal stream
+# Initialize Signal stream
 signal_stream = open(input_dir + signal_file, 'rb')
 
 # Initialize output stream
