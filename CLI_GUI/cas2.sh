@@ -1,6 +1,6 @@
 #!/bin/bash
 # Constant configuration
-GNU_RADIO_PIPELINE='/home/ntlhui/workspace/radio_collar_tracker/cw_detect/top_block.py'
+GNU_RADIO_PIPELINE='/home/ntlhui/workspace/radio_collar_tracker/cw_detect/cw_detect_deploy.py'
 # User supplied configuration
 data_dir='/home/ntlhui/workspace/radio_collar_tracker_test/RUN_001075/'
 run=1075
@@ -22,7 +22,7 @@ echo ${raw_file}
 for i in ${num_collars}
 do
 	# Get collar beat frequency
-	frequency=-11583
+	frequency=-48000
 	# Execute pipeline
 	${GNU_RADIO_PIPELINE} -f ${frequency} -i ${raw_file} -o `printf "%s%06d.raw" ${collar_file_prefix} ${i}`
 done
