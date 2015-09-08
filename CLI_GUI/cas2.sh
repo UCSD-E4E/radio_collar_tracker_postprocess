@@ -2,6 +2,7 @@
 # Constant configuration
 GNU_RADIO_PIPELINE='/home/ntlhui/workspace/radio_collar_tracker/cw_detect/cw_detect_deploy.py'
 RAW_DATA_COMPILER='/home/ntlhui/workspace/radio_collar_tracker/raw_gps_analysis/raw_gps_analysis.py'
+DISPLAY_DATA='/home/ntlhui/workspace/radio_collar_tracker/collarDisplay/display_data.py'
 # User supplied configuration
 data_dir='/home/ntlhui/workspace/radio_collar_tracker_test/RUN_001075/'
 run=1075
@@ -30,3 +31,8 @@ do
 done
 
 # For each collar, make map
+for i in ${num_collars}
+do
+	data_file=`printf '%s/RUN_%06d_COL_%06d.csv' ${data_dir} ${run} ${i}`
+	${DISPLAY_DATA} -i ${data_file} -o ${data_dir} -r ${run} -c ${i}
+done
