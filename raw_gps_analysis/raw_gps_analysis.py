@@ -2,13 +2,28 @@
 import math
 import cmath
 import struct
+import argparse
 
-input_dir = '/home/ntlhui/workspace/radio_collar_tracker_test/RUN_VALIDATION/'
-output_dir = '/home/ntlhui/workspace/radio_collar_tracker_test/RUN_VALIDATION/'
+# Get configuration
+parser = argparse.ArgumentParser(description='Combines the signal and gps data streams for the Radio Collar Tracker')
+parser.addArgument('-i', '--input', metavar='input_dir', dest='input_dir', required = True)
+parser.addArgument('-o', '--output', metavar = 'output_dir', dest = 'output_dir', require = True)
+parser.addArgument('-r', '--run', type=int, required = True, metavar = 'run_num', dest = 'run_num')
+parser.addArgument('-c', '--collar', type = int, required = True, metavar = 'collar', dest = 'collar')
 
-signal_file = '/RUN_000045.out'
-gps_file = '/GPS_000045'
-meta_file = '/META_000045'
+args = parser.parse_args()
+
+# Set configuration
+input_dir = args.input_dir
+output_dir = args.output_dir
+run_num = args.run_num
+col_num = args.collar
+
+# Configure variables
+signal_file = '/RUN_%06d.raw' % (run_num)
+gps_file = '/GPS_%06d' % (run_num)
+meta_file = '/META_%06d' % (run_num)
+output_file = '/RUN_%06d_COL_%06d.csv' % (run_num, col_num)
 
 # Import META file
 meta_file_stream = open(input_dir + meta_file, 'r')
@@ -25,7 +40,7 @@ gps_stream = open(input_dir + gps_file, 'r')
 signal_stream = open(input_dir + signal_file, 'rb')
 
 # Initialize output stream
-out_stream = open(output_dir + "/RUN_000045.csv", 'w')
+out_stream = open(output_dir + output_file, 'w')
 
 line = gps_stream.readline()
 signal_index = 0
