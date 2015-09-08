@@ -20,7 +20,7 @@ run_num = args.run_num
 col_num = args.collar
 
 # Configure variables
-signal_file = '/RUN_%06d.raw' % (run_num)
+signal_file = '/RUN_%06d_%06d.raw' % (run_num, col_num)
 gps_file = '/GPS_%06d' % (run_num)
 meta_file = '/META_%06d' % (run_num)
 output_file = '/RUN_%06d_COL_%06d.csv' % (run_num, col_num)
