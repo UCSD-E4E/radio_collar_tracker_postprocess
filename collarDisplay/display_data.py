@@ -9,10 +9,6 @@ import argparse
 
 kml_output = False
 # TODO Fix test case
-run_num = 45
-num_col = 1
-filename = '/home/ntlhui/workspace/radio_collar_tracker_test/RUN_VALIDATION/RUN_000045.csv'
-output_path = '/home/ntlhui/workspace/radio_collar_tracker_test/RUN_VALIDATION/'
 plot_height = 6
 plot_width = 8
 plot_dpi = 72
@@ -21,13 +17,21 @@ parser = argparse.ArgumentParser(description='Processes RUN_XXXXXX.csv files '
 		'from the Radio Collar Tracker software to generate maps of radio collar '
 		'signal strength')
 
+parser.add_argument('-r', '--run', type = int, help = 'Run number for this data file', metavar = 'run_num', dest = 'run_num', default = 1075)
+parser.add_argument('-c', '--collar', type = int, help = 'Collar number for this data file', metavar = 'collar', dest = 'collar', default = 1)
+parser.add_argument('-i', '--input', help = 'Input file to be processed', metavar = 'data_file', dest = 'filename', required = True)
+parser.add_argument('-o', '--output_dir', help = 'Output directory', metavar = 'output_dir', dest = 'output_path', required = True)
 
+# Get configuration
+args = parser.parse_args()
+run_num = args.run_num
+num_col = args.collar
+filename = args.filename
+output_path = args.output_path
 
 # make list of columns
 # Expects the csv to have the following columns: time, lat, lon, [collars]
-names = ['time', 'lat', 'lon']
-for i in range(num_col):
-	names.append('col%d' % i)
+names = ['time', 'lat', 'lon', 'col']
 
 # Read CSV
 data = np.genfromtxt(filename, delimiter=',', names=names)
@@ -45,39 +49,36 @@ for i in range(len(data['lat'])):
 	zonenum = utm_coord[2]
 	zone = utm_coord[3]
 
-# For each collar
-for col in xrange(num_col):
+# Configure plot
+fig = plot.figure()
+fig.set_size_inches(plot_width, plot_height)
+fig.set_dpi(plot_dpi)
+plot.grid()
+ax = plot.gca()
+ax.get_xaxis().get_major_formatter().set_useOffset(False)
+ax.get_yaxis().get_major_formatter().set_useOffset(False)
+ax.set_xlabel('Easting')
+ax.set_ylabel('Northing')
+ax.set_title('Run %d, Collar %d\nUTM Zone: %d %s' % (run_num, num_col, zonenum, zone))
+ax.set_aspect('equal')
+plot.xticks(rotation='vertical')
 
-	# Configure plot
-	fig = plot.figure(col)
-	fig.set_size_inches(plot_width, plot_height)
-	fig.set_dpi(plot_dpi)
-	plot.grid()
-	ax = plot.gca()
-	ax.get_xaxis().get_major_formatter().set_useOffset(False)
-	ax.get_yaxis().get_major_formatter().set_useOffset(False)
-	ax.set_xlabel('Easting')
-	ax.set_ylabel('Northing')
-	ax.set_title('Run %d, Collar %d\nUTM Zone: %d %s' % (run_num, col + 1, zonenum, zone))
-	ax.set_aspect('equal')
-	plot.xticks(rotation='vertical')
+# Calculate colorplot
+maxCol = np.amax(data['col'])
+minCol = np.amin(data['col'])
+curColMap = plot.cm.get_cmap('jet')
 
-	# Calculate colorplot
-	maxCol = np.amax(data['col%d' % col])
-	minCol = np.amin(data['col%d' % col])
-	curColMap = plot.cm.get_cmap('jet')
+# Plot data
+sc = plot.scatter(lon, lat, c=data['col'], cmap=curColMap, vmin = minCol, vmax = maxCol)
+colorbar = plot.colorbar(sc)
+colorbar.set_label('Maximum Signal Amplitude')
 
-	# Plot data
-	sc = plot.scatter(lon, lat, c=data['col%d' % col], cmap=curColMap, vmin = minCol, vmax = maxCol)
-	colorbar = plot.colorbar(sc)
-	colorbar.set_label('Maximum Signal Amplitude')
-
-	# Save plot
-	plot.savefig('%s/RUN_%06d_COL_%06d.png' % (output_path, run_num, col + 1), bbox_inches = 'tight')
-	print('Collar %d: %s/RUN_%06d_COL_%06d.png' %
-		(col + 1, output_path, run_num, col + 1))
-	# plot.show(block=False)
-	plot.close()
+# Save plot
+plot.savefig('%s/RUN_%06d_COL_%06d.png' % (output_path, run_num, num_col), bbox_inches = 'tight')
+print('Collar %d: %s/RUN_%06d_COL_%06d.png' %
+	(num_col, output_path, run_num, num_col))
+# plot.show(block=False)
+plot.close()
 
 if(kml_output):
 	import Image
