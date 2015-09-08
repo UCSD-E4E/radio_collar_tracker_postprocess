@@ -6,10 +6,10 @@ import argparse
 
 # Get configuration
 parser = argparse.ArgumentParser(description='Combines the signal and gps data streams for the Radio Collar Tracker')
-parser.addArgument('-i', '--input', metavar='input_dir', dest='input_dir', required = True)
-parser.addArgument('-o', '--output', metavar = 'output_dir', dest = 'output_dir', require = True)
-parser.addArgument('-r', '--run', type=int, required = True, metavar = 'run_num', dest = 'run_num')
-parser.addArgument('-c', '--collar', type = int, required = True, metavar = 'collar', dest = 'collar')
+parser.add_argument('-i', '--input', metavar='input_dir', dest='input_dir', required = True)
+parser.add_argument('-o', '--output', metavar = 'output_dir', dest = 'output_dir', required = True)
+parser.add_argument('-r', '--run', type=int, required = True, metavar = 'run_num', dest = 'run_num')
+parser.add_argument('-c', '--collar', type = int, required = True, metavar = 'collar', dest = 'collar')
 
 args = parser.parse_args()
 
