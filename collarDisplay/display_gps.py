@@ -11,10 +11,10 @@ parser = argparse.ArgumentParser(description='Processes RUN_XXXXXX.csv files '
         'from the Radio Collar Tracker software to generate maps of radio collar '
         'signal strength')
 
-filename = '/home/ntlhui/workspace/radio_collar_tracker_test/RUN_001075/GPS_001075'
-output_path = '/home/ntlhui/workspace/radio_collar_tracker_test/RUN_001075/'
+filename = '/home/ntlhui/workspace/radio_collar_tracker_test/RUN_001078/GPS_001078'
+output_path = '/home/ntlhui/workspace/radio_collar_tracker_test/RUN_001078/'
 kml_output = False
-run_num = 1075
+run_num = 1078
 num_col = 1
 
 # make list of columns
@@ -59,43 +59,43 @@ plot.close()
 
 if(kml_output):
     import Image
-    for i in xrange(1, num_col + 1):
-        fig = plot.figure(i)
-        fig.patch.set_facecolor('none')
-        fig.patch.set_alpha(0)
-        fig.set_size_inches(8, 6)
-        fig.set_dpi(72)
-        curColMap = plot.cm.get_cmap('jet')
-        sc = plot.scatter(lon, lat, c=coldata[i - 1], cmap=curColMap, vmin = minCol, vmax = maxCol)
-        ax = plot.gca()
-        ax.patch.set_facecolor('none')
-        ax.set_aspect('equal')
-        plot.axis('off')
-        plot.savefig('tmp.png', bbox_inches = 'tight')
-        print('Collar at %0.3f MHz: %s/RUN_%06d_COL_%0.3ftx.png' %
-        (collars[i - 1] / 1000000.0, output_path, run_num,
-        collars[i - 1] / 1000000.0))
-        # plot.show(block=False)
-        plot.close()
+    i = 1
+    fig = plot.figure(i)
+    fig.patch.set_facecolor('none')
+    fig.patch.set_alpha(0)
+    fig.set_size_inches(8, 6)
+    fig.set_dpi(72)
+    curColMap = plot.cm.get_cmap('jet')
+    sc = plot.scatter(lon, lat)
+    ax = plot.gca()
+    ax.patch.set_facecolor('none')
+    ax.set_aspect('equal')
+    plot.axis('off')
+    plot.savefig('tmp.png', bbox_inches = 'tight')
+    print('Collar at %0.3f MHz: %s/RUN_%06d_COL_%0.3ftx.png' %
+        (0, output_path, run_num,
+        0))
+    # plot.show(block=False)
+    plot.close()
 
-        image=Image.open('tmp.png')
-        image.load()
-        image_data = np.asarray(image)
-        image_data_bw = image_data.max(axis=2)
-        non_empty_columns = np.where(image_data_bw.max(axis=0)>0)[0]
-        non_empty_rows = np.where(image_data_bw.max(axis=1)>0)[0]
-        cropBox = (min(non_empty_rows), max(non_empty_rows), min(non_empty_columns), max(non_empty_columns))
+    image=Image.open('tmp.png')
+    image.load()
+    image_data = np.asarray(image)
+    image_data_bw = image_data.max(axis=2)
+    non_empty_columns = np.where(image_data_bw.max(axis=0)>0)[0]
+    non_empty_rows = np.where(image_data_bw.max(axis=1)>0)[0]
+    cropBox = (min(non_empty_rows), max(non_empty_rows), min(non_empty_columns), max(non_empty_columns))
 
-        image_data_new = image_data[cropBox[0]:cropBox[1]+1, cropBox[2]:cropBox[3]+1 , :]
+    image_data_new = image_data[cropBox[0]:cropBox[1]+1, cropBox[2]:cropBox[3]+1 , :]
 
-        new_image = Image.fromarray(image_data_new)
-        new_image.save('%s/RUN_%06d_COL%0.3ftx.png' % (output_path, run_num,
-        collars[i - 1] / 1000000.0))
-        os.remove('tmp.png')
+    new_image = Image.fromarray(image_data_new)
+    new_image.save('%s/RUN_%06d_COL%0.3ftx.png' % (output_path, run_num,
+    0))
+    os.remove('tmp.png')
 
-        f = open('%s/RUN_%06d_COL%0.3f.kml' % (output_path, run_num,
-        collars[i - 1] / 1000000.0), 'w')
-        f.write("""<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+    f = open('%s/RUN_%06d_COL%0.3f.kml' % (output_path, run_num,
+    0), 'w')
+    f.write("""<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
   <Folder>
     <name>Radio Collar Tracker</name>
@@ -115,5 +115,5 @@ if(kml_output):
       </LatLonBox>
     </GroundOverlay>
   </Folder>
-</kml>""" % (run_num, run_num, collars[i - 1] / 1000000.0, '%s/RUN_%06d_COL%0.3ftx.png' % (output_path, run_num, collars[i - 1] / 1000000.0),north, south, east, west))
+</kml>""" % (run_num, run_num, 0, '%s/RUN_%06d_COL%0.3ftx.png' % (output_path, run_num, 0),north, south, east, west))
         f.close()
