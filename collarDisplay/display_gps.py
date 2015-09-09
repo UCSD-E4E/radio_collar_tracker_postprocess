@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser(description='Processes RUN_XXXXXX.csv files '
 
 filename = '/home/ntlhui/workspace/radio_collar_tracker_test/RUN_001078/GPS_001078'
 output_path = '/home/ntlhui/workspace/radio_collar_tracker_test/RUN_001078/'
-kml_output = False
+kml_output = True
 run_num = 1078
 num_col = 1
 
@@ -26,6 +26,10 @@ data = np.genfromtxt(filename, delimiter=',', names=names)
 lat = [x / 1e7 for x in data['lat']]
 lon = [x / 1e7 for x in data['lon']]
 
+north = np.amax(lat)
+south = np.amin(lat)
+west = np.amin(lon)
+east = np.amax(lon)
 # convert deg to utm
 zone = "X"
 zonenum = 60
@@ -35,6 +39,7 @@ for i in range(len(data['lat'])):
     zone = utm_coord[3]
     lon[i] = utm_coord[0]
     lat[i] = utm_coord[1]
+
 
 fig = plot.figure(i)
 fig.set_size_inches(8, 6)
@@ -116,4 +121,4 @@ if(kml_output):
     </GroundOverlay>
   </Folder>
 </kml>""" % (run_num, run_num, 0, '%s/RUN_%06d_COL%0.3ftx.png' % (output_path, run_num, 0),north, south, east, west))
-        f.close()
+    f.close()
