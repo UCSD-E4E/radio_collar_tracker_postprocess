@@ -6,8 +6,36 @@ DISPLAY_DATA='/home/ntlhui/workspace/radio_collar_tracker/collarDisplay/display_
 META_FILE_READER='/home/ntlhui/workspace/radio_collar_tracker/meta_file_reader/read_meta_file.py'
 FREQUENCY_CALCULATOR='/home/ntlhui/workspace/radio_collar_tracker/ppm_adjust/get_beat_frequency.py'
 # User supplied configuration
-data_dir='/home/ntlhui/workspace/radio_collar_tracker_test/RUN_001078/'
-run=1078
+OPTIND=1
+if [[ $# -eq 0 ]]
+then
+	echo "No args!"
+	exit -1
+fi
+while getopts "hi:r:" opt; do
+	case $opt in
+		\?|h) 
+			echo "The Radio Collar Tracker Collar Analysis System (CAS) provides an integrated pipeline for processing data"
+			exit -1
+			;;
+		i)
+			data_dir=$OPTARG
+			if [[ `stat ${data_dir} -c %F` -ne "directory" ]]
+			then
+				echo "Bad input directory!"
+				exit -1
+			fi
+			;;
+		r)
+			run=$OPTARG
+			if [[ $run =~ '^[0-9]+$' ]]
+			then
+				echo "Bad run number!"
+				exit -1
+			fi
+			;;
+	esac
+done
 
 # Generated variables
 num_raw_files=`ls ${data_dir} | grep 'RAW_DATA_' | wc -l`
@@ -21,7 +49,11 @@ sdr_center_freq=`${META_FILE_READER} -i ${meta_file} -t center_freq`
 sdr_ppm=-64
 
 # Concatenate raw files together
-rm ${raw_file}
+stat ${raw_file} &> \dev\null
+if [[ $? -eq 1 ]]
+then
+	rm ${raw_file}
+fi
 for i in `seq 1 ${num_raw_files}`
 do
 	cat `printf "%s/RAW_DATA_%06d_%06d" ${data_dir} ${run} ${i}` >> ${raw_file}
