@@ -49,8 +49,7 @@ sdr_center_freq=`${META_FILE_READER} -i ${meta_file} -t center_freq`
 sdr_ppm=-64
 
 # Concatenate raw files together
-stat ${raw_file} &> \dev\null
-if [[ $? -eq 1 ]]
+if [[ -e $raw_file ]]
 then
 	rm ${raw_file}
 fi
