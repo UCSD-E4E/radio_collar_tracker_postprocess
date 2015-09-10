@@ -6,6 +6,7 @@ DISPLAY_DATA='/home/ntlhui/workspace/radio_collar_tracker/collarDisplay/display_
 META_FILE_READER='/home/ntlhui/workspace/radio_collar_tracker/meta_file_reader/read_meta_file.py'
 FREQUENCY_CALCULATOR='/home/ntlhui/workspace/radio_collar_tracker/ppm_adjust/get_beat_frequency.py'
 CONFIG_DIR='/home/ntlhui/workspace/radio_collar_tracker/config/'
+
 # User supplied configuration
 OPTIND=1
 if [[ $# -eq 0 ]]
