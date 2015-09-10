@@ -42,15 +42,16 @@ signal_stream = open(input_dir + signal_file, 'rb')
 # Initialize output stream
 out_stream = open(output_dir + output_file, 'w')
 
-line = gps_stream.readline()
 signal_index = 0
 done = False
 line_counter = 0
 
+line = gps_stream.readline()
 while line != "":
     # Extract time
     gps_time = float(line.split(',')[0].strip())
-    if gps_time < (signal_index / sampling_freq) + start_time:
+    # Fast forward if no SDR data.
+    if gps_time < (float(signal_index) / sampling_freq) + start_time:
         line = gps_stream.readline()
         line_counter += 1
         continue
@@ -58,15 +59,13 @@ while line != "":
     latitude = int(line.split(',')[1].strip())
     longitude = int(line.split(',')[2].strip())
 
-    # Throw out samples prior to this gps point
-    signal_bring_forward = gps_time - ((signal_index / sampling_freq) + start_time )
+    # Samples prior to this gps point
+    signal_bring_forward = gps_time - ((float(signal_index) / sampling_freq) + start_time )
     samples_bring_forward = int(signal_bring_forward * sampling_freq)
-    signal_stream.read(8 * samples_bring_forward)
-    signal_index += samples_bring_forward
     
-    # Get next second
+    # Get max of samples
     max_amplitude = 0
-    for x in range(sampling_freq):
+    while gps_time > (float(signal_index) / sampling_freq + start_time):
         # Get sample
         signal_raw = signal_stream.read(8)
         if signal_raw == "":
