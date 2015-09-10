@@ -20,6 +20,11 @@ while getopts "hi:r:" opt; do
 			;;
 		i)
 			data_dir=$OPTARG
+			if ! [[ -e ${data_dir} ]]
+			then
+				echo "Bad input directory!"
+				exit -1
+			fi
 			if [[ `stat ${data_dir} -c %F` -ne "directory" ]]
 			then
 				echo "Bad input directory!"
