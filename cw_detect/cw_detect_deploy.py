@@ -2,7 +2,7 @@
 ##################################################
 # GNU Radio Python Flow Graph
 # Title: Top Block
-# Generated: Mon Sep  7 22:20:51 2015
+# Generated: Thu Sep 10 07:11:22 2015
 ##################################################
 
 from gnuradio import analog
@@ -44,7 +44,6 @@ class top_block(gr.top_block):
         self.fir_filter_xxx_0 = filter.fir_filter_ccf(1, ([0.0008687428780831397, 0.0013175825588405132, -0.001188602764159441, -0.002553905127570033, 0.002098661847412586, 0.0053000920452177525, -0.003509196685627103, -0.010158673860132694, 0.005261188838630915, 0.01802591234445572, -0.007146207615733147, -0.030604897066950798, 0.008933454751968384, 0.052204325795173645, -0.010400292463600636, -0.09877216070890427, 0.011362021788954735, 0.3152790367603302, 0.48736584186553955, 0.3152790367603302, 0.011362021788954735, -0.09877216070890427, -0.010400292463600636, 0.052204325795173645, 0.008933454751968384, -0.030604897066950798, -0.007146207615733147, 0.01802591234445572, 0.005261188838630915, -0.010158673860132694, -0.003509196685627103, 0.0053000920452177525, 0.002098661847412586, -0.002553905127570033, -0.001188602764159441, 0.0013175825588405132, 0.0008687428780831397]))
         self.fir_filter_xxx_0.declare_sample_delay(0)
         self.blocks_uchar_to_float_0 = blocks.uchar_to_float()
-        self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
         self.blocks_multiply_xx_0 = blocks.multiply_vcc(1)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_vff((1/128.0, ))
         self.blocks_float_to_complex_0 = blocks.float_to_complex(1)
@@ -63,10 +62,9 @@ class top_block(gr.top_block):
         self.connect((self.blocks_deinterleave_0, 0), (self.blocks_float_to_complex_0, 0))    
         self.connect((self.blocks_deinterleave_0, 1), (self.blocks_float_to_complex_0, 1))    
         self.connect((self.blocks_file_source_0, 0), (self.blocks_uchar_to_float_0, 0))    
-        self.connect((self.blocks_float_to_complex_0, 0), (self.blocks_throttle_0, 0))    
+        self.connect((self.blocks_float_to_complex_0, 0), (self.blocks_multiply_xx_0, 0))    
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_add_const_vxx_0, 0))    
         self.connect((self.blocks_multiply_xx_0, 0), (self.rational_resampler_xxx_0, 0))    
-        self.connect((self.blocks_throttle_0, 0), (self.blocks_multiply_xx_0, 0))    
         self.connect((self.blocks_uchar_to_float_0, 0), (self.blocks_multiply_const_vxx_0, 0))    
         self.connect((self.fir_filter_xxx_0, 0), (self.blocks_file_sink_1, 0))    
         self.connect((self.rational_resampler_xxx_0, 0), (self.fir_filter_xxx_0, 0))    
@@ -99,7 +97,6 @@ class top_block(gr.top_block):
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
         self.analog_sig_source_x_0.set_sampling_freq(self.samp_rate)
-        self.blocks_throttle_0.set_sample_rate(self.samp_rate)
 
 
 if __name__ == '__main__':
