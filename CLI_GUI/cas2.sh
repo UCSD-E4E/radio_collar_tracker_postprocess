@@ -1,48 +1,26 @@
 #!/bin/bash
 # Constant configuration
-GNU_RADIO_PIPELINE='/home/ntlhui/workspace/radio_collar_tracker/cw_detect/cw_detect_deploy.py'
-RAW_DATA_COMPILER='/home/ntlhui/workspace/radio_collar_tracker/raw_gps_analysis/raw_gps_analysis.py'
-DISPLAY_DATA='/home/ntlhui/workspace/radio_collar_tracker/collarDisplay/display_data.py'
-META_FILE_READER='/home/ntlhui/workspace/radio_collar_tracker/meta_file_reader/read_meta_file.py'
-FREQUENCY_CALCULATOR='/home/ntlhui/workspace/radio_collar_tracker/ppm_adjust/get_beat_frequency.py'
-CONFIG_DIR='/home/ntlhui/workspace/radio_collar_tracker/config/'
+GNU_RADIO_PIPELINE='/Users/e4e/e4e-rct/radio_collar_tracker/cw_detect/cw_detect_deploy.py'
+RAW_DATA_COMPILER='/Users/e4e/e4e-rct/radio_collar_tracker/raw_gps_analysis/raw_gps_analysis.py'
+DISPLAY_DATA='/Users/e4e/e4e-rct/radio_collar_tracker/collarDisplay/display_data.py'
+META_FILE_READER='/Users/e4e/e4e-rct/radio_collar_tracker/meta_file_reader/read_meta_file.py'
+FREQUENCY_CALCULATOR='/Users/e4e/e4e-rct/radio_collar_tracker/ppm_adjust/get_beat_frequency.py'
+CONFIG_DIR='/Users/e4e/e4e-rct/radio_collar_tracker/config/'
+FILE_CHOOSER="/Users/e4e/e4e-rct/radio_collar_tracker/python_dialogs/filechooser.py"
+RUN_NUM_CHOOSER="/Users/e4e/e4e-rct/radio_collar_tracker/python_dialogs/getRunNum.py"
+COLLAR_CHOOSER="/users/e4e/e4e-rct/radio_collar_tracker/python_dialogs/getCollars.py"
 
 # User supplied configuration
-OPTIND=1
-if [[ $# -eq 0 ]]
+data_dir=`${FILE_CHOOSER} 2> /dev/null`
+if [[ $data_dir == "None" ]]
 then
-	echo "No args!"
-	exit -1
-fi
-while getopts "hi:r:" opt; do
-	case $opt in
-		\?|h) 
-			echo "The Radio Collar Tracker Collar Analysis System (CAS) provides an integrated pipeline for processing data"
-			exit -1
-			;;
-		i)
-			data_dir=$OPTARG
-			if ! [[ -e ${data_dir} ]]
-			then
-				echo "Bad input directory!"
-				exit -1
-			fi
-			if [[ `stat ${data_dir} -c %F` -ne "directory" ]]
-			then
-				echo "Bad input directory!"
-				exit -1
-			fi
-			;;
-		r)
-			run=$OPTARG
-			if [[ $run =~ '^[0-9]+$' ]]
-			then
-				echo "Bad run number!"
-				exit -1
-			fi
-			;;
-	esac
-done
+	exit 1
+fi	
+run=`${RUN_NUM_CHOOSER}`
+if [[ "None" == $run ]]
+then
+	exit 1
+fi	
 
 # Generated variables
 num_raw_files=`ls ${data_dir} | grep 'RAW_DATA_' | wc -l`
