@@ -21,6 +21,12 @@ if [[ "None" == $run ]]
 then
 	exit 1
 fi	
+${COLLAR_CHOOSER} > ${CONFIG_DIR}/COL
+col_res=$?
+if ! [[ $col_res == 0 ]]
+then
+	exit 1
+fi
 
 # Generated variables
 num_raw_files=`ls ${data_dir} | grep 'RAW_DATA_' | wc -l`
