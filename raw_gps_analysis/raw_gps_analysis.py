@@ -24,6 +24,7 @@ signal_file = '/RUN_%06d_%06d.raw' % (run_num, col_num)
 gps_file = '/GPS_%06d' % (run_num)
 meta_file = '/META_%06d' % (run_num)
 output_file = '/RUN_%06d_COL_%06d.csv' % (run_num, col_num)
+GPS_eliminate = 10
 
 # Import META file
 meta_file_stream = open(input_dir + meta_file, 'r')
@@ -50,6 +51,11 @@ line = gps_stream.readline()
 while line != "":
     # Extract time
     gps_time = float(line.split(',')[0].strip())
+    # Fast forward if not lined up
+    if line_counter % GPS_eliminate != 0:
+    	line = gps_stream.readline()
+    	line_counter += 1
+	continue
     # Fast forward if no SDR data.
     if gps_time < (float(signal_index) / sampling_freq) + start_time:
         line = gps_stream.readline()
