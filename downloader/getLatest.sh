@@ -10,5 +10,5 @@ run_num=`${META_FILE_READER} -i ./fileCount -t currentRun | ${DECREMENTER}`
 # Make directory
 output_dir=`${FILE_CHOOSER} 2> /dev/null`
 # Download data
-scp -i ~/.ssh/id_rsa pi@192.168.2.129:~/rct/*${run_num}* ${output_dir} > /dev/null
+scp -i ~/.ssh/id_rsa pi@192.168.2.129:~/rct/*${run_num}* ${output_dir}/`printf RUN_%06d $run_num` > /dev/null
 rm ./fileCount
