@@ -12,6 +12,6 @@ center_freq = args.center_freq
 collar_freq = args.collar_freq
 ppm = args.ppm
 
-actual_collar = collar_freq / 1.e6 * ppm + collar_freq
-beat_freq = actual_collar - center_freq
+actual_center = center_freq / 1.e6 * ppm + center_freq
+beat_freq = collar_freq - actual_center
 print(int(beat_freq))
