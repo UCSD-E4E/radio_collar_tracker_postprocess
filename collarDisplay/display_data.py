@@ -6,6 +6,12 @@ import matplotlib.pyplot as plot
 import utm
 import os
 import argparse
+import fileinput
+
+def read_meta_file(filename, tag):
+    for line in fileinput.input(filename):
+        if tag == line.strip().split(':')[0].strip():
+	    return line.strip().split(':')[1].strip()
 
 kml_output = False
 # TODO Fix test case
@@ -18,9 +24,10 @@ parser = argparse.ArgumentParser(description='Processes RUN_XXXXXX.csv files '
 		'signal strength')
 
 parser.add_argument('-r', '--run', type = int, help = 'Run number for this data file', metavar = 'run_num', dest = 'run_num', default = 1075)
-parser.add_argument('-c', '--collar', type = int, help = 'Collar number for this data file', metavar = 'collar', dest = 'collar', default = 1)
+parser.add_argument('-n', '--collar', type = int, help = 'Collar number for this data file', metavar = 'collar', dest = 'collar', default = 1)
 parser.add_argument('-i', '--input', help = 'Input file to be processed', metavar = 'data_file', dest = 'filename', required = True)
 parser.add_argument('-o', '--output_dir', help = 'Output directory', metavar = 'output_dir', dest = 'output_path', required = True)
+parser.add_argument('-c', '--definitions', help = "Collar Definitions", metavar = 'collar_definitions', dest = 'col_def', required = True)
 
 # Get configuration
 args = parser.parse_args()
@@ -28,6 +35,10 @@ run_num = args.run_num
 num_col = args.collar
 filename = args.filename
 output_path = args.output_path
+col_def = args.col_def
+
+# Get collar frequency
+col_freq = read_meta_file(col_def, str(num_col)) / 1.e6
 
 # make list of columns
 # Expects the csv to have the following columns: time, lat, lon, [collars]
@@ -59,7 +70,7 @@ ax.get_xaxis().get_major_formatter().set_useOffset(False)
 ax.get_yaxis().get_major_formatter().set_useOffset(False)
 ax.set_xlabel('Easting')
 ax.set_ylabel('Northing')
-ax.set_title('Run %d, Collar %d\nUTM Zone: %d %s' % (run_num, num_col, zonenum, zone))
+ax.set_title('Run %d, Collar %d at %3.3 MHz\nUTM Zone: %d %s' % (run_num, num_col, col_freq, zonenum, zone))
 ax.set_aspect('equal')
 plot.xticks(rotation='vertical')
 
@@ -81,44 +92,41 @@ print('Collar %d: %s/RUN_%06d_COL_%06d.png' %
 plot.close()
 
 if(kml_output):
-	import Image
-	for i in xrange(1, num_col + 1):
-		fig = plot.figure(i)
-		fig.patch.set_facecolor('none')
-		fig.patch.set_alpha(0)
-		fig.set_size_inches(8, 6)
-		fig.set_dpi(72)
-		curColMap = plot.cm.get_cmap('jet')
-		sc = plot.scatter(lon, lat, c=coldata[i - 1], cmap=curColMap, vmin = minCol, vmax = maxCol)
-		ax = plot.gca()
-		ax.patch.set_facecolor('none')
-		ax.set_aspect('equal')
-		plot.axis('off')
-		plot.savefig('tmp.png', bbox_inches = 'tight')
-		print('Collar at %0.3f MHz: %s/RUN_%06d_COL_%0.3ftx.png' %
+	from PIL import Image
+	fig = plot.figure()
+	fig.patch.set_facecolor('none')
+	fig.patch.set_alpha(0)
+	fig.set_size_inches(8, 6)
+	fig.set_dpi(72)
+	curColMap = plot.cm.get_cmap('jet')
+	sc = plot.scatter(lon, lat, c=coldata[i - 1], cmap=curColMap, vmin = minCol, vmax = maxCol)
+	ax = plot.gca()
+	ax.patch.set_facecolor('none')
+	ax.set_aspect('equal')
+	plot.axis('off')
+	plot.savefig('tmp.png', bbox_inches = 'tight')
+	print('Collar at %0.3f MHz: %s/RUN_%06d_COL_%0.3ftx.png' %
 		(collars[i - 1] / 1000000.0, output_path, run_num,
 		collars[i - 1] / 1000000.0))
-		# plot.show(block=False)
-		plot.close()
+	# plot.show(block=False)
+	plot.close()
 
-		image=Image.open('tmp.png')
-		image.load()
-		image_data = np.asarray(image)
-		image_data_bw = image_data.max(axis=2)
-		non_empty_columns = np.where(image_data_bw.max(axis=0)>0)[0]
-		non_empty_rows = np.where(image_data_bw.max(axis=1)>0)[0]
-		cropBox = (min(non_empty_rows), max(non_empty_rows), min(non_empty_columns), max(non_empty_columns))
+	image=Image.open('tmp.png')
+	image.load()
+	image_data = np.asarray(image)
+	image_data_bw = image_data.max(axis=2)
+	non_empty_columns = np.where(image_data_bw.max(axis=0)>0)[0]
+	non_empty_rows = np.where(image_data_bw.max(axis=1)>0)[0]
+	cropBox = (min(non_empty_rows), max(non_empty_rows), min(non_empty_columns), max(non_empty_columns))
 
-		image_data_new = image_data[cropBox[0]:cropBox[1]+1, cropBox[2]:cropBox[3]+1 , :]
+	image_data_new = image_data[cropBox[0]:cropBox[1]+1, cropBox[2]:cropBox[3]+1 , :]
 
-		new_image = Image.fromarray(image_data_new)
-		new_image.save('%s/RUN_%06d_COL%0.3ftx.png' % (output_path, run_num,
-		collars[i - 1] / 1000000.0))
-		os.remove('tmp.png')
+	new_image = Image.fromarray(image_data_new)
+	new_image.save('%s/RUN_%06d_COL%06dtx.png' % (output_path, run_num, num_col))
+	os.remove('tmp.png')
 
-		f = open('%s/RUN_%06d_COL%0.3f.kml' % (output_path, run_num,
-		collars[i - 1] / 1000000.0), 'w')
-		f.write("""<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+	f = open('%s/RUN_%06d_COL%06d.kml' % (output_path, run_num, num_col), 'w')
+	f.write("""<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
   <Folder>
 	<name>Radio Collar Tracker</name>
@@ -139,4 +147,4 @@ if(kml_output):
 	</GroundOverlay>
   </Folder>
 </kml>""" % (run_num, run_num, collars[i - 1] / 1000000.0, '%s/RUN_%06d_COL%0.3ftx.png' % (output_path, run_num, collars[i - 1] / 1000000.0),north, south, east, west))
-		f.close()
+	f.close()
