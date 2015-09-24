@@ -45,6 +45,10 @@ fi
 for i in `seq 1 ${num_raw_files}`
 do
 	cat `printf "%s/RAW_DATA_%06d_%06d" ${data_dir} ${run} ${i}` >> ${raw_file}
+	if ! [[ $? -eq 0 ]]
+	then
+		exit 1
+	fi
 done
 
 # Run through GNU Radio pipeline for each collar
@@ -52,15 +56,39 @@ for i in `seq 1 ${num_collars}`
 do
 	# Get collar beat frequency
 	frequency=`${META_FILE_READER} -i ${CONFIG_DIR}/COL -t ${i}`
+	if ! [[ $? -eq 0 ]]
+	then
+		exit 1
+	fi
 	beat_freq=`${FREQUENCY_CALCULATOR} -f ${sdr_center_freq} -c ${frequency} -e ${sdr_ppm}`
+	if ! [[ $? -eq 0 ]]
+	then
+		exit 1
+	fi
 	# Execute pipeline
 	${GNU_RADIO_PIPELINE} -f ${beat_freq} -i ${raw_file} -o `printf "%s%06d.raw" ${collar_file_prefix} ${i}`
+	if ! [[ $? -eq 0 ]]
+	then
+		exit 1
+	fi
 	${RAW_DATA_COMPILER} -i ${data_dir} -o ${data_dir} -r ${run} -c ${i}
+	if ! [[ $? -eq 0 ]]
+	then
+		exit 1
+	fi
 done
 
 # For each collar, make map
 for i in `seq 1 ${num_collars}`
 do
 	data_file=`printf '%s/RUN_%06d_COL_%06d.csv' ${data_dir} ${run} ${i}`
+	if ! [[ $? -eq 0 ]]
+	then
+		exit 1
+	fi
 	${DISPLAY_DATA} -i ${data_file} -o ${data_dir} -r ${run} -c ${i}
+	if ! [[ $? -eq 0 ]]
+	then
+		exit 1
+	fi
 done
