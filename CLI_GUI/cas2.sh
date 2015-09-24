@@ -9,6 +9,7 @@ CONFIG_DIR='/Users/e4e/e4e-rct/radio_collar_tracker/config/'
 FILE_CHOOSER="/Users/e4e/e4e-rct/radio_collar_tracker/python_dialogs/filechooser.py"
 RUN_NUM_CHOOSER="/Users/e4e/e4e-rct/radio_collar_tracker/python_dialogs/getRunNum.py"
 COLLAR_CHOOSER="/users/e4e/e4e-rct/radio_collar_tracker/python_dialogs/getCollars.py"
+CAT_RELEVANT='/Users/e4e/e4e-rct/radio_collar_tracker/CLI_GUI/cat_relevant.py'
 
 # User supplied configuration
 data_dir=`${FILE_CHOOSER} 2> /dev/null`
@@ -42,14 +43,11 @@ if [[ -e $raw_file ]]
 then
 	rm ${raw_file}
 fi
-for i in `seq 1 ${num_raw_files}`
-do
-	cat `printf "%s/RAW_DATA_%06d_%06d" ${data_dir} ${run} ${i}` >> ${raw_file}
-	if ! [[ $? -eq 0 ]]
-	then
-		exit 1
-	fi
-done
+${CAT_RELEVANT} -i ${data_dir} -r ${run}
+if ! [[ $? -eq 0 ]]
+then
+	exit 1
+fi
 
 # Run through GNU Radio pipeline for each collar
 for i in `seq 1 ${num_collars}`
