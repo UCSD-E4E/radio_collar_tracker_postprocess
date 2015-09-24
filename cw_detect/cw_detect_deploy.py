@@ -2,7 +2,7 @@
 ##################################################
 # GNU Radio Python Flow Graph
 # Title: Top Block
-# Generated: Thu Sep 10 07:11:22 2015
+# Generated: Wed Sep 23 17:56:40 2015
 ##################################################
 
 from gnuradio import analog
@@ -14,18 +14,17 @@ from gnuradio.eng_option import eng_option
 from gnuradio.filter import firdes
 from optparse import OptionParser
 
-
 class top_block(gr.top_block):
 
-    def __init__(self, bfo_freq=-11583, input_file="/dev/null", output_file="/dev/null"):
+    def __init__(self, bfo_freq=-91520, output_file="/dev/null", input_file="/dev/null"):
         gr.top_block.__init__(self, "Top Block")
 
         ##################################################
         # Parameters
         ##################################################
         self.bfo_freq = bfo_freq
-        self.input_file = input_file
         self.output_file = output_file
+        self.input_file = input_file
 
         ##################################################
         # Variables
@@ -52,7 +51,7 @@ class top_block(gr.top_block):
         self.blocks_file_sink_1.set_unbuffered(False)
         self.blocks_deinterleave_0 = blocks.deinterleave(gr.sizeof_float*1, 1)
         self.blocks_add_const_vxx_0 = blocks.add_const_vff((-1, ))
-        self.analog_sig_source_x_0 = analog.sig_source_c(samp_rate, analog.GR_SIN_WAVE, bfo_freq, 1, 0)
+        self.analog_sig_source_x_0 = analog.sig_source_c(samp_rate, analog.GR_SIN_WAVE, -bfo_freq, 1, 0)
 
         ##################################################
         # Connections
@@ -75,14 +74,7 @@ class top_block(gr.top_block):
 
     def set_bfo_freq(self, bfo_freq):
         self.bfo_freq = bfo_freq
-        self.analog_sig_source_x_0.set_frequency(self.bfo_freq)
-
-    def get_input_file(self):
-        return self.input_file
-
-    def set_input_file(self, input_file):
-        self.input_file = input_file
-        self.blocks_file_source_0.open(self.input_file, False)
+        self.analog_sig_source_x_0.set_frequency(-self.bfo_freq)
 
     def get_output_file(self):
         return self.output_file
@@ -90,6 +82,13 @@ class top_block(gr.top_block):
     def set_output_file(self, output_file):
         self.output_file = output_file
         self.blocks_file_sink_1.open(self.output_file)
+
+    def get_input_file(self):
+        return self.input_file
+
+    def set_input_file(self, input_file):
+        self.input_file = input_file
+        self.blocks_file_source_0.open(self.input_file, False)
 
     def get_samp_rate(self):
         return self.samp_rate
@@ -101,13 +100,13 @@ class top_block(gr.top_block):
 
 if __name__ == '__main__':
     parser = OptionParser(option_class=eng_option, usage="%prog: [options]")
-    parser.add_option("-f", "--bfo-freq", dest="bfo_freq", type="intx", default=-11583,
+    parser.add_option("-f", "--bfo-freq", dest="bfo_freq", type="intx", default=-91520,
         help="Set freq [default=%default]")
-    parser.add_option("-i", "--input-file", dest="input_file", type="string", default="/dev/null",
-        help="Set input [default=%default]")
     parser.add_option("-o", "--output-file", dest="output_file", type="string", default="/dev/null",
         help="Set output [default=%default]")
+    parser.add_option("-i", "--input-file", dest="input_file", type="string", default="/dev/null",
+        help="Set input [default=%default]")
     (options, args) = parser.parse_args()
-    tb = top_block(bfo_freq=options.bfo_freq, input_file=options.input_file, output_file=options.output_file)
+    tb = top_block(bfo_freq=options.bfo_freq, output_file=options.output_file, input_file=options.input_file)
     tb.start()
     tb.wait()
