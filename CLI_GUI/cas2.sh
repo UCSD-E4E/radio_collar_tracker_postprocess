@@ -84,7 +84,7 @@ do
 	then
 		exit 1
 	fi
-	${DISPLAY_DATA} -i ${data_file} -o ${data_dir} -r ${run} -c ${i}
+	${DISPLAY_DATA} -i ${data_file} -o ${data_dir} -r ${run} -n ${i} -c ${CONFIG_DIR}/COL
 	if ! [[ $? -eq 0 ]]
 	then
 		exit 1
