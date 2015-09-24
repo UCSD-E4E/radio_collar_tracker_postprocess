@@ -25,12 +25,10 @@ start_time = float(meta_file_stream.readline().strip().split(':')[1].strip())
 center_freq = int(meta_file_stream.readline().strip().split(':')[1].strip())
 sampling_freq = int(meta_file_stream.readline().strip().split(':')[1].strip())
 gain = float(meta_file_stream.readline().strip().split(':')[1].strip())
-print("Start signal time: %f" % start_time)
 
 # Get GPS data
 gps_stream = open(input_dir + gps_file, 'r')
 start_gps_time = float(gps_stream.readline().split(',')[0].strip())
-print("Start GPS Time: %f" % start_gps_time)
 
 # get last gps
 gps_line = ""
@@ -42,7 +40,6 @@ while True:
 	
 
 last_gps_time = float(gps_line.split(',')[0].strip())
-print("End GPS Time: %f" % last_gps_time)
 
 # Get number of signal files
 dir_list = os.listdir(input_dir)
@@ -50,7 +47,6 @@ filecount = 0
 for filename in dir_list:
     if filename.startswith("RAW_DATA"):
         filecount += 1
-print("Number of signal files: %d" % filecount)
 
 # Calculate first signal file
 filesize = os.stat(input_dir + signal_file_prefix + "%06d" % (1)).st_size
@@ -61,7 +57,6 @@ for i in range(1, filecount + 1):
         start_file = i
     else:
         break
-print("First signal file: %d" % start_file)
 
 # Calculate last signal file
 last_file = start_file
@@ -69,7 +64,6 @@ for i in range(start_file, filecount + 1):
     last_file = i
     if (i - 1) * file_length + start_time > last_gps_time:
 	break
-print("Last signal file: %d" % last_file)
 
 # concatenate files
 dest = open(input_dir + output_file, 'wb')
