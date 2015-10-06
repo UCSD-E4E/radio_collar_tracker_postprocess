@@ -1,8 +1,8 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 ##################################################
-# GNU Radio Python Flow Graph
+# Gnuradio Python Flow Graph
 # Title: Top Block
-# Generated: Wed Sep 23 17:56:40 2015
+# Generated: Tue Oct  6 14:23:04 2015
 ##################################################
 
 from gnuradio import analog
@@ -49,25 +49,27 @@ class top_block(gr.top_block):
         self.blocks_file_source_0 = blocks.file_source(gr.sizeof_char*1, input_file, False)
         self.blocks_file_sink_1 = blocks.file_sink(gr.sizeof_gr_complex*1, output_file, False)
         self.blocks_file_sink_1.set_unbuffered(False)
-        self.blocks_deinterleave_0 = blocks.deinterleave(gr.sizeof_float*1, 1)
+        self.blocks_deinterleave_0 = blocks.deinterleave(gr.sizeof_float*1)
         self.blocks_add_const_vxx_0 = blocks.add_const_vff((-1, ))
         self.analog_sig_source_x_0 = analog.sig_source_c(samp_rate, analog.GR_SIN_WAVE, -bfo_freq, 1, 0)
 
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.analog_sig_source_x_0, 0), (self.blocks_multiply_xx_0, 1))    
-        self.connect((self.blocks_add_const_vxx_0, 0), (self.blocks_deinterleave_0, 0))    
-        self.connect((self.blocks_deinterleave_0, 0), (self.blocks_float_to_complex_0, 0))    
-        self.connect((self.blocks_deinterleave_0, 1), (self.blocks_float_to_complex_0, 1))    
-        self.connect((self.blocks_file_source_0, 0), (self.blocks_uchar_to_float_0, 0))    
-        self.connect((self.blocks_float_to_complex_0, 0), (self.blocks_multiply_xx_0, 0))    
-        self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_add_const_vxx_0, 0))    
-        self.connect((self.blocks_multiply_xx_0, 0), (self.rational_resampler_xxx_0, 0))    
-        self.connect((self.blocks_uchar_to_float_0, 0), (self.blocks_multiply_const_vxx_0, 0))    
-        self.connect((self.fir_filter_xxx_0, 0), (self.blocks_file_sink_1, 0))    
-        self.connect((self.rational_resampler_xxx_0, 0), (self.fir_filter_xxx_0, 0))    
+        self.connect((self.analog_sig_source_x_0, 0), (self.blocks_multiply_xx_0, 1))
+        self.connect((self.blocks_add_const_vxx_0, 0), (self.blocks_deinterleave_0, 0))
+        self.connect((self.blocks_deinterleave_0, 0), (self.blocks_float_to_complex_0, 0))
+        self.connect((self.blocks_deinterleave_0, 1), (self.blocks_float_to_complex_0, 1))
+        self.connect((self.blocks_file_source_0, 0), (self.blocks_uchar_to_float_0, 0))
+        self.connect((self.blocks_float_to_complex_0, 0), (self.blocks_multiply_xx_0, 0))
+        self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_add_const_vxx_0, 0))
+        self.connect((self.blocks_multiply_xx_0, 0), (self.rational_resampler_xxx_0, 0))
+        self.connect((self.blocks_uchar_to_float_0, 0), (self.blocks_multiply_const_vxx_0, 0))
+        self.connect((self.fir_filter_xxx_0, 0), (self.blocks_file_sink_1, 0))
+        self.connect((self.rational_resampler_xxx_0, 0), (self.fir_filter_xxx_0, 0))
 
+
+# QT sink close method reimplementation
 
     def get_bfo_freq(self):
         return self.bfo_freq
@@ -97,7 +99,6 @@ class top_block(gr.top_block):
         self.samp_rate = samp_rate
         self.analog_sig_source_x_0.set_sampling_freq(self.samp_rate)
 
-
 if __name__ == '__main__':
     parser = OptionParser(option_class=eng_option, usage="%prog: [options]")
     parser.add_option("-f", "--bfo-freq", dest="bfo_freq", type="intx", default=-91520,
@@ -110,3 +111,4 @@ if __name__ == '__main__':
     tb = top_block(bfo_freq=options.bfo_freq, output_file=options.output_file, input_file=options.input_file)
     tb.start()
     tb.wait()
+
