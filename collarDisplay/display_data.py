@@ -38,7 +38,7 @@ output_path = args.output_path
 col_def = args.col_def
 
 # Get collar frequency
-col_freq = read_meta_file(col_def, str(num_col)) / 1.e6
+col_freq = float(read_meta_file(col_def, str(num_col))) / 1.e6
 
 # make list of columns
 # Expects the csv to have the following columns: time, lat, lon, [collars]
