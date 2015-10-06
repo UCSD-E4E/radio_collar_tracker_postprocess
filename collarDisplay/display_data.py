@@ -70,7 +70,7 @@ ax.get_xaxis().get_major_formatter().set_useOffset(False)
 ax.get_yaxis().get_major_formatter().set_useOffset(False)
 ax.set_xlabel('Easting')
 ax.set_ylabel('Northing')
-ax.set_title('Run %d, Collar %d at %3.3 MHz\nUTM Zone: %d %s' % (run_num, num_col, col_freq, zonenum, zone))
+ax.set_title('Run %d, Collar %d at %3.3f MHz\nUTM Zone: %d %s' % (run_num, num_col, col_freq, zonenum, zone))
 ax.set_aspect('equal')
 plot.xticks(rotation='vertical')
 
