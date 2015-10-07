@@ -132,3 +132,9 @@ step.raw: mkstep
 mksweep: mksweep.cpp
 	g++ mksweep.cpp $(CPPFLAGS)
 	g++ mksweep.o $(LFLAGS) -o mksweep
+
+iqstats: iqstats.cpp
+	g++ iqstats.cpp $(CPPFLAGS)
+	g++ iqstats.o $(LFLAGS) -o iqstats
+
+
