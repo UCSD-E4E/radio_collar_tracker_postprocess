@@ -39,6 +39,7 @@ clean:
 	-rm -rf DecimatorTester
 	-rm -rf *.raw
 	-rm -rf mksweep
+	-rm -rf iqstats
 
 Sample.o: Sample.cpp Sample.hpp
 	g++ Sample.cpp $(CPPFLAGS)
