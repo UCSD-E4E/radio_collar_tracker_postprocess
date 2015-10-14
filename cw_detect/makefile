@@ -39,6 +39,7 @@ clean:
 	-rm -rf DecimatorTester
 	-rm -rf *.raw
 	-rm -rf mksweep
+	-rm -rf iqstats
 
 Sample.o: Sample.cpp Sample.hpp
 	g++ Sample.cpp $(CPPFLAGS)
@@ -132,3 +133,9 @@ step.raw: mkstep
 mksweep: mksweep.cpp
 	g++ mksweep.cpp $(CPPFLAGS)
 	g++ mksweep.o $(LFLAGS) -o mksweep
+
+iqstats: iqstats.cpp
+	g++ iqstats.cpp $(CPPFLAGS)
+	g++ iqstats.o $(LFLAGS) -o iqstats
+
+
