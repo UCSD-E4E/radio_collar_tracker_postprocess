@@ -1,4 +1,4 @@
-LFLAGS = -pthread -lm -Wl,--no-as-needed -lsamplerate
+LFLAGS = -pthread -lm -Wl,--no-as-needed 
 CFLAGS = -std=gnu99 -c -Wall -g
 CPPFLAGS = -std=c++11 -c -Wall -g -pthread -Wl,--no-as-needed -O0
 DEFAULT_LENGTH = 4000
