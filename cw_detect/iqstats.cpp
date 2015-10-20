@@ -31,6 +31,16 @@ int main(int argc, char** argv){
 				break;
 		}
 	}
+	cout << "Interpreting as ";
+	switch(data_type){
+		case FLOAT:
+			cout << "float";
+			break;
+		case UINT8:
+			cout << "uint8_t";
+			break;
+	}
+	cout << endl;
 	string input_file (argv[optind]);
 	struct stat buffer;
 	if (stat(input_file.c_str(), &buffer)){
@@ -66,6 +76,7 @@ template <typename Type> void proc_file(ifstream* in_file){
 	uint32_t sample_counter = 0;
 	float fbuff;
 	double average = 0;
+	double sq_sum = 0;
 	double min = 1.0;
 	double max = 0;
 	float mag = 0;
@@ -89,9 +100,13 @@ template <typename Type> void proc_file(ifstream* in_file){
 			max = mag;
 		}
 		average += mag;
+		sq_sum += mag * mag;
 		sample_counter++;
 	}
-	cout << "Average: " << average / sample_counter << endl;
+	average /= sample_counter;
+	sq_sum = sq_sum / sample_counter - average * average;
+	cout << "Average: " << average << endl;
+	cout << "Std Dev: " << sqrt(sq_sum) << endl;
 	cout << "Max: " << max << endl;
 	cout << "Min: " << min << endl;
 	cout << "Count: " << sample_counter << endl;
@@ -100,17 +115,40 @@ template <typename Type> void proc_file(ifstream* in_file){
 template <> void proc_file<float>(ifstream* in_file){
 	float buff = 0;
 	uint32_t sample_counter = 0;
+	float fbuff;
+	double average = 0;
+	double sq_sum = 0;
+	double min = 1.0;
+	double max = 0;
+	float mag = 0;
+
 	while(in_file->peek() != EOF){
 		// get I sample
 		in_file->read(reinterpret_cast <char*> (&buff), sizeof(float));
-		cout << setw(9) << sample_counter << ":\t";
-		cout << setw(9) << fixed << setprecision(7);
-		cout << buff << "\t";
+		fbuff = buff;
+		mag = fbuff * fbuff;
 
 		// get the Q sample
 		in_file->read(reinterpret_cast <char*> (&buff), sizeof(float));
-		cout << setw(9) << fixed << setprecision(7);
-		cout << buff << endl;
-		sample_counter++;
+		fbuff = buff;
+		mag += fbuff * fbuff;
+		mag = sqrt(mag);
+
+		if(mag < min){
+			min = mag;
+		}
+		if(mag > max){
+			max = mag;
+		}
+		average += mag;
+		sq_sum += mag * mag;
+		sample_counter ++;
 	}
+	average /= sample_counter;
+	sq_sum = sq_sum / sample_counter - average * average;
+	cout << "Average: " << average << endl;
+	cout << "Std Dev: " << sqrt(sq_sum) << endl;
+	cout << "Max: " << max << endl;
+	cout << "Min: " << min << endl;
+	cout << "Count: " << sample_counter << endl;
 }
