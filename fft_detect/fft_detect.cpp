@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
 
 	int fft_index = beat_freq / 1000;
 	if(fft_index < 0){
-		fft_index = FFT_LENGTH - fft_index;
+		fft_index = FFT_LENGTH + fft_index;
 	}
 
 	cerr << "Index: " << fft_index << endl;
@@ -59,12 +59,13 @@ int main(int argc, char** argv) {
 	fftw_plan p;
 	uint8_t buffer[2];	// buffer for raw data
 	float sbuf[2];
+	double mbuf[2];
 	int counter = 0;
 
 	fft_buffer_in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * FFT_LENGTH);
 	fft_buffer_out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * FFT_LENGTH);
 	p = fftw_plan_dft_1d(FFT_LENGTH, fft_buffer_in, fft_buffer_out, FFTW_FORWARD,
-	                     FFTW_MEASURE);
+	                     FFTW_ESTIMATE);
 
 	cerr << "Input: " << input_file << endl;
 	in_file_stream.open(input_file, ios::in | ios::binary);
@@ -76,22 +77,32 @@ int main(int argc, char** argv) {
 		return -1;
 	}
 	// Loop through all of the samples
+	mbuf[0] = 0;
+	mbuf[1] = 0;
 	while (in_file_stream.peek() != EOF) {
 		in_file_stream.read(reinterpret_cast <char*>(buffer), 2);
 		fft_buffer_in[counter][0] = buffer[0] / 128.0 - 1.0;
+		mbuf[0] += fft_buffer_in[counter][0];
 		fft_buffer_in[counter][1] = buffer[1] / 128.0 - 1.0;
+		mbuf[1] += fft_buffer_in[counter][1];
 		if (counter >= FFT_LENGTH) {
-			counter = 0;
+			counter = -1;
+			for (int i = 0; i < FFT_LENGTH; i++){
+				fft_buffer_in[i][0] -= mbuf[0] / FFT_LENGTH;
+				fft_buffer_in[i][1] -= mbuf[1] / FFT_LENGTH;
+			}
 			fftw_execute(p);
-			sbuf[0] = (float)fft_buffer_out[fft_index][0];
-			sbuf[1] = (float)fft_buffer_out[fft_index][1];
+			sbuf[0] = (float)fft_buffer_out[fft_index][0] / FFT_LENGTH;
+			sbuf[1] = (float)fft_buffer_out[fft_index][1] / FFT_LENGTH;
 			out_file_stream.write(reinterpret_cast<char*>(sbuf), 2 * sizeof(float));
+			mbuf[0] = 0;
+			mbuf[1] = 0;
 		}
 		counter++;
 	}
+	//fftw_free(fft_buffer_in);
+	//fftw_free(fft_buffer_out);
 	fftw_destroy_plan(p);
-	fftw_free(fft_buffer_in);
-	fftw_free(fft_buffer_out);
 	in_file_stream.close();
 	out_file_stream.close();
 	return 0;
