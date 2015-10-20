@@ -31,7 +31,7 @@ meta_file_stream = open(input_dir + meta_file, 'r')
 # Get start time
 start_time = float(meta_file_stream.readline().strip().split(':')[1].strip())
 center_freq = int(meta_file_stream.readline().strip().split(':')[1].strip())
-sampling_freq = int(meta_file_stream.readline().strip().split(':')[1].strip())/100
+sampling_freq = int(meta_file_stream.readline().strip().split(':')[1].strip())/1024
 gain = float(meta_file_stream.readline().strip().split(':')[1].strip())
 
 # Initialize GPS stream
@@ -68,11 +68,13 @@ while line != "":
     longitude = int(line.split(',')[2].strip())
 
     # Samples prior to this gps point
-    signal_bring_forward = gps_time - ((float(signal_index) / sampling_freq) + start_time )
-    samples_bring_forward = int(signal_bring_forward * sampling_freq)
+    #signal_bring_forward = gps_time - ((float(signal_index) / sampling_freq) + start_time )
+    #samples_bring_forward = int(signal_bring_forward * sampling_freq)
     
     # Get max of samples
     max_amplitude = 0
+    avg_amplitude = 0
+    count = 0
     while gps_time > (float(signal_index) / sampling_freq + start_time):
         # Get sample
         signal_raw = signal_stream.read(8)
@@ -86,11 +88,15 @@ while line != "":
         # Check max
         if sample_amplitude > max_amplitude:
             max_amplitude = sample_amplitude
+        avg_amplitude += sample_amplitude
         # update index
         signal_index += 1
+        count += 1
     # Output GPS and signal amplitude
+    avg_amplitude /= count
     if done:
         break
+    max_amplitude = 10 * math.log10(avg_amplitude / max_amplitude)
     out_stream.write("%f,%d,%d,%f\n" % (gps_time, latitude, longitude, max_amplitude))
     line = gps_stream.readline()
     line_counter += 1
