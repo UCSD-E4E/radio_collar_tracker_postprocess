@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
 		return -1;
 	}
 
-	int fft_index = beat_freq / 1000;
+	int fft_index = beat_freq * (1024.0 / 2048000);
 	if(fft_index < 0){
 		fft_index = FFT_LENGTH + fft_index;
 	}
