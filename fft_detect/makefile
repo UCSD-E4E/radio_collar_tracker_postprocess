@@ -1,7 +1,7 @@
 CC = g++
 LD = g++
-LFLAGS = -lfftw3 -lm -pthread
-CFLAGS = -std=c++11 -c -Wall -g
+LFLAGS = -lfftw3 -lm
+CFLAGS = -std=c++11 -c -Wall -g -O4
 .PHONY: clean all
 
 all: fft_detect
