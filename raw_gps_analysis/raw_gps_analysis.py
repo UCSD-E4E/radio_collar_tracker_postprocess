@@ -10,6 +10,7 @@ parser.add_argument('-i', '--input', metavar='input_dir', dest='input_dir', requ
 parser.add_argument('-o', '--output', metavar = 'output_dir', dest = 'output_dir', required = True)
 parser.add_argument('-r', '--run', type=int, required = True, metavar = 'run_num', dest = 'run_num')
 parser.add_argument('-c', '--collar', type = int, required = True, metavar = 'collar', dest = 'collar')
+parser.add_argument('-a', '--altitude', type = int, require = True, metavar = 'altitude', dest = 'alt')
 
 args = parser.parse_args()
 
@@ -18,6 +19,7 @@ input_dir = args.input_dir
 output_dir = args.output_dir
 run_num = args.run_num
 col_num = args.collar
+tar_alt = args.alt
 
 # Configure variables
 signal_file = '/RUN_%06d_%06d.raw' % (run_num, col_num)
@@ -49,9 +51,14 @@ line_counter = 0
 
 line = gps_stream.readline()
 time_target = float(line.split(',')[0].strip()) - 0.5
+start_alt = float(line.split(',')[4].strip())
 while line != "":
     # Extract time
     gps_time = float(line.split(',')[0].strip())
+    gps_alt = float(line.split(',')[4].strip()) - start_alt
+    # throw out if not within 20% of target altitude
+    if math.abs(gps_alt - tar_alt) / tar_alt > 0.2:
+        continue
     # Fast forward if less than 1.5 sec prior to previous
     if gps_time < time_target:
     	line = gps_stream.readline()
@@ -70,7 +77,7 @@ while line != "":
     # Samples prior to this gps point
     #signal_bring_forward = gps_time - ((float(signal_index) / sampling_freq) + start_time )
     #samples_bring_forward = int(signal_bring_forward * sampling_freq)
-    
+
     # Get max of samples
     max_amplitude = 0
     avg_amplitude = 0
