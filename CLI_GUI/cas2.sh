@@ -10,18 +10,24 @@ FILE_CHOOSER="/home/e4e/nathan/radio_collar_tracker/python_dialogs/filechooser.p
 RUN_NUM_CHOOSER="/home/e4e/nathan/radio_collar_tracker/python_dialogs/getRunNum.py"
 COLLAR_CHOOSER="/home/e4e/nathan/radio_collar_tracker/python_dialogs/getCollars.py"
 CAT_RELEVANT='/home/e4e/nathan/radio_collar_tracker/CLI_GUI/cat_relevant.py'
+FLT_ALT = 'home/e4e/nathan/radio_collar_tracker/python_dialogs/getFltAlt.py'
 
 # User supplied configuration
 data_dir=`${FILE_CHOOSER} 2> /dev/null`
 if [[ $data_dir == "None" ]]
 then
 	exit 1
-fi	
+fi
 run=`${RUN_NUM_CHOOSER}`
 if [[ "None" == $run ]]
 then
 	exit 1
-fi	
+fi
+flt_alt=`${FLT_ALT}`
+if [[ "None" == $flt_alt ]]
+then
+	exit 1
+fi
 ${COLLAR_CHOOSER} > ${CONFIG_DIR}/COL
 col_res=$?
 if ! [[ $col_res == 0 ]]
@@ -69,7 +75,7 @@ do
 	then
 		exit 1
 	fi
-	${RAW_DATA_COMPILER} -i ${data_dir} -o ${data_dir} -r ${run} -c ${i}
+	${RAW_DATA_COMPILER} -i ${data_dir} -o ${data_dir} -r ${run} -c ${i} -a ${flt_alt}
 	if ! [[ $? -eq 0 ]]
 	then
 		exit 1
