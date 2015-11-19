@@ -40,7 +40,7 @@ uninstall:
 fft_detect/fft_detect: fft_detect/fft_detect.cpp
 	make -C fft_detect
 
-config/SDR.cfg: python_dialogs/getSDRppm.py
+config/SDR.cfg:
 	ppm=`python_dialogs/getSDRppm.py`
 	-mkdir config
 	echo 'sdr_ppm: ${ppm}' > config/SDR.cfg
