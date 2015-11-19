@@ -1,16 +1,6 @@
 #!/bin/bash
 # Constant configuration
-GNU_RADIO_PIPELINE='/home/e4e/nathan/radio_collar_tracker/fft_detect/fft_detect'
-RAW_DATA_COMPILER='/home/e4e/nathan/radio_collar_tracker/raw_gps_analysis/raw_gps_analysis.py'
-DISPLAY_DATA='/home/e4e/nathan/radio_collar_tracker/collarDisplay/display_data.py'
-META_FILE_READER='/home/e4e/nathan/radio_collar_tracker/meta_file_reader/read_meta_file.py'
-FREQUENCY_CALCULATOR='/home/e4e/nathan/radio_collar_tracker/ppm_adjust/get_beat_frequency.py'
-CONFIG_DIR='/home/e4e/nathan/radio_collar_tracker/config/'
-FILE_CHOOSER="/home/e4e/nathan/radio_collar_tracker/python_dialogs/filechooser.py"
-RUN_NUM_CHOOSER="/home/e4e/nathan/radio_collar_tracker/python_dialogs/getRunNum.py"
-COLLAR_CHOOSER="/home/e4e/nathan/radio_collar_tracker/python_dialogs/getCollars.py"
-CAT_RELEVANT='/home/e4e/nathan/radio_collar_tracker/CLI_GUI/cat_relevant.py'
-FLT_ALT = 'home/e4e/nathan/radio_collar_tracker/python_dialogs/getFltAlt.py'
+source /usr/bin/rct_bin_ref.sh
 
 # User supplied configuration
 data_dir=`${FILE_CHOOSER} 2> /dev/null`
