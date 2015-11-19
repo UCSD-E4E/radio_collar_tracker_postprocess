@@ -1,6 +1,8 @@
 SHELL=/bin/bash
 .PHONY: clean all install uninstall
 
+all: fft_detect/fft_detect
+
 install: fft_detect/fft_detect raw_gps_analysis/raw_gps_analysis.py\
 	collarDisplay/display_data.py meta_file_reader/read_meta_file.py\
 	ppm_adjust/get_beat_frequency.py config/SDR.cfg\
