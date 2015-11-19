@@ -103,7 +103,7 @@ while line != "":
     avg_amplitude /= count
     if done:
         break
-    max_amplitude = 10 * math.log10(avg_amplitude / max_amplitude)
+    max_amplitude = 10 * math.log10(max_amplitude / avg_amplitude)
     out_stream.write("%f,%d,%d,%f\n" % (gps_time, latitude, longitude, max_amplitude))
     line = gps_stream.readline()
     line_counter += 1
