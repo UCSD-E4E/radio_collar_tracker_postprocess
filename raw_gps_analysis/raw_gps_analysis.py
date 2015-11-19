@@ -57,10 +57,10 @@ while line != "":
 	gps_time = float(line.split(',')[0].strip())
 	gps_alt = float(line.split(',')[4].strip()) - start_alt
 	# throw out if not within 20% of target altitude
-	if math.fabs(gps_alt - tar_alt) / tar_alt > 0.2:
-		line = gps_stream.readline()
-		line_counter += 1
-		continue
+	# if math.fabs(gps_alt - tar_alt) / tar_alt > 0.5:
+	# 	line = gps_stream.readline()
+	# 	line_counter += 1
+	# 	continue
 	# Fast forward if less than 1.5 sec prior to previous
 	if gps_time < time_target:
 		line = gps_stream.readline()
