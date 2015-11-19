@@ -13,11 +13,17 @@ if [[ "None" == $run ]]
 then
 	exit 1
 fi
-flt_alt=`${FLT_ALT}`
-if [[ "None" == $flt_alt ]]
+if [[ -e ${data_dir}/ALT ]]
 then
-	exit 1
+	flt_alt=`${META_FILE_READER} -i ${data_dir}/ALT -t flt_alt`
+else
+	flt_alt=`${FLT_ALT}`
+	if [[ "None" == $flt_alt ]]
+	then
+		exit 1
+	fi
 fi
+
 if [[ -e ${data_dir}/COL ]]
 then
 	cp ${data_dir}/COL ${CONFIG_DIR}/COL
