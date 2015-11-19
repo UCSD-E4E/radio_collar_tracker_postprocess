@@ -10,7 +10,7 @@ parser.add_argument('-i', '--input', metavar='input_dir', dest='input_dir', requ
 parser.add_argument('-o', '--output', metavar = 'output_dir', dest = 'output_dir', required = True)
 parser.add_argument('-r', '--run', type=int, required = True, metavar = 'run_num', dest = 'run_num')
 parser.add_argument('-c', '--collar', type = int, required = True, metavar = 'collar', dest = 'collar')
-parser.add_argument('-a', '--altitude', type = int, require = True, metavar = 'altitude', dest = 'alt')
+parser.add_argument('-a', '--altitude', type = int, required = True, metavar = 'altitude', dest = 'alt')
 
 args = parser.parse_args()
 
