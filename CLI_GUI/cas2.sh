@@ -18,11 +18,16 @@ if [[ "None" == $flt_alt ]]
 then
 	exit 1
 fi
-${COLLAR_CHOOSER} > ${CONFIG_DIR}/COL
-col_res=$?
-if ! [[ $col_res == 0 ]]
+if [[ -e ${data_dir}/COL ]]
 then
-	exit 1
+	cp ${data_dir}/COL ${CONFIG_DIR}/COL
+else
+	${COLLAR_CHOOSER} > ${CONFIG_DIR}/COL
+	col_res=$?
+	if ! [[ $col_res == 0 ]]
+	then
+		exit 1
+	fi
 fi
 
 # Generated variables
