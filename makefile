@@ -36,7 +36,7 @@ rct_bin_ref.sh:
 
 clean:
 	make -C fft_detect clean
-	-rm rct_bin_ref.sh
+	-rm -f rct_bin_ref.sh
 	-rm config/COL
 	-rm config/SDR.cfg
 	-rm -rf config
