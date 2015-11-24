@@ -3,7 +3,7 @@ SHELL=/bin/bash
 
 all: fft_detect/fft_detect
 
-configure: config/SDR.cfg
+configure: config/SDR.cfg config
 
 config:
 	mkdir config
