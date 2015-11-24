@@ -76,7 +76,8 @@ for i in range(len(data['lat'])):
 	distance[i] = math.sqrt(d_lat * d_lat + d_lon * d_lon)
 	head_lat = prev_lat - lat[i]
 	head_lon = prev_lon - lon[i]
-	angle[i] = math.acos(d_lat * head_lat + d_lon * head_lon) / math.pi * 180
+	head_len = math.sqrt(head_lat * head_lat + head_lon * head_lon)
+	angle[i] = math.acos(d_lat / distance[i] * head_lat / head_len + d_lon / distance[i] * head_lon / head_len) / math.pi * 180
 	prev_lat = lat[i]
 	prev_lon = lon[i]
 
