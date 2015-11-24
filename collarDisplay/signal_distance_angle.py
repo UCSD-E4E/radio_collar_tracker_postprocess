@@ -106,8 +106,8 @@ colorbar.set_label('Maximum Signal Amplitude')
 
 
 # Save plot
-plot.savefig('%s/RUN_%06d_COL_%06d.png' % (output_path, run_num, num_col), bbox_inches = 'tight')
-print('Collar %d: %s/RUN_%06d_COL_%06d.png' %
+plot.savefig('%s/RUN_%06d_COL_%06d_signal_distance.png' % (output_path, run_num, num_col), bbox_inches = 'tight')
+print('Collar %d: %s/RUN_%06d_COL_%06d_signal_distance.png' %
 	(num_col, output_path, run_num, num_col))
 # plot.show(block=False)
 plot.close()
