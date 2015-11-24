@@ -2,6 +2,14 @@
 # Constant configuration
 source /usr/bin/rct_bin_ref.sh
 
+while getopts "s" opt; do
+	case $opt in
+		s)
+			signal_dist_outpt=true
+			;;
+	esac
+done
+
 # User supplied configuration
 data_dir=`${FILE_CHOOSER} 2> /dev/null`
 if [[ $data_dir == "None" ]]
@@ -92,6 +100,14 @@ do
 		exit 1
 	fi
 	${DISPLAY_DATA} -i ${data_file} -o ${data_dir} -r ${run} -n ${i} -c ${CONFIG_DIR}/COL
+	if ! [[ $? -eq 0 ]]
+	then
+		exit 1
+	fi
+	if [ "$signal_dist_outpt" = true ]
+	then
+		${SIGNAL_DISTANCE_DISPLAY_DATA} -i ${data_file} -o ${data_dir} -r ${run} -n ${i} -c ${CONFIG_DIR}/COL
+	fi
 	if ! [[ $? -eq 0 ]]
 	then
 		exit 1
