@@ -16,10 +16,15 @@ if [[ $data_dir == "None" ]]
 then
 	exit 1
 fi
-run=`${RUN_NUM_CHOOSER}`
-if [[ "None" == $run ]]
+if [[ -e ${data_dir}/RUN ]]
 then
-	exit 1
+	run=`${META_FILE_READER} -i ${data_dir}/RUN -t run_num`
+else
+	run=`${RUN_NUM_CHOOSER}`
+	if [[ "None" == $run ]]
+	then
+		exit 1
+	fi
 fi
 if [[ -e ${data_dir}/ALT ]]
 then
