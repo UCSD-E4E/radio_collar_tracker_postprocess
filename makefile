@@ -1,7 +1,9 @@
 SHELL=/bin/bash
-.PHONY: clean all install uninstall
+.PHONY: clean all install uninstall configure
 
-all: fft_detect/fft_detect config
+all: fft_detect/fft_detect
+
+configure: config/SDR.cfg
 
 config:
 	mkdir config
