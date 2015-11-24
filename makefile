@@ -33,7 +33,7 @@ rct_bin_ref.sh:
 	echo FLT_ALT=\'$(CURDIR)/python_dialogs/getFltAlt.py\' >> rct_bin_ref.sh
 
 clean:
-	make -c fft_detect clean
+	make -C fft_detect clean
 	-rm rct_bin_ref.sh
 	-rm config/COL
 	-rm config/SDR.cfg
