@@ -19,6 +19,7 @@ rct_bin_ref.sh:
 	echo GNU_RADIO_PIPELINE=\'$(CURDIR)/fft_detect/fft_detect\' >> rct_bin_ref.sh
 	echo RAW_DATA_COMPILER=\'$(CURDIR)/raw_gps_analysis/raw_gps_analysis.py\' >> rct_bin_ref.sh
 	echo DISPLAY_DATA=\'$(CURDIR)/collarDisplay/display_data.py\' >> rct_bin_ref.sh
+	echo SIGNAL_DISTANCE_DISPLAY_DATA=\'$(CURDIR)/collarDisplay/signal_distance_angle.py\' >> rct_bin_ref.sh
 	echo META_FILE_READER=\'$(CURDIR)/meta_file_reader/read_meta_file.py\' >> rct_bin_ref.sh
 	echo FREQUENCY_CALCULATOR=\'$(CURDIR)/ppm_adjust/get_beat_frequency.py\' >> rct_bin_ref.sh
 	echo CONFIG_DIR=\'$(CURDIR)/config/\' >> rct_bin_ref.sh
