@@ -4,6 +4,12 @@ Airborne Wildlife Radio Collar Tracker
 
 Engineers for Exploration, UCSD Project
 
+Installing the Post-Process Code
+================================
+make all
+make configure
+sudo make install
+
 
 Running the Post-Process Code
 =============================
