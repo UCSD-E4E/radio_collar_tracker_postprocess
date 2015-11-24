@@ -1,7 +1,10 @@
 SHELL=/bin/bash
 .PHONY: clean all install uninstall
 
-all: fft_detect/fft_detect
+all: fft_detect/fft_detect config
+
+config:
+	mkdir config
 
 install: fft_detect/fft_detect raw_gps_analysis/raw_gps_analysis.py\
 	collarDisplay/display_data.py meta_file_reader/read_meta_file.py\
@@ -28,6 +31,13 @@ rct_bin_ref.sh:
 	echo COLLAR_CHOOSER=\"$(CURDIR)/python_dialogs/getCollars.py\" >> rct_bin_ref.sh
 	echo CAT_RELEVANT=\'$(CURDIR)/CLI_GUI/cat_relevant.py\' >> rct_bin_ref.sh
 	echo FLT_ALT=\'$(CURDIR)/python_dialogs/getFltAlt.py\' >> rct_bin_ref.sh
+
+clean:
+	make -c fft_detect clean
+	-rm rct_bin_ref.sh
+	-rm config/COL
+	-rm config/SDR.cfg
+	-rm -rf config
 
 uninstall:
 	-rm config/SDR.cfg
