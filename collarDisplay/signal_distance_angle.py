@@ -7,6 +7,7 @@ import utm
 import os
 import argparse
 import fileinput
+import math
 
 def read_meta_file(filename, tag):
     for line in fileinput.input(filename):
@@ -60,6 +61,26 @@ for i in range(len(data['lat'])):
 	zonenum = utm_coord[2]
 	zone = utm_coord[3]
 
+## Custom Location
+target_lon = 599679
+target_lat = 3620338
+distance = [None] * len(data['lat'])
+angle = [None] * len(data['lat'])
+
+# Calculate distance and angle per sample
+prev_lat = lat[0]
+prev_lon = lon[0] + 1
+for i in range(len(data['lat'])):
+	d_lat = - lat[i] + target_lat
+	d_lon = - lon[i] + target_lon
+	distance[i] = math.sqrt(d_lat * d_lat + d_lon * d_lon)
+	head_lat = prev_lat - lat[i]
+	head_lon = prev_lon - lon[i]
+	head_len = math.sqrt(head_lat * head_lat + head_lon * head_lon)
+	angle[i] = math.acos(d_lat / distance[i] * head_lat / head_len + d_lon / distance[i] * head_lon / head_len) / math.pi * 180
+	prev_lat = lat[i]
+	prev_lon = lon[i]
+
 # Configure plot
 fig = plot.figure()
 fig.set_size_inches(plot_width, plot_height)
@@ -68,10 +89,9 @@ plot.grid()
 ax = plot.gca()
 ax.get_xaxis().get_major_formatter().set_useOffset(False)
 ax.get_yaxis().get_major_formatter().set_useOffset(False)
-ax.set_xlabel('Easting')
-ax.set_ylabel('Northing')
-ax.set_title('Run %d, Collar %d at %3.3f MHz\nUTM Zone: %d %s' % (run_num, num_col, col_freq, zonenum, zone))
-ax.set_aspect('equal')
+ax.set_xlabel('Angle')
+ax.set_ylabel('Distance')
+ax.set_title('Run %d, Collar %d at %3.3f MHz' % (run_num, num_col, col_freq))
 plot.xticks(rotation='vertical')
 
 # Calculate colorplot
@@ -80,71 +100,14 @@ minCol = np.amin(data['col'])
 curColMap = plot.cm.get_cmap('jet')
 
 # Plot data
-sc = plot.scatter(lon, lat, c=data['col'], cmap=curColMap, vmin = minCol, vmax = maxCol)
+sc = plot.scatter(angle, distance, c=data['col'], cmap=curColMap, vmin = minCol, vmax = maxCol)
 colorbar = plot.colorbar(sc)
 colorbar.set_label('Maximum Signal Amplitude')
 
+
 # Save plot
-plot.savefig('%s/RUN_%06d_COL_%06d.png' % (output_path, run_num, num_col), bbox_inches = 'tight')
-print('Collar %d: %s/RUN_%06d_COL_%06d.png' %
+plot.savefig('%s/RUN_%06d_COL_%06d_signal_distance.png' % (output_path, run_num, num_col), bbox_inches = 'tight')
+print('Collar %d: %s/RUN_%06d_COL_%06d_signal_distance.png' %
 	(num_col, output_path, run_num, num_col))
 # plot.show(block=False)
 plot.close()
-
-if(kml_output):
-	from PIL import Image
-	fig = plot.figure()
-	fig.patch.set_facecolor('none')
-	fig.patch.set_alpha(0)
-	fig.set_size_inches(8, 6)
-	fig.set_dpi(72)
-	curColMap = plot.cm.get_cmap('jet')
-	sc = plot.scatter(lon, lat, c=coldata[i - 1], cmap=curColMap, vmin = minCol, vmax = maxCol)
-	ax = plot.gca()
-	ax.patch.set_facecolor('none')
-	ax.set_aspect('equal')
-	plot.axis('off')
-	plot.savefig('tmp.png', bbox_inches = 'tight')
-	print('Collar at %0.3f MHz: %s/RUN_%06d_COL_%0.3ftx.png' %
-		(collars[i - 1] / 1000000.0, output_path, run_num,
-		collars[i - 1] / 1000000.0))
-	# plot.show(block=False)
-	plot.close()
-
-	image=Image.open('tmp.png')
-	image.load()
-	image_data = np.asarray(image)
-	image_data_bw = image_data.max(axis=2)
-	non_empty_columns = np.where(image_data_bw.max(axis=0)>0)[0]
-	non_empty_rows = np.where(image_data_bw.max(axis=1)>0)[0]
-	cropBox = (min(non_empty_rows), max(non_empty_rows), min(non_empty_columns), max(non_empty_columns))
-
-	image_data_new = image_data[cropBox[0]:cropBox[1]+1, cropBox[2]:cropBox[3]+1 , :]
-
-	new_image = Image.fromarray(image_data_new)
-	new_image.save('%s/RUN_%06d_COL%06dtx.png' % (output_path, run_num, num_col))
-	os.remove('tmp.png')
-
-	f = open('%s/RUN_%06d_COL%06d.kml' % (output_path, run_num, num_col), 'w')
-	f.write("""<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<kml xmlns="http://www.opengis.net/kml/2.2">
-  <Folder>
-	<name>Radio Collar Tracker</name>
-	<description>Radio Collar Tracker, UCSD</description>
-	<GroundOverlay>
-	  <name>RUN %d</name>
-	  <description>RUN %d, Collar at %0.3f MHz</description>
-	  <Icon>
-		<href>%s</href>
-	  </Icon>
-	  <LatLonBox>
-		<north>%f</north>
-		<south>%f</south>
-		<east>%f</east>
-		<west>%f</west>
-		<rotation>0</rotation>
-	  </LatLonBox>
-	</GroundOverlay>
-  </Folder>
-</kml>""" % (run_num, run_num, collars[i - 1] / 1000000.0, '%s/RUN_%06d_COL%0.3ftx.png' % (output_path, run_num, collars[i - 1] / 1000000.0),north, south, east, west))
-	f.close()
