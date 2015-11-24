@@ -2,10 +2,16 @@
 # Constant configuration
 source /usr/bin/rct_bin_ref.sh
 
-while getopts "s" opt; do
+while getopts "src" opt; do
 	case $opt in
 		s)
 			signal_dist_outpt=true
+			;;
+		r)
+			record=true
+			;;
+		c)
+			clean_run=true
 			;;
 	esac
 done
@@ -16,6 +22,24 @@ if [[ $data_dir == "None" ]]
 then
 	exit 1
 fi
+
+if [ "${clean_run}" = true ]
+then
+	if [[ -e ${data_dir}/RUN ]]
+	then
+		rm ${data_dir}/RUN
+	fi
+	if [[ -e ${data_dir}/ALT ]]
+	then
+		rm ${data_dir}/ALT
+	fi
+	if [[ -e ${data_dir}/COL ]]
+	then
+		rm ${data_dir}/COL
+	fi
+	exit 0
+fi
+
 if [[ -e ${data_dir}/RUN ]]
 then
 	run=`${META_FILE_READER} -i ${data_dir}/RUN -t run_num`
@@ -26,6 +50,12 @@ else
 		exit 1
 	fi
 fi
+
+if [ "${record}" = true ]
+then
+	echo "run_num: ${run}" > ${data_dir}/RUN
+fi
+
 if [[ -e ${data_dir}/ALT ]]
 then
 	flt_alt=`${META_FILE_READER} -i ${data_dir}/ALT -t flt_alt`
@@ -35,6 +65,11 @@ else
 	then
 		exit 1
 	fi
+fi
+
+if [ "${record}" = true ]
+then
+	echo "flt_alt: ${flt_alt}" > ${data_dir}/ALT
 fi
 
 if [[ -e ${data_dir}/COL ]]
@@ -47,6 +82,11 @@ else
 	then
 		exit 1
 	fi
+fi
+
+if [ "${record}" = true ]
+then
+	cp ${CONFIG_DIR}/COL ${data_dir}/COL
 fi
 
 # Generated variables
