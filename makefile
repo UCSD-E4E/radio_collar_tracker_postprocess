@@ -7,6 +7,7 @@ configure: config/SDR.cfg config
 
 config:
 	mkdir config
+	chmod a+rwx config
 
 install: fft_detect/fft_detect raw_gps_analysis/raw_gps_analysis.py\
 	collarDisplay/display_data.py meta_file_reader/read_meta_file.py\
