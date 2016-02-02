@@ -10,13 +10,34 @@ Installing the Post-Process Code
 	* fftw3 (http://fftw.org/)
 	* make (build-essential)
 	* python 2.7+ (https://www.python.org/)
-	* python-tk
-	* numpy (http://www.numpy.org/)
-	* matplotlib (http://matplotlib.org/)
+	* tkinter (python-tk)
+	* numpy (python-numpy)
+	* matplotlib (python-matplotlib)
 	* utm 0.4.0 (https://pypi.python.org/pypi/utm)
 2.	Make and install rct_cas
+	```sh
+	make all
+	sudo make install
+	```
+
+In all, a typical Debian-based installation might look like this:
 ```sh
-make all
+sudo apt-get install build-essential python-tk python-numpy python-matplotlib python-pip python-dev git
+wget ftp://ftp.fftw.org/pub/fftw/fftw-3.3.4.tar.gz
+wget https://pypi.python.org/packages/source/u/utm/utm-0.4.0.tar.gz
+tar -xzf fftw-3.3.4.tar.gz
+cd fftw-3.3.4
+./configure
+make
+sudo make install
+cd ..
+tar -xzf utm-0.4.0.tar.gz
+cd utm-0.4.0
+sudo pip install -e .
+cd ..
+git clone https://github.com/UCSD-E4E/radio_collar_tracker
+cd radio_collar_tracker
+make
 sudo make install
 ```
 
