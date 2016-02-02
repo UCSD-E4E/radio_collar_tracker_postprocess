@@ -8,7 +8,7 @@ Installing the Post-Process Code
 ================================
 1.	Install Dependencies:
 	* fftw3 (http://fftw.org/)
-	* make
+	* make (build-essential)
 	* python 2.7+ (https://www.python.org/)
 	* numpy (http://www.numpy.org/)
 	* matplotlib (http://matplotlib.org/)
