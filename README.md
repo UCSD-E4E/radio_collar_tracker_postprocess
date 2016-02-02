@@ -10,6 +10,7 @@ Installing the Post-Process Code
 	* fftw3 (http://fftw.org/)
 	* make (build-essential)
 	* python 2.7+ (https://www.python.org/)
+	* python-tk
 	* numpy (http://www.numpy.org/)
 	* matplotlib (http://matplotlib.org/)
 	* utm 0.4.0 (https://pypi.python.org/pypi/utm)
