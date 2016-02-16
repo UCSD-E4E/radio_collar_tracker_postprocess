@@ -54,3 +54,46 @@ Running the Post-Process Code
 	3. `runcli.sh` is an interactive shell script.  Usage: `runcli.sh`
 5. Note: if you run the PostProcessC code without using the integration scripts, ensure that all paths are fixed paths.
  -->
+
+# Output and Intermediate Data Format
+
+## Concatenated IQ Data
+The utility CLI_GUI/cat_relevant.py concatenates the relevant raw IQ data files
+together, in order to reduce the amount of computation required by the
+post-processing code.  The resultant file is named `RUN_[run_num].raw`, where
+run_num is a six character field containing the run number, zero padded.  This
+file contains the raw IQ data from the start of recording until the sample
+recorded at the same time as the last GPS datapoint.  This data is stored as
+pairs of 8-bit unsigned integers, with each pair representing the in-phase and
+quadrature components of the recorded signal.  See
+https://en.wikipedia.org/wiki/In-phase_and_quadrature_components for an overview
+of IQ signal representation.
+
+## Processed IQ Data
+The utility fft_detect/fft_detect transforms the raw time-domain IQ data into
+its frequency-domain representation, and isolates a single frequency from that.
+It loads the concatenated IQ data, and performs an FFT on 1024 sample wide
+windows.  From the resultant complex frequency spectrum, fft_detect records the
+proper frequency bin.  This frequency bin amplitude is stored as a 32-bit IEEE
+float.  The resultant signal has a sampling frequency of 2 kSps, and each sample
+represents the amplitude of the signal at the requested frequency, that is, the
+time-averaged amplitude of the real signal's frequency component at that
+frequency over the duration of that sample.
+
+This file is named `RUN_[run_num]_[col_num].raw`.  The collar number is
+referenced in the local collar definitions file (usually `COL`), and is
+represented as a six digit field, zero padded.  The run number is also a six
+digit field, zero padded.
+
+## Correlated GPS and Signal Data
+The utility raw_gps_analysis/raw_gps_analysis.py correlates the recorded GPS
+data and the processed IQ data to create a sequence of correlated GPS locations
+and signal strengths.  This utility also does a simple altitude filter to
+eliminate the takeoff and landing phases of flight by doing a +/- 20% threshold
+on the relative altitude data.  Correlation is accomplished by taking the
+maximum signal amplitude for the signal data prior to each GPS location, for at
+most 1.5 seconds.  That is, each GPS location is associated with the highest
+signal amplitude in the previous 1.5 seconds or since the last GPS position.
+This information is stored as comma separated values as: local timestamp
+(seconds since UTC), latitude (degrees * 1e7), longitude (degrees * 1e7), signal
+amplitude (dB?).
