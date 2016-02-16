@@ -97,3 +97,8 @@ signal amplitude in the previous 1.5 seconds or since the last GPS position.
 This information is stored as comma separated values as: local timestamp
 (seconds since UTC), latitude (degrees * 1e7), longitude (degrees * 1e7), signal
 amplitude (dB?).
+
+This file is named `RUN_[run_num]_[col_num].csv`.  The collar number is
+referenced in the local collar definitions file (usually `COL`), and is
+represented as a six digit field, zero padded.  The run number is also a six
+digit field, zero padded.
