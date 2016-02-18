@@ -44,14 +44,14 @@ class imageDisplayPanel(tk.Frame):
             
         i = 0
         buttonOffset = 0;
-        buttonWidth = 25 / numImages; #Width / numImages
+        #buttonWidth = 25 / numImages; #Width / numImages
         while i < numImages:
             number = str(i)
             print("I is: %d, number is: %s" %(i,number))
             newButton = tk.Button(self,text=number,command=lambda i=i:self.changeImage(i))
             self.buttonList.append(newButton);
             newButton.pack()
-            newButton.place(anchor='nw',x=buttonOffset + 20);
+            newButton.place(anchor='nw',x=buttonOffset);
             self.update()
             buttonOffset+=newButton.winfo_height();
             
@@ -66,7 +66,10 @@ class imageDisplayPanel(tk.Frame):
         print("Image path is: %s" %(imagePath))
         #image = Image.open(imagePath)
         #photo = ImageTk.PhotoImage(image)
-        self.image = tk.PhotoImage(file=imagePath)
-        self.imageLabel.configure(image=self.image)
-        self.imageLabel.place(anchor='nw',y=30,x=260)
+        try:
+            self.image = tk.PhotoImage(file=imagePath)
+            self.imageLabel.configure(image=self.image)
+            self.imageLabel.place(anchor='nw',y=30,x=260)
+        except tk.TclError:
+            print("Caught TCLERROR")
         return;
