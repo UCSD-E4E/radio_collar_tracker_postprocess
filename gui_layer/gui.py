@@ -34,13 +34,13 @@ class dirSelectPanel(tk.Frame):
         self.config(bg='beige')
         
     def initializeWidgets(self):
-        self.dirText = tk.Text(self,height=1,width = 30,bd=0,bg='beige',wrap='word')
+        self.dirText = tk.Text(self,height=1,width = 30,bd=0,bg='beige')
         self.dirTB = tk.Entry(self)
-        self.runText = tk.Text(self,height=2,width = 30,bd=0,bg='beige',wrap='word')
+        self.runText = tk.Text(self,height=2,width = 30,bd=0,bg='beige')
         self.runTB = tk.Entry(self)
-        self.altText = tk.Text(self,height=2,width = 30,bd=0,bg='beige',wrap='word')
+        self.altText = tk.Text(self,height=2,width = 30,bd=0,bg='beige')
         self.altTB = tk.Entry(self)
-        self.colText = tk.Text(self,height=2,width = 30,bd=0,bg='beige',wrap='word')
+        self.colText = tk.Text(self,height=2,width = 30,bd=0,bg='beige')
         self.colTB = tk.Entry(self)
         
         
@@ -49,6 +49,16 @@ class dirSelectPanel(tk.Frame):
         self.runText.insert('insert',"If this box is red, please insert the number of runs below")
         self.altText.insert('insert',"If this box is red, please insert the working altitude")
         self.colText.insert('insert',"If this box is red, please insert the number of collars below")
+        
+        #disables text boxes, text cannot be edited
+        self.dirText.config(state='disabled',wrap='word')
+        self.runText.config(state='disabled',wrap='word')
+        self.altText.config(state='disabled',wrap='word')
+        self.colText.config(state='disabled',wrap='word')
+        
+        
+        
+        
         
         curHeight = 0
         self.dirText.grid()
