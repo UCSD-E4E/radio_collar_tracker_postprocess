@@ -1,116 +1,83 @@
 import Tkinter as tk
 import tkFileDialog as filedialog
+import tkSimpleDialog as simpledialog
+
+from dirSelectPanel import dirSelectPanel
+from imageDisplayPanel import imageDisplayPanel
+from auxiliaryOptionsPanel import auxiliaryOptionsPanel
+
+from META_FILE_READER import META_FILE_READER
+from getNumCols import GET_NUM_COLLARS
+import os
 
 class Application(tk.Frame):
+    record=0;SDO=0;clean=0;
+    firstFrame = 0;
+    secondFrame = 0;
+    thirdFrame = 0;
     randValue = 20
+    HEIGHT = 300
     def __init__(self,master=None):
-        tk.Frame.__init__(self,master,width = 500,height=300)
+        tk.Frame.__init__(self,master,width=750,height=self.HEIGHT)
+        #self.grid_propagate('false')
+        #self.pack_propagate('false')
+        #self.place_propagate('false')
         self.grid()
         self.placeFrames()
         self.config(background="red")
         
-    def beginCalculations(self):
-        print("Wow this actually worked%d" %(self.randValue))
-        print("TODO: add functionality")
+        
+    def beginCalculations(self,data_dir,run_num,flt_alt,num_col):
+        print("run_num= %d,flt_alt= %d,num_col= %d" %(run_num,flt_alt,num_col))
+        imageList = []
+        i=0
+        while i < num_col:
+            imageList.append("RUN_%06d_COL_%06d.gif"%(run_num,i+1))
+            i = i+1
+        self.secondFrame.newImages(num_col,"%s/"%(data_dir),imageList);
+        
+        #TODO: Move script stuff here
         
     def placeFrames(self):
-        print("TODO: add functionality")
-        firstFrame = dirSelectPanel(self,self.beginCalculations)
+        panelX = 0;
+        self.firstFrame = dirSelectPanel(self,self.HEIGHT,self.beginCalculations)
+        self.firstFrame.pack()
+        self.firstFrame.place(anchor='nw',x=panelX)
+        self.update()
+        panelX = panelX + self.firstFrame.winfo_width();
         
+        separatorFrame1 = separatorFrame(self,self.HEIGHT);
+        separatorFrame1.pack()
+        separatorFrame1.place(anchor='nw',x=panelX)
+        self.update()
+        panelX = panelX + separatorFrame1.winfo_width();
+        
+        self.secondFrame =imageDisplayPanel(self,self.HEIGHT);
+        self.secondFrame.pack()
+        self.secondFrame.place(anchor='nw',x=panelX)
+        self.update()
+        panelX = panelX + self.secondFrame.winfo_width();
+        
+        separatorFrame2 = separatorFrame(self,self.HEIGHT);
+        separatorFrame2.pack()
+        separatorFrame2.place(anchor='nw',x=panelX)
+        self.update()
+        panelX = panelX + separatorFrame2.winfo_width();
+        
+        self.thirdFrame = auxiliaryOptionsPanel(self,self.HEIGHT)
+        self.thirdFrame.pack()
+        self.thirdFrame.place(anchor='nw',x=panelX)
+        self.update()
+        panelX = panelX + self.thirdFrame.winfo_width()
         
         #for(int i = 0; i < fileNameList.length;i++):
         #    filecopy(data_dir + fileNameList[1],dataout_dir + fileNameList[1]);
-        
 
-class dirSelectPanel(tk.Frame):
-    doCalculations = 0
-    dirText = 0; runTBText = 0; altTBText = 0; colTBText = 0
-    dirTB = 0; runTB = 0; altTB = 0; colTB = 0
-    def __init__(self,parent,calculationHandler):
-        tk.Frame.__init__(self,parent)
-        self.grid()
-        self.doCalculations = calculationHandler
-        self.initializeWidgets()
-        self.config(bg='beige')
         
-    def initializeWidgets(self):
-        self.dirText = tk.Text(self,height=1,width = 30,bd=0,bg='beige')
-        self.dirTB = tk.Entry(self)
-        self.runText = tk.Text(self,height=2,width = 30,bd=0,bg='beige')
-        self.runTB = tk.Entry(self)
-        self.altText = tk.Text(self,height=2,width = 30,bd=0,bg='beige')
-        self.altTB = tk.Entry(self)
-        self.colText = tk.Text(self,height=2,width = 30,bd=0,bg='beige')
-        self.colTB = tk.Entry(self)
-        
-        
-        #INSERT = self.dirText.INSERT
-        self.dirText.insert('insert',"Please select a data directory")
-        self.runText.insert('insert',"If this box is red, please insert the number of runs below")
-        self.altText.insert('insert',"If this box is red, please insert the working altitude")
-        self.colText.insert('insert',"If this box is red, please insert the number of collars below")
-        
-        #disables text boxes, text cannot be edited
-        self.dirText.config(state='disabled',wrap='word')
-        self.runText.config(state='disabled',wrap='word')
-        self.altText.config(state='disabled',wrap='word')
-        self.colText.config(state='disabled',wrap='word')
-        
-        
-        
-        
-        
-        curHeight = 0
-        self.dirText.grid()
-        curHeight = curHeight + self.dirText.winfo_height();
-        print(curHeight)
-        self.dirTB.grid()
-        self.runText.grid()
-        self.runTB.grid()
-        self.altText.grid()
-        self.altTB.grid()
-        self.colText.grid()
-        self.colTB.grid()
-        
-        
-        
-        
-        #curHeight = 0
-        #self.dirText.place(anchor='nw')
-        #self.update()
-        #curHeight = curHeight + self.dirText.winfo_height();
-        #print(curHeight)
-        #self.dirTB.place(anchor='ne',x=-1)
-        #self.update()
-        #curHeight = curHeight + self.dirTB.winfo_height();
-        #print(curHeight)
-        #self.runText.place(anchor='nw',rely=curHeight)
-        #self.update()
-        #curHeight = curHeight + self.runText.winfo_height();
-        #print(curHeight)
-        #self.runTB.place(anchor='nw',x=1)
-        #self.altText.place(anchor='nw')
-        #self.altTB.place(anchor='nw')
-        #self.colText.place(anchor='ne',x=-1)
-        #self.colTB.place(anchor='se',x=200)
-        
-        self.doStuffButton = tk.Button(self,text='Calculate',command=self.prepareForCalc)
-        
-        self.doStuffButton.grid()
-        
-    
-
-    def changeSize(self):
-        self.width = 200;
-        self.height = 300;
-        
-    def prepareForCalc(self):
-        self.doCalculations();
-
-
-
-
-
+class separatorFrame(tk.Frame):
+    def __init__(self,parent,HEIGHT):
+        data_dir = tk.StringVar()
+        tk.Frame.__init__(self,parent,width=3,height=HEIGHT,bg='black')
 
 top = Application()
 top.master.title('Radio Collar Tracker')
