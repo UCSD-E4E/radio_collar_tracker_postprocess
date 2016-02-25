@@ -6,7 +6,7 @@ import os.path
 class Application(tk.Frame):
     randValue = 20
     # fileNameListParent is the list that stores all the file paths and names
-    fileNameListParent = ['/home/nan/gui/test2/1.txt','/home/nan/gui/test2/2.txt']
+    #fileNameListParent = ['/home/nan/gui/test2/1.txt','/home/nan/gui/test2/2.txt']
 
     def __init__(self,master=None):
         tk.Frame.__init__(self,master,width = 500,height=300)
@@ -20,7 +20,7 @@ class Application(tk.Frame):
         
     def placeFrames(self):
         print("TODO: add functionality")
-        firstFrame = dirExportFiles(self,self.fileNameListParent)
+        firstFrame = dirExportFiles(self)
         
         
         #for(int i = 0; i < fileNameList.length;i++):
@@ -29,8 +29,8 @@ class Application(tk.Frame):
 
 class dirExportFiles(tk.Frame):
     
-    def __init__(self,parent,fileNameListParent):
-	self.fileNameList = fileNameListParent
+    def __init__(self,parent):
+	self.fileNameList = []
 	
         tk.Frame.__init__(self,parent)
         self.grid()
@@ -42,20 +42,26 @@ class dirExportFiles(tk.Frame):
         
     def initializeWidgets(self):
 	#self.exportButton = tk.Button(self, text='Export', command=self.exportFunction(self.fileNameList))
-	self.exportButton = tk.Button(self, text='Export', command=lambda:self.exportFunction(self.fileNameList))
+	self.exportButton = tk.Button(self, text='Export', state='disabled', command=self.exportFunction)
 	self.exportButton.grid()
         
         
-    def exportFunction(self,fileList):
+    def exportFunction(self):
 	# dest_path = filedialog.askdirectory()
 	# check for existence of the file path if not ask for path again
 	dest_path = filedialog.askdirectory()
 	if os.path.exists(dest_path):
-		for file in fileList:
+		for file in self.fileNameList:
 			shutil.copy2(file, dest_path)
 			#print 'here'
 		
+    def clearList(self):
+	self.fileNameList[:] = []
 
+    def updateList(self, newList):
+	self.fileNameList[:] = newList
+	if (len(self.fileNameList) != 0 ):
+		self.exportButton.config(state='active')
 
 
 
