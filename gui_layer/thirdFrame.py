@@ -9,10 +9,13 @@ class Application(tk.Frame):
     fileNameListParent = ['/home/nan/gui/test2/1.txt','/home/nan/gui/test2/2.txt']
 
     def __init__(self,master=None):
-        tk.Frame.__init__(self,master,width = 500,height=300)
+        tk.Frame.__init__(self,master)
+        #self.pack_propagate('false')
+        #self.grid_propagate('false')
         self.grid()
         self.placeFrames()
         self.config(background="red")
+        
         
     def beginCalculations(self):
         print("Wow this actually worked%d" %(self.randValue))
@@ -29,16 +32,17 @@ class Application(tk.Frame):
 
 class dirExportFiles(tk.Frame):
     
-    def __init__(self,parent,fileNameListParent):
-	self.fileNameList = fileNameListParent
-	
-        tk.Frame.__init__(self,parent)
-        self.grid()
+    fileNameList = ""
+    
+    def __init__(self,parent,fileNameListParent=[]):
+        self.fileNameList = fileNameListParent
+        tk.Frame.__init__(self,parent,bg='#F0F0F0',width=44,height=300)
+        self.pack_propagate('false')
+        self.grid_propagate('false')
+        self.pack(side='left')
         #self.doCalculations = calculationHandler
         self.initializeWidgets()
-        self.config(bg='beige')
-	self.config(height='500')
-	self.config(width='300')
+
         
     def initializeWidgets(self):
 	#self.exportButton = tk.Button(self, text='Export', command=self.exportFunction(self.fileNameList))
@@ -54,13 +58,12 @@ class dirExportFiles(tk.Frame):
 		for file in fileList:
 			shutil.copy2(file, dest_path)
 			#print 'here'
-		
 
 
 
 
 
 
-top = Application()
-top.master.title('Radio Collar Tracker')
-top.mainloop()
+#top = Application()
+#top.master.title('Radio Collar Tracker')
+#top.mainloop()

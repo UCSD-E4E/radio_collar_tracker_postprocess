@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+#NOTE: I had to comment out plot.close, it seems to be closing my gui (cntr+f (TODO))
+
 import sys
 import numpy as np
 import matplotlib.pyplot as plot
@@ -10,8 +13,9 @@ import fileinput
 
 def read_meta_file(filename, tag):
     for line in fileinput.input(filename):
-        if tag == line.strip().split(':')[0].strip():
-	    return line.strip().split(':')[1].strip()
+        if tag == line.strip().split(':')[0].strip():   
+            fileinput.close()
+            return line.strip().split(':')[1].strip()
 
 kml_output = False
 # TODO Fix test case
@@ -70,7 +74,7 @@ def display_data(run_num,num_col,filename,output_path,col_def):
     fig = plot.figure()
     fig.set_size_inches(plot_width, plot_height)
     fig.set_dpi(plot_dpi)
-    plot.grid()
+    #plot.grid()
     ax = plot.gca()
     ax.get_xaxis().get_major_formatter().set_useOffset(False)
     ax.get_yaxis().get_major_formatter().set_useOffset(False)
@@ -95,9 +99,11 @@ def display_data(run_num,num_col,filename,output_path,col_def):
     print('Collar %d: %s/RUN_%06d_COL_%06d.png' %
         (num_col, output_path, run_num, num_col))
     # plot.show(block=False)
-    plot.close()
+    #plot.close('all') TODO: Uncomment at some point maybe
+    
 
     if(kml_output):
+        print("doing kml_output")
         from PIL import Image
         fig = plot.figure()
         fig.patch.set_facecolor('none')
@@ -130,7 +136,7 @@ def display_data(run_num,num_col,filename,output_path,col_def):
         new_image = Image.fromarray(image_data_new)
         new_image.save('%s/RUN_%06d_COL%06dtx.png' % (output_path, run_num, num_col))
         os.remove('tmp.png')
-
+        image.close()
         f = open('%s/RUN_%06d_COL%06d.kml' % (output_path, run_num, num_col), 'w')
         f.write("""<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <kml xmlns="http://www.opengis.net/kml/2.2">

@@ -2,6 +2,9 @@ import os
 import shutil
 import fileinput
 
+import Tkinter as tk
+import tkSimpleDialog as simpledialog
+
 def GET_NUM_COLLARS(COLPath):
 
     
@@ -12,7 +15,7 @@ def GET_NUM_COLLARS(COLPath):
         return len(collarList)
             
             
-def getCollars(self):
+def getCollars(self=None):
     root = tk.Tk()
     root.withdraw()
     counter = 1

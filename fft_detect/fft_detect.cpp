@@ -5,7 +5,10 @@
 #include <fstream>
 #include <cstdint>
 #include <complex>
-#include "fftw3.h"
+#include <fftw3.h>
+#include <cstring>
+#include <cstdlib>
+
 
 #define FFT_LENGTH 1024
 

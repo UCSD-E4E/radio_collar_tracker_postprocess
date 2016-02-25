@@ -1,0 +1,4 @@
+1) Add script implementation to gui
+2) get the c file to fully work with the script implementation
+3) add checking to ensure data_dir is a data directory
+4) 
