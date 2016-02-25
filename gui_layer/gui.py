@@ -5,7 +5,7 @@ import tkSimpleDialog as simpledialog
 from dirSelectPanel import dirSelectPanel
 from imageDisplayPanel import imageDisplayPanel
 from auxiliaryOptionsPanel import auxiliaryOptionsPanel
-from thirdFrame import dirExportFiles
+from dirExportFiles import dirExportFiles
 
 from scriptImplementation import scriptImplementation
 
@@ -21,14 +21,13 @@ class Application(tk.Frame):
     randValue = 20
     HEIGHT = 300
     def __init__(self,master=None):
-        tk.Frame.__init__(self,master)
+        tk.Frame.__init__(self,master,bg='#F0F0F0')
         #self.minsize(
         #self.grid_propagate('false')
         #self.pack_propagate('false')
         #self.place_propagate('false')
         self.grid()
         self.placeFrames()
-        self.config(background="red")
         self.update()
         
         
@@ -48,10 +47,14 @@ class Application(tk.Frame):
         
         scriptImplementation(programPath,data_dir,CONFIGPath,run_num,flt_alt,num_col,frequencyList)
         i=1
+        imageListFullPath = []
         while i <= num_col:
             imageList.append("RUN_%06d_COL_%06d.png"%(run_num,i))
+            imageListFullPath.append("%s/%s" %(data_dir,imageList[i-1]))
             i = i+1
-        self.secondFrame.newImages(num_col,"%s/"%(data_dir),imageList);
+        self.secondFrame.newImages(num_col,"%s/"%(data_dir),imageList)
+        
+        self.thirdFrame.updateList(imageListFullPath)
         
         #TODO: Move script stuff here
         
@@ -81,7 +84,7 @@ class Application(tk.Frame):
         self.update()
         panelX = panelX + separatorFrame2.winfo_width();
         
-        self.thirdFrame = dirExportFiles(self,self.HEIGHT)
+        self.thirdFrame = dirExportFiles(self)
         self.thirdFrame.pack()
         self.update()
         #self.thirdFrame.place(anchor='nw',x=panelX)
