@@ -10,8 +10,9 @@ import fileinput
 
 def read_meta_file(filename, tag):
     for line in fileinput.input(filename):
-        if tag == line.strip().split(':')[0].strip():
-	    return line.strip().split(':')[1].strip()
+        if tag == line.strip().split(':')[0].strip():   
+            fileinput.close()
+            return line.strip().split(':')[1].strip()
 
 kml_output = False
 # TODO Fix test case

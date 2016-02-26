@@ -2,6 +2,15 @@ import Tkinter as tk
 import tkFileDialog as filedialog
 import tkSimpleDialog as simpledialog
 
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'meta_file_reader'))
+#sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'CLI_GUI'))
+sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'python_dialogs'))
+
+from read_meta_file import read_meta_file
+from getCollars import GET_NUM_COLLARS
+
 from dirSelectPanel import dirSelectPanel
 from imageDisplayPanel import imageDisplayPanel
 from auxiliaryOptionsPanel import auxiliaryOptionsPanel
@@ -9,9 +18,6 @@ from dirExportFiles import dirExportFiles
 
 from scriptImplementation import scriptImplementation
 
-from META_FILE_READER import META_FILE_READER
-from getNumCols import GET_NUM_COLLARS
-import os
 
 class Application(tk.Frame):
     record=0;SDO=0;clean=0;

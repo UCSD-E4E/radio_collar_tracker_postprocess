@@ -3,12 +3,19 @@ import tkFileDialog as filedialog
 import tkSimpleDialog as simpledialog
 import re
 
-
-from META_FILE_READER import META_FILE_READER
-from getNumCols import *
 import os
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'meta_file_reader'))
+sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'python_dialogs'))
+from read_meta_file import read_meta_file
+from getCollars import *
+
+
 import fileinput
 import shutil
+
+
 
 class dirSelectPanel(tk.Frame):
     #TODO: Need to add functionality for collecting collar frequencies
@@ -222,10 +229,10 @@ class dirSelectPanel(tk.Frame):
 
         run = 0; alt = 0; col = 0;
         if os.path.exists(RUNPath):
-            run = META_FILE_READER(RUNPath, 'run_num')
+            run = read_meta_file(RUNPath, 'run_num')
             
         if os.path.exists(ALTPath):
-            alt =  META_FILE_READER(ALTPath, 'flt_alt')
+            alt =  read_meta_file(ALTPath, 'flt_alt')
             
         if os.path.exists(COLPath):
             col = GET_NUM_COLLARS(COLPath);
@@ -278,11 +285,15 @@ class dirSelectPanel(tk.Frame):
         if num_col < 1:
             self.colTB.config(bg='red',state='normal')
             self.colTB.delete(0, 'end')
+            self.colTB.insert(0,0)
+            self.colTB.config(state='disabled')
         else:
             self.colTB.config(state='normal')
             self.colTB.delete(0, 'end')
             self.colTB.insert(0,num_col)
             self.colTB.config(bg='white',state='disabled')
+            
+            
     def prepareConfigCOLFile(self,data_dir):
     
         COLPath = data_dir + '/COL'

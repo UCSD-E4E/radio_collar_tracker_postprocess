@@ -2,10 +2,14 @@ import Tkinter as tk
 import tkFileDialog as filedialog
 import tkSimpleDialog as simpledialog
 
-
-from META_FILE_READER import META_FILE_READER
-from getNumCols import GET_NUM_COLLARS
+import sys
 import os
+
+sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'meta_file_reader'))
+sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'python_dialogs'))
+
+from read_meta_file import read_meta_file
+from getCollars import GET_NUM_COLLARS
 
 class auxiliaryOptionsPanel(tk.Frame):
     #TODO: Need to add functionality for collecting collar frequencies

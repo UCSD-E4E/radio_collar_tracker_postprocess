@@ -1,11 +1,9 @@
-#!/usr/bin/env python
-import fileinput
-
 def read_meta_file(filename, tag):
     for line in fileinput.input(filename):
         if tag == line.strip().split(':')[0].strip():
             fileinput.close()
             return line.strip().split(':')[1].strip()
+     
 
 
 if __name__ == "__main__":

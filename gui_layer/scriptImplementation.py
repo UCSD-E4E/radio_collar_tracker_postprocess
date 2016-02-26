@@ -13,15 +13,21 @@ import fileinput
 
 import subprocess
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'raw_gps_analysis'))
+sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'meta_file_reader'))
+sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'CLI_GUI'))
+sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'collarDisplay'))
 
-import glob
-from META_FILE_READER import META_FILE_READER
-from cat_relevent import cat_relevent
+from read_meta_file import read_meta_file
+from cat_relevant import cat_relevant
 from raw_gps_analysis import raw_gps_analysis
 from display_data import display_data
 
-import sys
-sys.path.insert(0, 'C:/')
+
+import glob
+
 
 
 def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,frequencyList=[]):
@@ -34,13 +40,13 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
     raw_file = "%s/RUN_%06d.raw" % (data_dir,int(run))
     collar_file_prefix = "%s/RUN_%06d_" % (data_dir,int(run))
     meta_file = "%s/META_%06d" % (data_dir,int(run))
-    sdr_center_freq = META_FILE_READER(meta_file, 'center_freq')
-    sdr_ppm = META_FILE_READER(SDRPath, 'sdr_ppm')
+    sdr_center_freq = read_meta_file(meta_file, 'center_freq')
+    sdr_ppm = read_meta_file(SDRPath, 'sdr_ppm')
     
     #if os.path.exists(raw_file):
     #   os.remove(raw_file)
     
-    cat_relevent(data_dir,int(run)) 
+    cat_relevant(data_dir,int(run)) 
     #UNCOMMENT
     
     curCol = 1
@@ -48,7 +54,7 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
         print("entering calculation pipeline: %d <= %d" % (curCol,num_col))
         if(len(frequencyList) == 0):
             
-            frequency = META_FILE_READER(configCOLPath,str(curCol))
+            frequency = read_meta_file(configCOLPath,str(curCol))
         else:
             frequency = frequencyList[curCol-1]
            #TODO: Nathan: I believe this is the errorCheck on line 117
