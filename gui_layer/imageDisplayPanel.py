@@ -16,26 +16,34 @@ from glob import glob
 
 class imageDisplayPanel(tk.Frame):
     #TODO: Need to add functionality for collecting collar frequencies
-    imageLabel = 0
+    numImages = 0
+    imageID = 0
+    enlargeImageFunction = 0
+    enlargeImageButton = 0
+    imageCanvas = 0
     VERTICLE_PADDING = 3;
     IMSize = 190, 270
     image_dir =""
     imageList = [];
     buttonList = [];
-    def __init__(self,parent,HEIGHT):
+    def __init__(self,parent,HEIGHT,enlargeFunc):
+        self.enlargeImageFunction = enlargeFunc
         tk.Frame.__init__(self,parent,width=210,height=HEIGHT,bg='#F0F0F0')
         #self.config(bg='blue')
         #self.pack_propagate('false')
-        self.imageList.append("LING");
+        #self.imageList.append("LING");
         number = 0
-        newButton = tk.Button(self,text=number,command=lambda:self.changeImage(0))
-        self.buttonList.append(newButton);
-        self.imageLabel = tk.Label(justify='left')
-        self.imageLabel.pack()
-        self.imageLabel.place(anchor='nw',x= 400,y=5)
+        #newButton = tk.Button(self,text=number,command=lambda:self.changeImage(0))
+        #self.buttonList.append(newButton);
+        self.enlargeImageButton = tk.Button(self,text='Enlarge Image',command=self.enlargeImage)
+        self.enlargeImageButton.pack(side='bottom')
+        self.enlargeImageButton.lower()
+        
+        self.imageCanvas = tk.Canvas(self,width=190,height=HEIGHT-40,bg='#F0F0F0')
+        self.imageCanvas.pack(side='bottom',padx=10)
         
     def newImages(self,numImages,imageIN_dir,imageNames):
-        self.imageLabel.configure(image="")
+        self.imageCanvas.delete("all")
         self.image_dir = imageIN_dir;
         length = len(self.buttonList)
         print("len ButtonList = %d"%(length))
@@ -49,6 +57,8 @@ class imageDisplayPanel(tk.Frame):
             del self.imageList[0]
             
             
+            
+            
         i = 0
         buttonOffset = 0;
         #buttonWidth = 25 / numImages; #Width / numImages
@@ -57,8 +67,7 @@ class imageDisplayPanel(tk.Frame):
             print("I is: %d, number is: %s" %(i,number))
             newButton = tk.Button(self,text=number,command=lambda i=i:self.changeImage(i))
             self.buttonList.append(newButton);
-            newButton.pack()
-            newButton.place(anchor='nw',x=buttonOffset)
+            newButton.pack(side='left')
             print("Made it here")
             self.update()
             print("But not here")
@@ -69,8 +78,18 @@ class imageDisplayPanel(tk.Frame):
             
         if(numImages > 0):
             self.changeImage(0)
-    
+            
+        self.numImages = numImages
+        
+        
+        if self.numImages >0:
+            self.enlargeImageButton.lift()
+        else:
+            self.enlargeImageButton.lower()
+            
+            
     def changeImage(self,number):
+        self.imageID = number
         imagePath = "%s%s" %(self.image_dir,self.imageList[number])
         print("Number is %d" %(number))
         print("image_dir is :%s" %(self.image_dir))
@@ -80,11 +99,28 @@ class imageDisplayPanel(tk.Frame):
         photo = ImageTk.PhotoImage(image)
         #try:
         self.image = photo
-        self.imageLabel.configure(image=self.image)
-        self.imageLabel.place(anchor='nw',y=30,x=260)
+        self.imageCanvas.create_image(1,1,image=self.image,anchor='nw')
+        self.update()
+        #self.imageCanvas.pack_forget()
+        
+        
+        i =0
+        while i < self.numImages:
+            self.buttonList[i].pack(side='left')
+            i=i+1
+        
+        
+        
+        #self.enlargeImageButton.pack(side='bottom')
+        #self.imageCanvas.pack(side='bottom',padx=10)
+        #self.imageCanvas.place(anchor='nw',y=30,x=260)
         #self.image = tk.PhotoImage(file=imagePath)
         #self.imageLabel.configure(image=self.image)
         #self.imageLabel.place(anchor='nw',y=30,x=260)
         #except tk.TclError:
         #    print("Caught TCLERROR")
         return;
+        
+        
+    def enlargeImage(self):
+        self.enlargeImageFunction(self.imageID)

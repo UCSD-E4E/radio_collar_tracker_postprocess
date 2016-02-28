@@ -5,10 +5,10 @@ import os.path
 
 
 
-class dirExportFiles(tk.Frame):
-    
+class dirExportPanel(tk.Frame):
+    fileNameList = []
     def __init__(self,parent):
-	self.fileNameList = []
+        self.fileNameList = []
 	
         tk.Frame.__init__(self,parent)
         self.grid()

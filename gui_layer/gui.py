@@ -14,7 +14,8 @@ from getCollars import GET_NUM_COLLARS
 from dirSelectPanel import dirSelectPanel
 from imageDisplayPanel import imageDisplayPanel
 from auxiliaryOptionsPanel import auxiliaryOptionsPanel
-from dirExportFiles import dirExportFiles
+from dirExportPanel import dirExportPanel
+from newDataEntryPanel import newDataEntryPanel
 
 from scriptImplementation import scriptImplementation
 
@@ -35,6 +36,10 @@ class Application(tk.Frame):
         self.grid()
         self.placeFrames()
         self.update()
+        
+        
+    def displayEnlargedImage(self,number):
+        print("TODO: Open image number for custom imaging")
         
         
     def beginCalculations(self,data_dir,run_num,flt_alt,num_col,frequencyList):
@@ -66,45 +71,21 @@ class Application(tk.Frame):
         
     def placeFrames(self):
         panelX = 0;
-        self.firstFrame = dirSelectPanel(self,self.HEIGHT,self.beginCalculations)
-        self.firstFrame.pack()
-        #self.firstFrame.place(anchor='nw',x=panelX)
-        self.update()
-        panelX = panelX + self.firstFrame.winfo_width();
-        
+        #self.firstFrame = dirSelectPanel(self,self.HEIGHT,self.beginCalculations)
+        self.firstFrame = newDataEntryPanel(self,200,'#F0F0F0',self.beginCalculations)
         separatorFrame1 = separatorFrame(self,self.HEIGHT);
-        separatorFrame1.pack()
-        #separatorFrame1.place(anchor='nw',x=panelX)
-        self.update()
-        panelX = panelX + separatorFrame1.winfo_width();
-        
-        self.secondFrame =imageDisplayPanel(self,self.HEIGHT);
-        self.secondFrame.pack()
-        #self.secondFrame.place(anchor='nw',x=panelX)
-        self.update()
-        panelX = panelX + self.secondFrame.winfo_width();
-        
+        self.secondFrame =imageDisplayPanel(self,self.HEIGHT,enlargeFunc=self.displayEnlargedImage);
         separatorFrame2 = separatorFrame(self,self.HEIGHT);
-        separatorFrame2.pack()
-        #separatorFrame2.place(anchor='nw',x=panelX)
-        self.update()
-        panelX = panelX + separatorFrame2.winfo_width();
+        self.thirdFrame = dirExportPanel(self)
+
+        self.firstFrame.pack(side='left',anchor='n')
+        separatorFrame1.pack(side='left',anchor='n')
+        self.secondFrame.pack(side='left',anchor='n')
+        separatorFrame2.pack(side='left',anchor='n')
+        self.thirdFrame.pack(side='left',anchor='n')
         
-        self.thirdFrame = dirExportFiles(self)
-        self.thirdFrame.pack()
-        self.update()
-        #self.thirdFrame.place(anchor='nw',x=panelX)
-        panelX = panelX + self.thirdFrame.winfo_width()
         
-        #for(int i = 0; i < fileNameList.length;i++):
-        #    filecopy(data_dir + fileNameList[1],dataout_dir + fileNameList[1]);
-        self.firstFrame.pack(side='left')
-        separatorFrame1.pack(side='left')
-        self.secondFrame.pack(side='left')
-        separatorFrame2.pack(side='left')
-        self.thirdFrame.pack(side='left')
-        
-        self.firstFrame.lift()
+        #self.firstFrame.lift()
     
         
 class separatorFrame(tk.Frame):

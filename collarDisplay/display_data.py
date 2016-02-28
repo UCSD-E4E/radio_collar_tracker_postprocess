@@ -96,7 +96,7 @@ def display_data(run_num,num_col,filename,output_path,col_def):
     print('Collar %d: %s/RUN_%06d_COL_%06d.png' %
         (num_col, output_path, run_num, num_col))
     # plot.show(block=False)
-    plot.close()
+    #plot.close() TODO: Uncomment at some point maybe
 
     if(kml_output):
         from PIL import Image

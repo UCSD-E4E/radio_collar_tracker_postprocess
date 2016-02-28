@@ -34,7 +34,7 @@ def GET_NUM_COLLARS(COLPath):
         return len(collarList)
             
             
-def getCollars(self=None):
+def getNewCollars(self=None):
     root = tk.Tk()
     root.withdraw()
     counter = 1
@@ -49,6 +49,17 @@ def getCollars(self=None):
         else:
             return output
             
+def getOldCollars(path):
+    frequencyList = []
+    lineCount = 0;
+    with open(path) as infp:
+        for line in infp:
+            frequencyList.append(line)
+            lineCount += 1       
+    infp.close()
+    
+    return frequencyList
+            
 def getNumCollars(path):
     lineCount = 0;
     with open(path) as infp:
@@ -56,3 +67,30 @@ def getNumCollars(path):
             lineCount += 1
                     
     return lineCount
+    
+    
+def getNewCollarsClean(self=None):
+    frequencyList = getNewCollars()
+    outFreqList = []
+    num_col = len(frequencyList);
+    i = 0
+    while i < num_col:
+        frequencyList[i] = frequencyList[i].translate(None,' \n')
+        frequencyList[i] =frequencyList[i].split(':')[1]
+        outFreqList.append(frequencyList[i])
+        i = i+1
+        
+    return outFreqList
+        
+def getOldCollarsClean(path):
+    frequencyList = getOldCollars(path)
+    outFreqList = []
+    num_col = len(frequencyList);
+    i = 0
+    while i < num_col:
+        frequencyList[i] = frequencyList[i].translate(None,' \n')
+        frequencyList[i] =frequencyList[i].split(':')[1]
+        outFreqList.append(frequencyList[i])
+        i = i+1
+        
+    return outFreqList

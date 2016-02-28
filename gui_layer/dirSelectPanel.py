@@ -254,7 +254,8 @@ class dirSelectPanel(tk.Frame):
             self.altTB.config(state='normal')
             self.altTB.delete(0, 'end')
             self.altTB.insert(0,alt)
-            #self.altTB.config(bg='white',state='disabled') Nathan said do not disable altitude
+            self.altTB.config(bg='white');
+            #self.altTB.config(state='disabled') Nathan said do not disable altitude
             
         if col < 1:
             self.colTB.config(bg='red',state='normal')
