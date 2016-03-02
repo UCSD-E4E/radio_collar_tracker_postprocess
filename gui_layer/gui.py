@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import Tkinter as tk
 import tkFileDialog as filedialog
 import tkSimpleDialog as simpledialog
@@ -36,16 +37,16 @@ class Application(tk.Frame):
         self.grid()
         self.placeFrames()
         self.update()
-        
-        
+
+
     def displayEnlargedImage(self,number):
         print("TODO: Open image number for custom imaging")
-        
-        
+
+
     def beginCalculations(self,data_dir,run_num,flt_alt,num_col,frequencyList):
         print("run_num= %d,flt_alt= %d,num_col= %d" %(run_num,flt_alt,num_col))
         imageList = []
-        
+
         COLPath = data_dir + '/COL'
         CONFIGPath = os.path.dirname(os.path.realpath(__file__))
         CONFIGPath = CONFIGPath.replace("\\","/")
@@ -55,7 +56,7 @@ class Application(tk.Frame):
         CONFIGPath = CONFIGPath + '/config'
         ConfigCOLPath = CONFIGPath + '/COL'
         col = 0
-        
+
         scriptImplementation(programPath,data_dir,CONFIGPath,run_num,flt_alt,num_col,frequencyList)
         i=1
         imageListFullPath = []
@@ -64,11 +65,11 @@ class Application(tk.Frame):
             imageListFullPath.append("%s/%s" %(data_dir,imageList[i-1]))
             i = i+1
         self.secondFrame.newImages(num_col,"%s/"%(data_dir),imageList)
-        
+
         self.thirdFrame.updateList(imageListFullPath)
-        
+
         #TODO: Move script stuff here
-        
+
     def placeFrames(self):
         panelX = 0;
         #self.firstFrame = dirSelectPanel(self,self.HEIGHT,self.beginCalculations)
@@ -83,11 +84,11 @@ class Application(tk.Frame):
         self.secondFrame.pack(side='left',anchor='n')
         separatorFrame2.pack(side='left',anchor='n')
         self.thirdFrame.pack(side='left',anchor='n')
-        
-        
+
+
         #self.firstFrame.lift()
-    
-        
+
+
 class separatorFrame(tk.Frame):
     def __init__(self,parent,HEIGHT):
         data_dir = tk.StringVar()
