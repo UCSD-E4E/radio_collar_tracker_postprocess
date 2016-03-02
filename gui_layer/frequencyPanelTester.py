@@ -10,7 +10,7 @@ class Application(tk.Frame):
 
     def __init__(self,master=None):
         tk.Frame.__init__(self,master,width = 500,height=300)
-        self.grid()
+        self.pack()
         self.placeFrames()
         self.config(background="red")
         

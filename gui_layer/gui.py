@@ -36,7 +36,7 @@ class Application(tk.Frame):
         #self.grid_propagate('false')
         #self.pack_propagate('false')
         #self.place_propagate('false')
-        self.grid()
+        self.pack()
         self.placeFrames()
         self.update()
 
