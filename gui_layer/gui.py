@@ -22,10 +22,12 @@ from scriptImplementation import scriptImplementation
 
 
 class Application(tk.Frame):
-    record=0;SDO=0;clean=0;
-    firstFrame = 0;
-    secondFrame = 0;
-    thirdFrame = 0;
+    record=0
+    SDO=0
+    clean=0
+    firstFrame = 0
+    secondFrame = 0
+    thirdFrame = 0
     randValue = 20
     HEIGHT = 300
     def __init__(self,master=None):
