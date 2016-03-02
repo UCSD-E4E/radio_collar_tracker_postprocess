@@ -11,7 +11,7 @@ class dirExportPanel(tk.Frame):
         self.fileNameList = []
 	
         tk.Frame.__init__(self,parent)
-        self.grid()
+        #self.grid()
         #self.doCalculations = calculationHandler
         self.initializeWidgets()
         self.config(bg='#F0F0F0')
@@ -21,7 +21,7 @@ class dirExportPanel(tk.Frame):
     def initializeWidgets(self):
 	#self.exportButton = tk.Button(self, text='Export', command=self.exportFunction(self.fileNameList))
         self.exportButton = tk.Button(self, text='Export', state='disabled', command=self.exportFunction)
-        self.exportButton.grid()
+        self.exportButton.pack()
         
         
     def exportFunction(self):
