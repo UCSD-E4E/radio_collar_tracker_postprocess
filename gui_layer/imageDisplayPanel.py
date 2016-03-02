@@ -45,8 +45,6 @@ class imageDisplayPanel(tk.Frame):
     def newImages(self,numImages,imageIN_dir,imageNames):
         self.imageCanvas.delete("all")
         self.image_dir = imageIN_dir;
-        length = len(self.buttonList)
-        print("len ButtonList = %d"%(length))
     
     #this loop deletes all buttons
         while len(self.buttonList) > 0:
@@ -56,7 +54,8 @@ class imageDisplayPanel(tk.Frame):
         while len(self.imageList) > 0:
             del self.imageList[0]
             
-            
+        length = len(self.buttonList)
+        print("len ButtonList = %d"%(length))    
             
             
         i = 0
@@ -76,11 +75,11 @@ class imageDisplayPanel(tk.Frame):
             self.imageList.append(imageNames[i])
             i = i+1;
             
+        self.numImages = numImages    
         if(numImages > 0):
             self.changeImage(0)
             
-        self.numImages = numImages
-        
+        print("imageListLength = %d" %(len(self.imageList)))
         
         if self.numImages >0:
             self.enlargeImageButton.lift()
