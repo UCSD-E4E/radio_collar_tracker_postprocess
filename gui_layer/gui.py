@@ -89,6 +89,8 @@ class Application(tk.Frame):
 
 
         #self.firstFrame.lift()
+    def quit():
+        root.destroy()
 
 
 class separatorFrame(tk.Frame):
