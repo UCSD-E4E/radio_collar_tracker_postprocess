@@ -10,7 +10,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'meta_file_reader')
 sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'python_dialogs'))
 from read_meta_file import read_meta_file
 from getCollars import *
-
+from getDir import getDir
 
 import fileinput
 import shutil
@@ -26,11 +26,13 @@ class newDataEntryPanel(tk.Frame):
     doCalculations = 0
     dirFrame = 0; runFrame = 0; altFrame = 0; colFrame = 0
     calculateButton = 0
+    parent = 0
     
     updatedFrequencyList = []#["123", "444123123"]
     #to be used in tandem with getCollarFrequencies
     def __init__(self,parent,width,color,calculationHandler):
         self.bgcolor = color
+        self.parent = parent
         data_dir = tk.StringVar()
         tk.Frame.__init__(self,parent,width=width,bg=self.bgcolor)
         self.WIDTH = width
@@ -120,9 +122,6 @@ class newDataEntryPanel(tk.Frame):
     def initializeFields(self):
         #This function is called by the directoryPanel when a new directory is set
         self.updatedFrequencyList = []
-        root = tk.Tk()
-        root.withdraw()
-        root.grid()
         
         data_dir = self.dirFrame.getDirectory()
         
@@ -145,7 +144,7 @@ class newDataEntryPanel(tk.Frame):
             
         self.runFrame.setRunID(run)
         self.altFrame.setAlt(alt)
-        self.colFrame.setNewFreqs(collarFreqList)
+        self.colFrame.setNewFreqs(self.updatedFrequencyList)
         
         
             
@@ -172,6 +171,7 @@ class newDataEntryPanel(tk.Frame):
                     concolFile.write("%d: %s\n" %(col+1,self.updatedFrequencyList[col]))
                     col = col+1
                     
+                    
 class directoryPanel(tk.Frame):
     bgcolor = 0
     buttonColor = '#CCCCCC'
@@ -180,8 +180,10 @@ class directoryPanel(tk.Frame):
     dirText = 0;
     dirTB = 0;
     selectDirButton = 0;
+    parent = 0;
     def __init__(self,parent,width,color,updateDirectoryFunction):
         self.bgcolor = color
+        self.parent = parent;
         tk.Frame.__init__(self,parent,width=width,bg=color)
         self.updateDirFunc = updateDirectoryFunction
         self.initializeWidgets()
@@ -199,7 +201,8 @@ class directoryPanel(tk.Frame):
         
     def updateDirectory(self):
         #self.dirTB.config(state='normal')
-        self.data_dir = filedialog.askdirectory()#'C:/Users/Work/Documents/Files/Projects/RadioCollar/SampleData/RCT_SAMPLE/RUN_002027-copy'
+        self.data_dir = getDir()#'C:/Users/Work/Documents/Files/Projects/RadioCollar/SampleData/RCT_SAMPLE/RUN_002027-copy'\
+        #self.parent.parent.quitter()
         self.dirTB.delete(0, 'end')
         self.dirTB.insert(0, self.data_dir)
         #Decided not to disable dirTB

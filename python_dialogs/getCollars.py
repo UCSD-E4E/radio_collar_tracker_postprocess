@@ -35,8 +35,8 @@ def GET_NUM_COLLARS(COLPath):
             
             
 def getNewCollars(self=None):
-    root = tk.Tk()
-    root.withdraw()
+    #root = tk.Tk()
+    #root.withdraw()
     counter = 1
     hasOutput = False
     output = [];

@@ -62,38 +62,33 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
         if frequency == "":
             return
         frequency = int(frequency)
-        
-               
-               
+
+ 
+
             #TODO: Error checking
         beat_freq = getBeatFrequency(int(sdr_center_freq), int(frequency), int(sdr_ppm))
-            
-            
+  
+  
         GNU_RADIO_PIPELINE = programPath + '/fft_detect/fft_detect'
         collarFile = "%s%06d.raw" % (collar_file_prefix, curCol)
         print("collarFile: %s" %(collarFile))
-        
+
         #os.execl(GNU_RADIO_PIPELINE,'fft_detect','-f',str(beat_freq),'-i',str(raw_file),'-o',str(collarFile))
-        
+
         argString = '-f ' + str(beat_freq) + ' -i ' + str(raw_file) + ' -o ' + str(collarFile)
-        
         p = subprocess.call(GNU_RADIO_PIPELINE + ' ' + argString)
         #UNCOMMENT
             
             #TODO: Error checking
         raw_gps_analysis(data_dir,data_dir,int(run),int(curCol),int(flt_alt))
-
         curCol = curCol + 1
      
     curCol = 1
     while curCol <= num_col:
         data_file = "%s/RUN_%06d_COL_%06d.csv" %(data_dir,int(run), int(curCol))
-        
         display_data(int(run),int(curCol),data_file,data_dir,configCOLPath)
-        
         curCol = curCol + 1
-        
-        
+           
         
             
             
