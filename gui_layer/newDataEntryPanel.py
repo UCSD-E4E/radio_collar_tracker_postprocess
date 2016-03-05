@@ -138,8 +138,7 @@ class newDataEntryPanel(tk.Frame):
             alt =  read_meta_file(ALTPath, 'flt_alt')
             
         if os.path.exists(COLPath):
-            collarFreqList = getOldCollarsClean(COLPath);
-            self.updatedFrequencyList = collarFreqList
+            self.updatedFrequencyList = getOldCollarsClean(COLPath);
 
             
         self.runFrame.setRunID(run)
