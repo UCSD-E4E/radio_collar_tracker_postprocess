@@ -68,7 +68,7 @@ def display_data(run_num,num_col,filename,output_path,col_def):
         zone = utm_coord[3]
 
     # Configure plot
-    fig = plot.figure(9)
+    fig = plot.figure()
     fig.set_size_inches(plot_width, plot_height)
     fig.set_dpi(plot_dpi)
     plot.grid()
@@ -96,9 +96,8 @@ def display_data(run_num,num_col,filename,output_path,col_def):
     print('Collar %d: %s/RUN_%06d_COL_%06d.png' %
         (num_col, output_path, run_num, num_col))
     # plot.show(block=False)
-    #plot.close(9) #NATHANTODO: Figure out how to close the plot without closing tkinter
-    
-    
+    #plot.close() #NATHANTODO: Uncomment at some point maybe
+
     if(kml_output):
         from PIL import Image
         fig = plot.figure()
