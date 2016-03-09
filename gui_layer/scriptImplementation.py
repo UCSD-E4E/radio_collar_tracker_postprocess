@@ -87,6 +87,7 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
     while curCol <= num_col:
         data_file = "%s/RUN_%06d_COL_%06d.csv" %(data_dir,int(run), int(curCol))
         display_data(int(run),int(curCol),data_file,data_dir,configCOLPath)
+        #subprocess.call(display_data(int(run),int(curCol),data_file,data_dir,configCOLPath))
         curCol = curCol + 1
            
         
