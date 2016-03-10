@@ -41,6 +41,9 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
     collar_file_prefix = "%s/RUN_%06d_" % (data_dir,int(run))
     meta_file = "%s/META_%06d" % (data_dir,int(run))
     sdr_center_freq = read_meta_file(meta_file, 'center_freq')
+
+    print "sdr: \n"
+    print SDRPath
     sdr_ppm = read_meta_file(SDRPath, 'sdr_ppm')
     
     #if os.path.exists(raw_file):
@@ -62,8 +65,8 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
         if frequency == "":
             return
         frequency = int(frequency)
-
  
+
 
             #TODO: Error checking
         beat_freq = getBeatFrequency(int(sdr_center_freq), int(frequency), int(sdr_ppm))
@@ -72,18 +75,25 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
         GNU_RADIO_PIPELINE = programPath + '/fft_detect/fft_detect'
         collarFile = "%s%06d.raw" % (collar_file_prefix, curCol)
         print("collarFile: %s" %(collarFile))
-	
 
-
-	print "IMHERE#6\n"
-	print GNU_RADIO_PIPELINE
 
 
 
         #os.execl(GNU_RADIO_PIPELINE,'fft_detect','-f',str(beat_freq),'-i',str(raw_file),'-o',str(collarFile))
 
         argString = '-f ' + str(beat_freq) + ' -i ' + str(raw_file) + ' -o ' + str(collarFile)
-        p = subprocess.call(GNU_RADIO_PIPELINE + ' ' + argString)
+	
+
+
+	print "IMHERE#6"
+	print str(beat_freq)
+	print "IMHERE#7"
+	print str(raw_file)
+	print "IMHERE#8"
+	print str(collarFile)
+	print GNU_RADIO_PIPELINE + ' ' + argString
+
+        p = subprocess.call(GNU_RADIO_PIPELINE + ' ' + argString, shell=True)
         #UNCOMMENT
             
             #TODO: Error checking
@@ -116,6 +126,7 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
 def getBeatFrequency(center_freq,collar_freq,ppm):
     
         actual_center = int(center_freq) / 1.e6 * int(ppm) + int(center_freq)
+
         beat_freq = int(collar_freq) - int(actual_center)
         print('center_freq = %d, collar_freq = %d, ppm= %d, actual_center = %d, beat_freq = %d'%( center_freq,collar_freq,ppm,actual_center,beat_freq))
         return(int(beat_freq))
