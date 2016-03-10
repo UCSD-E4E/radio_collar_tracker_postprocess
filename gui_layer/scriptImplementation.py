@@ -72,6 +72,13 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
         GNU_RADIO_PIPELINE = programPath + '/fft_detect/fft_detect'
         collarFile = "%s%06d.raw" % (collar_file_prefix, curCol)
         print("collarFile: %s" %(collarFile))
+	
+
+
+	print "IMHERE#6\n"
+	print GNU_RADIO_PIPELINE
+
+
 
         #os.execl(GNU_RADIO_PIPELINE,'fft_detect','-f',str(beat_freq),'-i',str(raw_file),'-o',str(collarFile))
 

@@ -98,10 +98,20 @@ class newDataEntryPanel(tk.Frame):
         if(altValue == 0):
             proceed=0
 
+	print self.updatedFrequencyList
+	print "\nIMHERE 1\n"
             
             
         frequencyList = self.colFrame.getCollarFrequencies() 
+
+	print frequencyList
+	print "\nIMHERE 2\n"
+
         self.updatedFrequencyList = frequencyList
+
+	print self.updatedFrequencyList
+	print "\nIMHERE 3\n"
+
         i = 0
         while i < len(frequencyList ):
             print(frequencyList[i])
@@ -115,10 +125,8 @@ class newDataEntryPanel(tk.Frame):
             
         if(colValue == 0):
             proceed=0
-        
+       
 
-        
-        
 
  
         if(proceed == 1):
@@ -151,7 +159,6 @@ class newDataEntryPanel(tk.Frame):
         self.runFrame.setRunID(run)
         self.altFrame.setAlt(alt)
         self.colFrame.setNewFreqs(self.updatedFrequencyList)
-        
         
             
             
@@ -404,6 +411,7 @@ class frequencyPannel(tk.Frame):
 	self.botframe = tk.Frame(self)
 	self.botframe.pack(side='bottom')
         self.initializeWidgets()
+
         
     def initializeWidgets(self):
 	self.freq = tk.Entry(self.currframe, bg='beige')
@@ -412,11 +420,36 @@ class frequencyPannel(tk.Frame):
 	self.freq.pack(side='left')
 	self.add.pack(side='left')
 	self.dele.pack(side='left')
+
+
+    #TODO!!!!!!
+    def setNewFreqs(self, newList):
+        #self.frequencyList[:] = newList
+	length = len(newList)
+
+	print self.frequencyList
+	print "\nIMHERE 5\n"
+
+        if length > 0:
+            self.freq.insert(0,newList[0])
+            self.addEntry()
+            curPanel = self.newEntry
+            i = 1
+            while i < length:
+                curPanel.freq.insert(0,newList[i])
+                curPanel.addEntry()
+                curPanel = self.newEntry
+                i = i+1
+
+
 		
     def clearList(self):
 	self.frequencyList[:] = []
 
     def getCollarFrequencies(self):
+	print self.frequencyList
+	print "\nIMHERE 4\n"
+
 	return self.frequencyList[:]
 
     def updateList(self, newList):

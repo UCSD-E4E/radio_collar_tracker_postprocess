@@ -40,7 +40,7 @@ class imageDisplayPanel(tk.Frame):
         #self.enlargeImageButton.lower()
         
         self.imageCanvas = tk.Canvas(self,width=190,height=HEIGHT,bg='#F0F0F0')
-        self.imageCanvas.pack(side='bottom',padx=10)
+        self.imageCanvas.pack(side='bottom',fill='both',expand=True)
         
     def newImages(self,numImages,imageIN_dir,imageNames):
         self.imageCanvas.delete("all")
