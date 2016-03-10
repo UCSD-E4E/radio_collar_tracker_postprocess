@@ -2,6 +2,7 @@
 import Tkinter as tk
 import tkFileDialog as filedialog
 import tkSimpleDialog as simpledialog
+import ttk
 
 import os
 import sys
@@ -36,7 +37,7 @@ class Application(tk.Frame):
         #self.grid_propagate('false')
         #self.pack_propagate('false')
         #self.place_propagate('false')
-        self.pack()
+        self.pack(fill="both",expand=True)
         self.placeFrames()
         self.update()
 
@@ -74,18 +75,17 @@ class Application(tk.Frame):
 
     def placeFrames(self):
         panelX = 0;
-        #self.firstFrame = dirSelectPanel(self,self.HEIGHT,self.beginCalculations)
         self.firstFrame = newDataEntryPanel(self,200,'#F0F0F0',self.beginCalculations)
         separatorFrame1 = separatorFrame(self,self.HEIGHT);
         self.secondFrame =imageDisplayPanel(self,self.HEIGHT,enlargeFunc=self.displayEnlargedImage);
         separatorFrame2 = separatorFrame(self,self.HEIGHT);
         self.thirdFrame = dirExportPanel(self)
 
-        self.firstFrame.pack(side='left',anchor='n')
-        separatorFrame1.pack(side='left',anchor='n')
-        self.secondFrame.pack(side='left',anchor='n')
-        separatorFrame2.pack(side='left',anchor='n')
-        self.thirdFrame.pack(side='left',anchor='n')
+        self.firstFrame.pack(side='left',fill="y")
+        separatorFrame1.pack(side='left',fill="y")
+        self.secondFrame.pack(side='left',fill="both",expand=True)
+        separatorFrame2.pack(side='left',fill="y")
+        self.thirdFrame.pack(side='left',fill="y")
 
 
         #self.firstFrame.lift()
@@ -99,7 +99,7 @@ class Application(tk.Frame):
 class separatorFrame(tk.Frame):
     def __init__(self,parent,HEIGHT):
         data_dir = tk.StringVar()
-        tk.Frame.__init__(self,parent,width=3,height=HEIGHT,bg='black')
+        tk.Frame.__init__(self,parent,width=2,height=HEIGHT,bg='black')
 
 top = Application()
 top.master.title('Radio Collar Tracker')

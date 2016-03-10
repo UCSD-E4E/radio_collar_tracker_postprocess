@@ -19,7 +19,7 @@ class imageDisplayPanel(tk.Frame):
     numImages = 0
     imageID = 0
     enlargeImageFunction = 0
-    enlargeImageButton = 0
+    #enlargeImageButton = 0
     imageCanvas = 0
     VERTICLE_PADDING = 3;
     IMSize = 190, 270
@@ -35,11 +35,11 @@ class imageDisplayPanel(tk.Frame):
         number = 0
         #newButton = tk.Button(self,text=number,command=lambda:self.changeImage(0))
         #self.buttonList.append(newButton);
-        self.enlargeImageButton = tk.Button(self,text='Enlarge Image',command=self.enlargeImage)
-        self.enlargeImageButton.pack(side='bottom')
-        self.enlargeImageButton.lower()
+        #self.enlargeImageButton = tk.Button(self,text='Enlarge Image',command=self.enlargeImage)
+        #self.enlargeImageButton.pack(side='bottom')
+        #self.enlargeImageButton.lower()
         
-        self.imageCanvas = tk.Canvas(self,width=190,height=HEIGHT-40,bg='#F0F0F0')
+        self.imageCanvas = tk.Canvas(self,width=190,height=HEIGHT,bg='#F0F0F0')
         self.imageCanvas.pack(side='bottom',padx=10)
         
     def newImages(self,numImages,imageIN_dir,imageNames):
@@ -81,10 +81,10 @@ class imageDisplayPanel(tk.Frame):
             
         print("imageListLength = %d" %(len(self.imageList)))
         
-        if self.numImages >0:
-            self.enlargeImageButton.lift()
-        else:
-            self.enlargeImageButton.lower()
+        #if self.numImages >0:
+            #self.enlargeImageButton.lift()
+        #else:
+            #self.enlargeImageButton.lower()
             
             
     def changeImage(self,number):

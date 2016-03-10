@@ -4,7 +4,6 @@ import shutil
 import os.path
 
 
-
 class dirExportPanel(tk.Frame):
     fileNameList = []
     def __init__(self,parent):
@@ -15,13 +14,12 @@ class dirExportPanel(tk.Frame):
         #self.doCalculations = calculationHandler
         self.initializeWidgets()
         self.config(bg='#F0F0F0')
-        self.config(height='500')
-        self.config(width='300')
+
         
     def initializeWidgets(self):
 	#self.exportButton = tk.Button(self, text='Export', command=self.exportFunction(self.fileNameList))
         self.exportButton = tk.Button(self, text='Export', state='disabled', command=self.exportFunction)
-        self.exportButton.pack()
+        self.exportButton.pack(side="left")
         
         
     def exportFunction(self):

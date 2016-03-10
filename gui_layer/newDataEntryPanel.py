@@ -2,7 +2,6 @@ import Tkinter as tk
 import tkFileDialog as filedialog
 import tkSimpleDialog as simpledialog
 import re
-
 import os
 import sys
 
@@ -17,6 +16,7 @@ import shutil
 
 from frequencyPanel import frequencyPanel
 
+
 class newDataEntryPanel(tk.Frame):
     #TODO: Need to add functionality for collecting collar frequencies
     WIDTH = 0
@@ -28,7 +28,7 @@ class newDataEntryPanel(tk.Frame):
     calculateButton = 0
     parent = 0
     
-    updatedFrequencyList = []#["123", "444123123"]
+    updatedFrequencyList = [] #["123", "444123123"]
     #to be used in tandem with getCollarFrequencies
     def __init__(self,parent,width,color,calculationHandler):
         self.bgcolor = color
@@ -39,10 +39,9 @@ class newDataEntryPanel(tk.Frame):
         #self.grid_propagate('false')
         #self.pack_propagate('false')
         self.doCalculations = calculationHandler
-
 	#pack frames in order
 	self.currframe = tk.Frame(self)
-	self.currframe.pack()
+	self.currframe.pack(side='left')
 	self.botframe = tk.Frame(self)
 	self.botframe.pack(side='bottom')
 
@@ -58,13 +57,14 @@ class newDataEntryPanel(tk.Frame):
         self.dirFrame = directoryPanel(self.currframe,self.WIDTH,self.bgcolor,self.initializeFields)
         self.runFrame = runIDPanel(self.currframe,self.WIDTH,self.bgcolor)
         self.altFrame = altitudePanel(self.currframe,self.WIDTH,self.bgcolor)
-        self.colFrame = frequencyPannel(self.botframe,self.WIDTH,self.bgcolor)
-        self.calculateButton = tk.Button(self.botframe,text='Calculate',command=self.prepareForCalc,bg=self.buttonColor)
-        
-        self.dirFrame.pack(side='top',anchor='w',pady=5)
-        self.runFrame.pack(side='top',anchor='w',pady=5)
-        self.altFrame.pack(side='top',anchor='w',pady=5)
-        self.colFrame.pack(side='top',anchor='w',pady=5)
+        self.colFrame = frequencyPannel(self.currframe,self.WIDTH,self.bgcolor)
+        self.calculateButton = tk.Button(self.currframe,text='Calculate',command=self.prepareForCalc,bg=self.buttonColor)     
+
+
+        self.dirFrame.pack(side='top',pady=5)
+        self.runFrame.pack(side='top',pady=5)
+        self.altFrame.pack(side='top',pady=5)
+        self.colFrame.pack(side='top',pady=5)
         self.calculateButton.pack(side='top',pady=5)
         
         
@@ -195,11 +195,11 @@ class directoryPanel(tk.Frame):
         self.initializeWidgets()
 
     def initializeWidgets(self):
-        self.dirText = tk.Text(self,height=1,width = 30,bd=0,bg=self.bgcolor)
-        self.dirTB = tk.Entry(self,width = 50)
+        self.dirText = tk.Label(self,text="Data Directory/Folder",bg=self.bgcolor)
+        self.dirTB = tk.Entry(self, width=29)
         self.selectDirButton = tk.Button(self,text='...',command=self.updateDirectory,width=3,bg=self.buttonColor)
         
-        self.dirText.insert('insert','Data Directory/Folder')
+        #self.dirText.insert('insert','Data Directory/Folder')
         
         self.dirText.pack(side = 'top',)
         self.dirTB.pack(side='left',padx=3,)
@@ -207,7 +207,7 @@ class directoryPanel(tk.Frame):
         
     def updateDirectory(self):
         #self.dirTB.config(state='normal')
-        self.data_dir = getDir()#'C:/Users/Work/Documents/Files/Projects/RadioCollar/SampleData/RCT_SAMPLE/RUN_002027-copy'\
+        self.data_dir = getDir() #'C:/Users/Work/Documents/Files/Projects/RadioCollar/SampleData/RCT_SAMPLE/RUN_002027-copy'\
         #self.parent.parent.quitter()
         self.dirTB.delete(0, 'end')
         self.dirTB.insert(0, self.data_dir)
@@ -223,7 +223,7 @@ class runIDPanel(tk.Frame):
     runID = 0
     runIDText = 0
     runIDTB = 0
-    errorText = 0
+    #errorText = 0
     def __init__(self,parent,width,color):
         self.bgcolor = color
         tk.Frame.__init__(self,parent,width=width,bg=color)
@@ -233,19 +233,17 @@ class runIDPanel(tk.Frame):
         self.runID = tk.StringVar()
         self.runID.trace("w", lambda name, index, mode,runID=self.runID.get(): self.changeRunID())
     
-        self.runIDText = tk.Text(self,height=1,width = 15,bd=0,bg=self.bgcolor)
-        self.runIDTB = tk.Entry(self,width = 8,textvariable=self.runID)
-        self.errorText = tk.Text(self,height=1,width = 23,bd=0,bg=self.bgcolor)
-        
-        self.runIDText.insert('insert','Run ID: ')
-        self.errorText.insert('insert','Please input an integer')
-        
-        self.errorText.config(bg=self.bgcolor)
-        self.errorText.config(foreground=self.bgcolor)
+        self.runIDText = tk.Label(self,text="Run ID: ",width=12,bg=self.bgcolor)
+        self.runIDTB = tk.Entry(self,width = 23,textvariable=self.runID)
+
+        #self.errorText = tk.Text(self,height=1,width = 23,bd=0,bg=self.bgcolor)
+        #self.errorText.insert('insert','Please input an integer')        
+        #self.errorText.config(bg=self.bgcolor)
+        #self.errorText.config(foreground=self.bgcolor)
         
         self.runIDText.pack(side = 'left',padx=3)
         self.runIDTB.pack(side='left')
-        self.errorText.pack(side='left',padx=3)
+        #self.errorText.pack(side='left',padx=3)
         
     def setRunID(self,newID='-1'):
         #Changing this should call changeRunID automatically
@@ -260,14 +258,14 @@ class runIDPanel(tk.Frame):
             run = -1
         print('run = %d' %(run))
         if run < 0:
-            self.errorText.config(foreground='red')
-            #self.runIDTB.config(bg='red')
+            #self.errorText.config(foreground='red')
+            self.runIDTB.config(bg='red')
             #self.runID.set('-1')
             
         else:
             #self.runID.set(newID)
-            #self.runIDTB.config(bg='white')
-            self.errorText.config(foreground=self.bgcolor)
+            self.runIDTB.config(bg='white')
+            #self.errorText.config(foreground=self.bgcolor)
             
             
     def getRunID(self=None):
@@ -278,7 +276,7 @@ class altitudePanel(tk.Frame):
     alt = 0
     altText = 0
     altTB = 0
-    errorText = 0
+    #errorText = 0
     def __init__(self,parent,width,color):
         self.bgcolor = color
         tk.Frame.__init__(self,parent,width=width,bg=color)
@@ -288,19 +286,17 @@ class altitudePanel(tk.Frame):
         self.alt = tk.StringVar()
         self.alt.trace("w", lambda name, index, mode, alt=self.alt.get(): self.changeAlt())
     
-        self.altText = tk.Text(self,height=1,width = 15,bd=0,bg=self.bgcolor)
-        self.altTB = tk.Entry(self,width = 8,textvariable=self.alt)
-        self.errorText = tk.Text(self,height=1,width = 23,bd=0,bg=self.bgcolor)
-        
-        self.altText.insert('insert','Run altitude: ')
-        self.errorText.insert('insert','Please input an integer')
-        
-        self.errorText.config(bg=self.bgcolor)
-        self.errorText.config(foreground=self.bgcolor)
+        self.altText = tk.Label(self,text="Run altitude: ",width=12,bg=self.bgcolor)
+        self.altTB = tk.Entry(self,width = 23,textvariable=self.alt)
+
+        #self.errorText = tk.Text(self,height=1,width = 23,bd=0,bg=self.bgcolor)
+        #self.errorText.insert('insert','Please input an integer')       
+        #self.errorText.config(bg=self.bgcolor)
+        #self.errorText.config(foreground=self.bgcolor)
         
         self.altText.pack(side = 'left',padx=3)
         self.altTB.pack(side='left')
-        self.errorText.pack(side='left',padx=3)
+        #self.errorText.pack(side='left',padx=3)
         
     def setAlt(self,newalt='-1'):
         #Changing this should call changeRunID automatically
@@ -315,14 +311,14 @@ class altitudePanel(tk.Frame):
             alt = -1
 
         if alt < 0:
-            self.errorText.config(foreground='red')
-            #self.altTB.config(bg='red')
+            #self.errorText.config(foreground='red')
+            self.altTB.config(bg='red')
             #self.alt.set ('-1')
             
         else:
             #self.alt.set(newID)
-            #self.altTB.config(bg='white')
-            self.errorText.config(foreground=self.bgcolor)
+            self.altTB.config(bg='white')
+            #self.errorText.config(foreground=self.bgcolor)
             
     def getAlt(self=None):
         return self.alt.get()
@@ -391,7 +387,6 @@ class collarFreqPanel(tk.Frame):
             self.num_colsTB.config(bg='white',state='disabled')
     
     
-    
     def getCollarFrequencies(self=None):
         return self.frequencyList
 
@@ -420,6 +415,9 @@ class frequencyPannel(tk.Frame):
 		
     def clearList(self):
 	self.frequencyList[:] = []
+
+    def getCollarFrequencies(self):
+	return self.frequencyList[:]
 
     def updateList(self, newList):
 	self.frequencyList[:] = newList
