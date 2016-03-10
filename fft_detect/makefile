@@ -1,6 +1,6 @@
 CC = g++
 LD = g++
-LFLAGS = -lm -LC:/Users/Work/Documents/Files/CodeLibraries/fftw-3.3.4-64 -llibfftw3-3
+LFLAGS = -lfftw3 -lm
 CFLAGS = -std=c++11 -c -Wall -g -O4
 .PHONY: clean all
 
@@ -14,4 +14,4 @@ fft_detect.o: fft_detect.cpp
 	${CC} ${CFLAGS} fft_detect.cpp
 
 fft_detect: fft_detect.o
-	${LD} fft_detect.o -o fft_detect ${LFLAGS}
+	${LD} fft_detect.o ${LFLAGS} -o fft_detect
