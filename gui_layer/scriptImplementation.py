@@ -82,16 +82,6 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
         #os.execl(GNU_RADIO_PIPELINE,'fft_detect','-f',str(beat_freq),'-i',str(raw_file),'-o',str(collarFile))
 
         argString = '-f ' + str(beat_freq) + ' -i ' + str(raw_file) + ' -o ' + str(collarFile)
-	
-
-
-	print "IMHERE#6"
-	print str(beat_freq)
-	print "IMHERE#7"
-	print str(raw_file)
-	print "IMHERE#8"
-	print str(collarFile)
-	print GNU_RADIO_PIPELINE + ' ' + argString
 
         p = subprocess.call(GNU_RADIO_PIPELINE + ' ' + argString, shell=True)
         #UNCOMMENT

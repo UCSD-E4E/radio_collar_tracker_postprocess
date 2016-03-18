@@ -19,7 +19,7 @@ from auxiliaryOptionsPanel import auxiliaryOptionsPanel
 from dirExportPanel import dirExportPanel
 from newDataEntryPanel import newDataEntryPanel
 
-from scriptImplementation import scriptImplementation
+#from scriptImplementation import scriptImplementation
 
 
 class Application(tk.Frame):
@@ -38,12 +38,18 @@ class Application(tk.Frame):
         #self.pack_propagate('false')
         #self.place_propagate('false')
         self.pack(fill="both",expand=True)
+
+	self.firstF=tk.Frame(self)
+	self.firstF.pack(side="left",fill='y')
+	self.secondF=tk.Frame(self)
+	self.secondF.pack(side="left",fill="both",expand=True)
+	self.thirdF=tk.Frame(self)
+	self.thirdF.pack(side="left",fill='y')
+
         self.placeFrames()
         self.update()
 
-
-    def displayEnlargedImage(self,number):
-        print("TODO: Open image number for custom imaging")
+		
 
 
     def beginCalculations(self,data_dir,run_num,flt_alt,num_col,frequencyList):
@@ -60,14 +66,16 @@ class Application(tk.Frame):
         ConfigCOLPath = CONFIGPath + '/COL'
         col = 0
 
-        scriptImplementation(programPath,data_dir,CONFIGPath,run_num,flt_alt,num_col,frequencyList)
+        self.secondFrame.scriptImplementation(programPath,data_dir,CONFIGPath,run_num,flt_alt,num_col,frequencyList)
         i=1
         imageListFullPath = []
         while i <= num_col:
             imageList.append("RUN_%06d_COL_%06d.png"%(run_num,i))
             imageListFullPath.append("%s/%s" %(data_dir,imageList[i-1]))
             i = i+1
-        self.secondFrame.newImages(num_col,"%s/"%(data_dir),imageList)
+        #self.secondFrame.newImages(num_col,"%s/"%(data_dir),imageList)
+
+	#self.secondFrame.displayImage(data_dir,CONFIGPath,run_num,flt_alt,num_col,frequencyList)
 
         self.thirdFrame.updateList(imageListFullPath)
 
@@ -75,11 +83,11 @@ class Application(tk.Frame):
 
     def placeFrames(self):
         panelX = 0;
-        self.firstFrame = newDataEntryPanel(self,200,'#F0F0F0',self.beginCalculations)
-        separatorFrame1 = separatorFrame(self,self.HEIGHT);
-        self.secondFrame =imageDisplayPanel(self,self.HEIGHT,enlargeFunc=self.displayEnlargedImage);
-        separatorFrame2 = separatorFrame(self,self.HEIGHT);
-        self.thirdFrame = dirExportPanel(self)
+        self.firstFrame = newDataEntryPanel(self.firstF,200,'#F0F0F0',self.beginCalculations)
+        separatorFrame1 = separatorFrame(self.firstF,self.HEIGHT);
+        self.secondFrame =imageDisplayPanel(self.secondF,self.HEIGHT);
+        separatorFrame2 = separatorFrame(self.thirdF,self.HEIGHT);
+        self.thirdFrame = dirExportPanel(self.thirdF)
 
         self.firstFrame.pack(side='left',fill="y")
         separatorFrame1.pack(side='left',fill="y")
