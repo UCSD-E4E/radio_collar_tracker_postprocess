@@ -107,7 +107,7 @@ static PyObject* fft_detect(PyObject* self, PyObject* args){
 	char* ifile_cstr;
 	char* ofile_cstr;
 	int freq_bin;
-	int run_num
+	int run_num;
 	int retval;
 	if(!PyArg_ParseTuple(args, "ssii", &ifile_cstr, &ofile_cstr, &freq_bin, &run_num)){
 		return NULL;
