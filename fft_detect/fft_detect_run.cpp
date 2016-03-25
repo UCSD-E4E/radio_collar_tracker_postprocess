@@ -21,14 +21,16 @@ using namespace std;
 int main(int argc, char** argv) {
 	string input_file;
 	string output_file;
-	int beat_freq;
+	int beat_freq = 0;
+	int run_num = 0;
 
 	bool hasOutput = false;
 	bool hasInput = false;
 	bool hasFreq = false;
+	bool hasRun = false;
 
 	int opt;
-	while((opt = getopt(argc, argv, "o:i:f:")) != -1){
+	while((opt = getopt(argc, argv, "o:i:f:r:")) != -1){
 		switch(opt){
 			case 'o':
 				output_file = optarg;
@@ -42,13 +44,17 @@ int main(int argc, char** argv) {
 				beat_freq = atoi(optarg);
 				hasFreq = true;
 				break;
+			case 'r':
+				run_num = atoi(optarg);
+				hasRun = true;
+				break;
 			case '?':
 			default:
 				break;
 		}
 	}
 
-	if(!(hasOutput && hasInput && hasFreq)){
+	if(!(hasOutput && hasInput && hasFreq && hasRun)){
 		cerr << "Not enough args!" << endl;
 		return -1;
 	}
@@ -58,8 +64,6 @@ int main(int argc, char** argv) {
 		fft_index = FFT_LENGTH + fft_index;
 	}
 
-	cerr << "Index: " << fft_index << endl;
-
-	return process(input_file.c_str(), output_file.c_str(), fft_index);
+	return process(input_file.c_str(), output_file.c_str(), fft_index, run_num);
 
 }
