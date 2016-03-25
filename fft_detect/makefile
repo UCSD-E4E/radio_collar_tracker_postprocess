@@ -3,10 +3,13 @@ CC = gcc
 LD = g++
 LFLAGS = -lfftw3 -lm -O4
 INC =
-CPPFLAGS = -std=c++11 -c -Wall -O4 ${INC}
-CFLAGS = -std=gnu99 -c -Wall -O4 ${INC}
+CPPFLAGS = -std=c++11 -c -Wall -g ${INC}
+CFLAGS = -std=gnu99 -c -Wall -g ${INC}
 PYTHON = python
-.PHONY: clean all install_python build_python
+.PHONY: clean all install_python build_python test
+
+test: all
+	./fft_detect -i /home/ntlhui/workspace/RUN_002070 -o /home/ntlhui/workspace/RUN_002070/RUN_002070_000004.raw -f 1000 -r 2070
 
 all: fft_detect
 
