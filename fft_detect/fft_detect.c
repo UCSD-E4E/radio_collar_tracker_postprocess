@@ -6,12 +6,21 @@
 #include <stdint.h>
 #include "fft_detect.h"
 #include <string.h>
+#include <math.h>
 
 #ifdef _PYTHON
 #include <Python.h>
 #endif
 
+#ifdef __unix__
+#include <dirent.h>
+#endif
+
 #define FFT_LENGTH 1024
+#define SAMPLE_RATE 2048000
+#define SIG_LENGTH 0.06 * 2048000 / 1024
+
+#define PROGRESS_BAR_LEN 50
 
 ////////////////////////////////
 // Hidden Function Prototypes //
@@ -30,6 +39,23 @@ PyMODINIT_FUNC initfft_detect(void){
 int process(const char* run_dir, const char* ofile, const int freq_bin, const int run_num){
 	FILE* in_file;
 	FILE* out_file = fopen(ofile, "wb");
+
+#ifdef __unix__
+	int num_files = 0;
+	DIR* dirp;
+	struct dirent* entry;
+
+	dirp = opendir(run_dir);
+	while ((entry = readdir(dirp)) != NULL) {
+		char* data_prefix = malloc(sizeof(char) * 16);
+		sprintf(data_prefix, "RAW_DATA_%06d", run_num);
+	    if (strncmp(entry->d_name, data_prefix, 15) == 0) {
+         	num_files++;
+    	}
+    	free(data_prefix);
+	}
+	closedir(dirp);
+#endif
 
 	fftw_complex *fft_buffer_in, *fft_buffer_out;
 	fftw_plan p;
@@ -60,6 +86,19 @@ int process(const char* run_dir, const char* ofile, const int freq_bin, const in
 
 	mbuf[0] = 0;
 	mbuf[1] = 0;
+	int i;
+
+#ifdef __unix__
+	char* progress_bar = (char*) calloc(sizeof(char), PROGRESS_BAR_LEN + 1);
+	char* format_string = malloc(sizeof(char) * 17);
+	sprintf(format_string, "%s%d%s", "\r[%-", PROGRESS_BAR_LEN, "s]%3.0f%%");
+	for(i = 0; i < (int)round((float)PROGRESS_BAR_LEN * file_num / num_files); ++i){
+		progress_bar[i] = '#';
+	}
+	printf(format_string, progress_bar, 100.0 * (file_num - 1) / num_files);
+	fflush(stdout);
+#endif
+
 	while(!feof(in_file)){
 		if(!(counter < FFT_LENGTH)){
 			counter = 0;
@@ -80,6 +119,15 @@ int process(const char* run_dir, const char* ofile, const int freq_bin, const in
 			sprintf(ifile, "%s/RAW_DATA_%06d_%06d", run_dir, run_num, ++file_num);
 			fclose(in_file);
 			in_file = fopen(ifile, "rb");
+#ifdef __unix__
+			int j;
+			for(j = 0; j < (int)round((float)PROGRESS_BAR_LEN * file_num / num_files); ++j){
+				progress_bar[j] = '#';
+			}
+			printf(format_string, progress_bar, 100.0 * (file_num - 1) / num_files);
+			fflush(stdout);
+#endif
+
 			if(!in_file){
 				break;
 			}
@@ -96,9 +144,17 @@ int process(const char* run_dir, const char* ofile, const int freq_bin, const in
 		mbuf[1] += fft_buffer_in[counter][1];
 		++counter;
 	}
+	fftw_free(fft_buffer_in);
+	fftw_free(fft_buffer_out);
 	fftw_destroy_plan(p);
+	fftw_cleanup();
 	free(ifile);
 	fclose(out_file);
+#ifdef __unix__
+	printf("\n");
+	free(progress_bar);
+	free(format_string);
+#endif
 	return 0;
 }
 
