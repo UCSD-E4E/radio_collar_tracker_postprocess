@@ -18,7 +18,7 @@
 
 #define FFT_LENGTH 1024
 #define SAMPLE_RATE 2048000
-#define SIG_LENGTH (int)(0.06 * 2048000 / 1024)
+#define SIG_LENGTH (int)(0.06 * SAMPLE_RATE / FFT_LENGTH)
 
 #define PROGRESS_BAR_LEN 50
 
