@@ -18,7 +18,7 @@
 
 #define FFT_LENGTH 1024
 #define SAMPLE_RATE 2048000
-#define SIG_LENGTH 0.06 * 2048000 / 1024
+#define SIG_LENGTH (int)(0.06 * 2048000 / 1024)
 
 #define PROGRESS_BAR_LEN 50
 
@@ -39,6 +39,10 @@ PyMODINIT_FUNC initfft_detect(void){
 int process(const char* run_dir, const char* ofile, const int freq_bin, const int run_num){
 	FILE* in_file;
 	FILE* out_file = fopen(ofile, "wb");
+
+	if(freq_bin < 0 || freq_bin >= FFT_LENGTH){
+		return -1;
+	}
 
 #ifdef __unix__
 	int num_files = 0;
@@ -63,11 +67,13 @@ int process(const char* run_dir, const char* ofile, const int freq_bin, const in
 	uint8_t buffer[2];
 	// Sample buffer
 	float sbuf[2];
-	// Average
-	double mbuf[2];
 	// Sample counter
 	int counter = 0;
 	int file_num = 0;
+
+	double* history = (double*) calloc(2 * sizeof(double), SIG_LENGTH);
+	unsigned int history_idx = 0;
+	float convolution[2] = {0, 0};
 
 	fft_buffer_in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * FFT_LENGTH);
 	fft_buffer_out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * FFT_LENGTH);
@@ -84,8 +90,6 @@ int process(const char* run_dir, const char* ofile, const int freq_bin, const in
 		return -1;
 	}
 
-	mbuf[0] = 0;
-	mbuf[1] = 0;
 	int i;
 
 #ifdef __unix__
@@ -102,17 +106,19 @@ int process(const char* run_dir, const char* ofile, const int freq_bin, const in
 	while(!feof(in_file)){
 		if(!(counter < FFT_LENGTH)){
 			counter = 0;
-			int i;
-			for(i = 0; i < FFT_LENGTH; i++){
-				fft_buffer_in[i][0] -= mbuf[0] / FFT_LENGTH;
-				fft_buffer_in[i][1] -= mbuf[1] / FFT_LENGTH;
-			}
 			fftw_execute(p);
 			sbuf[0] = (float)fft_buffer_out[freq_bin][0] / FFT_LENGTH;
 			sbuf[1] = (float)fft_buffer_out[freq_bin][1] / FFT_LENGTH;
-			fwrite(sbuf, sizeof(float), 2, out_file);
-			mbuf[0] = 0;
-			mbuf[1] = 0;
+			history[history_idx * 2] = sbuf[0];
+			history[history_idx * 2 + 1] = sbuf[1];
+			convolution[0] = 0;
+			convolution[1] = 0;
+			for(i = 0; i < SIG_LENGTH; i++){
+				convolution[0] += history[i * 2];
+				convolution[1] += history[i * 2 + 1];
+			}
+			history_idx = (history_idx + 1) % SIG_LENGTH;
+			fwrite(convolution, sizeof(float), 2, out_file);
 		}
 		int num_bytes_read = fread((void*)buffer, sizeof(uint8_t), 2, in_file);
 		if(num_bytes_read == 0 && feof(in_file)){
@@ -139,9 +145,7 @@ int process(const char* run_dir, const char* ofile, const int freq_bin, const in
 			return -1;
 		}
 		fft_buffer_in[counter][0] = buffer[0] / 128.0 - 1.0;
-		mbuf[0] += fft_buffer_in[counter][0];
 		fft_buffer_in[counter][1] = buffer[1] / 128.0 - 1.0;
-		mbuf[1] += fft_buffer_in[counter][1];
 		++counter;
 	}
 	fftw_free(fft_buffer_in);
