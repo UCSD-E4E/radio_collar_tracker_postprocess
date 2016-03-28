@@ -8,10 +8,10 @@ CFLAGS = -std=gnu99 -c -Wall -g ${INC}
 PYTHON = python
 .PHONY: clean all install_python build_python test
 
+all: fft_detect
+
 test: all
 	./fft_detect -i /home/ntlhui/workspace/RUN_002070 -o /home/ntlhui/workspace/RUN_002070/RUN_002070_000004.raw -f 1000 -r 2070
-
-all: fft_detect
 
 clean:
 	-rm -rf *.o
