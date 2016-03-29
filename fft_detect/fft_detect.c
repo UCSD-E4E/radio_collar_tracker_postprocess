@@ -109,8 +109,8 @@ int process(const char* run_dir, const char* ofile, const int freq_bin, const in
 			fftw_execute(p);
 			sbuf[0] = (float)fft_buffer_out[freq_bin][0] / FFT_LENGTH;
 			sbuf[1] = (float)fft_buffer_out[freq_bin][1] / FFT_LENGTH;
-			history[history_idx * 2] = sbuf[0];
-			history[history_idx * 2 + 1] = sbuf[1];
+			history[history_idx * 2] = sbuf[0] * sbuf[0];
+			history[history_idx * 2 + 1] = sbuf[1] * sbuf[1];
 			convolution[0] = 0;
 			convolution[1] = 0;
 			for(i = 0; i < SIG_LENGTH; i++){
