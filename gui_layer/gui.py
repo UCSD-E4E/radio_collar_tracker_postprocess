@@ -6,54 +6,40 @@ import ttk
 
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'meta_file_reader'))
-#sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'CLI_GUI'))
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'meta_file_reader'))
 sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'python_dialogs'))
 
 from read_meta_file import read_meta_file
 from getCollars import GET_NUM_COLLARS
 
-#from dirSelectPanel import dirSelectPanel
 from imageDisplayPanel import imageDisplayPanel
 from auxiliaryOptionsPanel import auxiliaryOptionsPanel
 from dirExportPanel import dirExportPanel
 from newDataEntryPanel import newDataEntryPanel
 
-#from scriptImplementation import scriptImplementation
-
-
 class Application(tk.Frame):
-    record=0
-    SDO=0
-    clean=0
-    firstFrame = 0
-    secondFrame = 0
-    thirdFrame = 0
+    record = 0
+    SDO = 0
+    clean = 0
     randValue = 20
     HEIGHT = 300
-    def __init__(self,master=None):
-        tk.Frame.__init__(self,master,bg='#F0F0F0')
-        #self.minsize(
-        #self.grid_propagate('false')
-        #self.pack_propagate('false')
-        #self.place_propagate('false')
-        self.pack(fill="both",expand=True)
+    def __init__(self, master = None):
+        tk.Frame.__init__(self, master, bg = "#F0F0F0")
+        self.pack(fill = "both", expand = True)
 
-	self.firstF=tk.Frame(self)
-	self.firstF.pack(side="left",fill='y')
-	self.secondF=tk.Frame(self)
-	self.secondF.pack(side="left",fill="both",expand=True)
-	self.thirdF=tk.Frame(self)
-	self.thirdF.pack(side="left",fill='y')
+        self.firstF = tk.Frame(self)
+        self.firstF.pack(side = "left", fill = "y")
+        self.secondF = tk.Frame(self)
+        self.secondF.pack(side = "left", fill = "both", expand = True)
+        self.thirdF = tk.Frame(self)
+        self.thirdF.pack(side = "left", fill = "y")
 
         self.placeFrames()
         self.update()
 
-		
-
-
-    def beginCalculations(self,data_dir,run_num,flt_alt,num_col,frequencyList):
-        print("run_num= %d,flt_alt= %d,num_col= %d" %(run_num,flt_alt,num_col))
+    def beginCalculations(self, data_dir, run_num, flt_alt, num_col, frequencyList):
+        print("run_num= %d, flt_alt= %d, num_col= %d" % (run_num,flt_alt,num_col))
         imageList = []
 
         COLPath = data_dir + '/COL'
@@ -75,18 +61,17 @@ class Application(tk.Frame):
             i = i+1
         #self.secondFrame.newImages(num_col,"%s/"%(data_dir),imageList)
 
-	#self.secondFrame.displayImage(data_dir,CONFIGPath,run_num,flt_alt,num_col,frequencyList)
+        #self.secondFrame.displayImage(data_dir,CONFIGPath,run_num,flt_alt,num_col,frequencyList)
 
         self.thirdFrame.updateList(imageListFullPath)
 
         #TODO: Move script stuff here
 
     def placeFrames(self):
-        panelX = 0;
-        self.firstFrame = newDataEntryPanel(self.firstF,200,'#F0F0F0',self.beginCalculations)
-        separatorFrame1 = separatorFrame(self.firstF,self.HEIGHT);
-        self.secondFrame =imageDisplayPanel(self.secondF,self.HEIGHT);
-        separatorFrame2 = separatorFrame(self.thirdF,self.HEIGHT);
+        self.firstFrame = newDataEntryPanel(self.firstF, 200, '#F0F0F0', self.beginCalculations)
+        separatorFrame1 = separatorFrame(self.firstF, self.HEIGHT);
+        self.secondFrame = imageDisplayPanel(self.secondF, self.HEIGHT);
+        separatorFrame2 = separatorFrame(self.thirdF, self.HEIGHT);
         self.thirdFrame = dirExportPanel(self.thirdF)
 
         self.firstFrame.pack(side='left',fill="y")
@@ -99,7 +84,7 @@ class Application(tk.Frame):
         #self.firstFrame.lift()
     def quit(self=None):
         root.destroy()
-        
+
     def quitter(self):
         quit()
 
