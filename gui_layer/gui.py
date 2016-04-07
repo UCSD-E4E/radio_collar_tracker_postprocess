@@ -13,7 +13,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'python_dialogs'))
 from read_meta_file import read_meta_file
 from getCollars import GET_NUM_COLLARS
 
-from imageDisplayPanel import imageDisplayPanel
+from newImageDisplayPanel import imageDisplayPanel
 from auxiliaryOptionsPanel import auxiliaryOptionsPanel
 from dirExportPanel import dirExportPanel
 from newDataEntryPanel import newDataEntryPanel
