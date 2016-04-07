@@ -14,7 +14,7 @@ from getDir import getDir
 import fileinput
 import shutil
 
-from frequencyPanel import frequencyPanel
+from newFrequencyPanel import frequencyPanel
 
 
 class newDataEntryPanel(tk.Frame):
@@ -50,16 +50,15 @@ class newDataEntryPanel(tk.Frame):
         self.dirFrame = directoryPanel(self.currframe, self.width, self.bgcolor, self.initializeFields)
         self.runFrame = runIDPanel(self.currframe, self.width, self.bgcolor)
         self.altFrame = altitudePanel(self.currframe, self.width, self.bgcolor)
-        self.colFrame = frequencyPannel(self.currframe, self.width, self.bgcolor)
+        self.colFrame = frequencyPanel(self.currframe, self.width, self.bgcolor)
         self.calculateButton = tk.Button(self.currframe, text = 'Calculate', command = self.prepareForCalc, bg = self.buttonColor)
 
 
-        self.dirFrame.pack(side = 'top', pady = 5)
-        self.runFrame.pack(side = 'top', pady = 5)
-        self.altFrame.pack(side = 'top', pady = 5)
-        self.colFrame.pack(side = 'top', pady = 5)
-        self.calculateButton.pack(side = 'top', pady = 5)
-
+        self.dirFrame.grid(row=0,column=0,sticky="nw")
+        self.runFrame.grid(row=1,column=0,sticky="nw")
+        self.altFrame.grid(row=2,column=0,sticky="nw")
+        self.colFrame.grid(row=3,column=0,sticky="nw")
+        self.calculateButton.grid(row=4,column=0,sticky="w")
 
 
     def prepareForCalc(self):
@@ -91,19 +90,13 @@ class newDataEntryPanel(tk.Frame):
         if(altValue == 0):
             proceed=0
 
-        print self.updatedFrequencyList
-        print "\nIMHERE 1\n"
 
 
         frequencyList = self.colFrame.getCollarFrequencies()
 
-        print frequencyList
-        print "\nIMHERE 2\n"
 
         self.updatedFrequencyList = frequencyList
 
-        print self.updatedFrequencyList
-        print "\nIMHERE 3\n"
 
         i = 0
         while i < len(frequencyList ):
@@ -151,7 +144,7 @@ class newDataEntryPanel(tk.Frame):
 
         self.runFrame.setRunID(run)
         self.altFrame.setAlt(alt)
-        self.colFrame.setNewFreqs(self.updatedFrequencyList)
+        self.colFrame.setCollarFrequencies(self.updatedFrequencyList)
 
 
 
@@ -193,9 +186,9 @@ class directoryPanel(tk.Frame):
         self.dirTB = tk.Entry(self, width = 29)
         self.selectDirButton = tk.Button(self, text = '...', command = self.updateDirectory, width = 3, bg = directoryPanel.buttonColor)
 
-        self.dirText.pack(side = 'top',)
-        self.dirTB.pack(side = 'left', padx = 3,)
-        self.selectDirButton.pack(side = 'right')
+        self.dirText.grid(row=0,column=0,sticky="w")
+        self.dirTB.grid(row=0,column=1,sticky="w")
+        self.selectDirButton.grid(row=0,column=2,sticky="w")
 
     def updateDirectory(self):
         #self.dirTB.config(state='normal')
@@ -233,8 +226,8 @@ class runIDPanel(tk.Frame):
         #self.errorText.config(bg=self.bgcolor)
         #self.errorText.config(foreground=self.bgcolor)
 
-        self.runIDText.pack(side = 'left',padx=3)
-        self.runIDTB.pack(side='left')
+        self.runIDText.grid(row=0,column=0,sticky="w")
+        self.runIDTB.grid(row=0,column=1,sticky="w")
         #self.errorText.pack(side='left',padx=3)
 
     def setRunID(self,newID='-1'):
@@ -286,8 +279,8 @@ class altitudePanel(tk.Frame):
         #self.errorText.config(bg=self.bgcolor)
         #self.errorText.config(foreground=self.bgcolor)
 
-        self.altText.pack(side = 'left',padx=3)
-        self.altTB.pack(side='left')
+        self.altText.grid(row=0,column=0,sticky="w")
+        self.altTB.grid(row=0,column=1,sticky="w")
         #self.errorText.pack(side='left',padx=3)
 
     def setAlt(self,newalt='-1'):
@@ -383,174 +376,4 @@ class collarFreqPanel(tk.Frame):
         return self.frequencyList
 
 
-class frequencyPannel(tk.Frame):
-    bgcolor=0
-    frequencyList = []
-    def __init__(self,parent,width,color):
-        self.bgcolor=color
-        tk.Frame.__init__(self,parent,width=width,bg=color)
-        self.mainframe = tk.Frame(self)
-        self.mainframe.pack()
-        self.currframe = tk.Frame(self)
-        self.currframe.pack()
-        self.botframe = tk.Frame(self)
-        self.botframe.pack(side='bottom')
-        self.initializeWidgets()
-
-
-    def initializeWidgets(self):
-        self.freq = tk.Entry(self.currframe, bg='beige')
-        self.add = tk.Button(self.currframe, text="ADD", command=self.addEntry)
-        self.dele = tk.Button(self.currframe, text="DELETE", command=lambda:self.delEntry())
-        self.freq.pack(side='left')
-        self.add.pack(side='left')
-        self.dele.pack(side='left')
-
-
-    #TODO!!!!!!
-    def setNewFreqs(self, newList):
-        #self.frequencyList[:] = newList
-        length = len(newList)
-
-        print self.frequencyList
-        print "\nIMHERE 5\n"
-
-        if length > 0:
-            self.freq.insert(0,newList[0])
-            self.addEntry()
-            curPanel = self.newEntry
-            i = 1
-            while i < length:
-                curPanel.freq.insert(0,newList[i])
-                curPanel.addEntry()
-                curPanel = self.newEntry
-                i = i+1
-
-
-
-    def clearList(self):
-        self.frequencyList[:] = []
-
-    def getCollarFrequencies(self):
-        print self.frequencyList
-        print "\nIMHERE 4\n"
-
-        return self.frequencyList[:]
-
-    def updateList(self, newList):
-        self.frequencyList[:] = newList
-
-    def getList(self):
-        return self.frequencyList[:]
-
-    def printList(self):
-        freqNum = len(self.frequencyList)
-        print "The total number of frequencies entered is: " + str(freqNum)
-        for i in range(freqNum):
-            print "Frequency " + str(i) + ": " + self.frequencyList[i]
-
-    def addElem(self,elem):
-        self.frequencyList.append(elem)
-
-    def delElem(self,elem):
-        self.frequencyList.remove(elem)
-
-    def addEntry(self):
-        freqVal = self.freq.get()
-        temp = 0
-        try:
-            temp = int(freqVal)
-        except ValueError:
-            temp = 0
-        if (temp==0):
-            self.freq.config(bg='red')
-        else:
-            self.addElem(freqVal)
-            self.freq.config(state='disabled')
-            self.add.config(state='disabled')
-            # create a new frequency entry below by calling the sub pannel class
-            self.newEntry = frequencySubPannel(self.botframe, self.addElem, self.delElem, self.getList)
-
-    def delEntry(self):
-        freqVal = self.freq.get()
-        temp = 0
-        try:
-            temp = int(freqVal)
-        except ValueError:
-            temp = 0
-        if (temp==0):
-            self.freq.config(bg='red')
-        else:
-            if (freqVal in self.getList()):
-                self.delElem(freqVal)
-                self.currframe.destroy()
-
-
-# create a sub pannel down below for creating a new frequency entry, the benifit of doing this is that this is a independent frame
-class frequencySubPannel(tk.Frame):
-    addfunc = 0
-    delfunc = 0
-    getlistfunc = 0
-
-    def __init__(self,parent,addElemFunc,delElemFunc,getListFunc):
-        self.addfunc = addElemFunc
-        self.delfunc = delElemFunc
-        self.getlistfunc = getListFunc
-
-        tk.Frame.__init__(self,parent)
-
-        self.mainframe = tk.Frame(parent)
-        self.mainframe.pack()
-        self.currframe = tk.Frame(parent)
-        self.currframe.pack()
-        self.botframe = tk.Frame(parent)
-        self.botframe.pack(side='bottom')
-
-        self.initializeWidgets()
-
-    def initializeWidgets(self):
-        self.freq = tk.Entry(self.currframe, bg='beige')
-        self.add = tk.Button(self.currframe, text="ADD", command=self.addEntry)
-        self.dele = tk.Button(self.currframe, text="DELETE", command=lambda:self.delEntry())
-        self.freq.pack(side='left')
-        self.add.pack(side='left')
-        self.dele.pack(side='left')
-
-    def addElem(self,elem):
-        self.addfunc(elem)
-
-    def delElem(self,elem):
-        self.delfunc(elem)
-
-    def getList(self):
-        return self.getlistfunc()
-
-    def addEntry(self):
-        freqVal = self.freq.get()
-        temp = 0
-        try:
-            temp = int(freqVal)
-        except ValueError:
-            temp = 0
-        if (temp==0):
-            self.freq.config(bg='red')
-        else:
-            self.addElem(freqVal)
-            self.freq.config(state='disabled')
-            self.add.config(state='disabled')
-            self.newEntry = frequencySubPannel(self.botframe, self.addElem, self.delElem, self.getList)
-
-    def delEntry(self):
-        freqVal = self.freq.get()
-        temp = 0
-        try:
-            temp = int(freqVal)
-        except ValueError:
-            temp = 0
-        if (temp==0):
-            self.freq.config(bg='red')
-        else:
-            if (freqVal in self.getList()):
-                self.delElem(freqVal)
-                self.currframe.destroy()
 

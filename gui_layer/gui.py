@@ -26,14 +26,14 @@ class Application(tk.Frame):
     HEIGHT = 300
     def __init__(self, master = None):
         tk.Frame.__init__(self, master, bg = "#F0F0F0")
-        self.pack(fill = "both", expand = True)
+        self.grid()
 
         self.firstF = tk.Frame(self)
-        self.firstF.pack(side = "left", fill = "y")
+        self.firstF.grid(row=0,column=0)
         self.secondF = tk.Frame(self)
-        self.secondF.pack(side = "left", fill = "both", expand = True)
+        self.secondF.grid(row=0,column=1)
         self.thirdF = tk.Frame(self)
-        self.thirdF.pack(side = "left", fill = "y")
+        self.thirdF.grid(row=0,column=2)
 
         self.placeFrames()
         self.update()
@@ -74,11 +74,11 @@ class Application(tk.Frame):
         separatorFrame2 = separatorFrame(self.thirdF, self.HEIGHT);
         self.thirdFrame = dirExportPanel(self.thirdF)
 
-        self.firstFrame.pack(side='left',fill="y")
-        separatorFrame1.pack(side='left',fill="y")
-        self.secondFrame.pack(side='left',fill="both",expand=True)
-        separatorFrame2.pack(side='left',fill="y")
-        self.thirdFrame.pack(side='left',fill="y")
+        self.firstFrame.grid(row=0,column=0)
+        separatorFrame1.grid(row=0,column=1)
+        self.secondFrame.grid(row=0,column=2)
+        separatorFrame2.grid(row=0,column=3)
+        self.thirdFrame.grid(row=0,column=4)
 
 
         #self.firstFrame.lift()

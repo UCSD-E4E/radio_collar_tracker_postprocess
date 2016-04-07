@@ -177,8 +177,8 @@ class imageDisplayPanel(tk.Frame):
         meta_file = "%s/META_%06d" % (data_dir,int(run))
         sdr_center_freq = read_meta_file(meta_file, 'center_freq')
     
-        print "sdr: \n"
-        print SDRPath
+        print "SDR path: %s"%(SDRPath)
+        
         sdr_ppm = read_meta_file(SDRPath, 'sdr_ppm')
         
         #if os.path.exists(raw_file):
@@ -210,8 +210,6 @@ class imageDisplayPanel(tk.Frame):
             GNU_RADIO_PIPELINE = programPath + '/fft_detect/fft_detect'
             collarFile = "%s%06d.raw" % (collar_file_prefix, curCol)
             print("collarFile: %s" %(collarFile))
-    
-    	    print("NEWKLSAJFDIOSAFJOIASDJFLWJELQFJWEKLGHWEIOGHIOAFJ")
     
     
             #os.execl(GNU_RADIO_PIPELINE,'fft_detect','-f',str(beat_freq),'-i',str(raw_file),'-o',str(collarFile))
