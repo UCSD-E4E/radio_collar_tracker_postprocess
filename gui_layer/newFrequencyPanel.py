@@ -101,6 +101,10 @@ class frequencySubPanel(tk.Frame):
         self.delButton.grid(row=0,column=1)
         
     def deleteSelf(self,event=None):
+        #These two lines ensure number of collars is updated correctly
+        self.freqValTV.set("")
+        self.updateNumCount()
+        
         self.destroy()
     def changeFreq(self):
         
