@@ -20,27 +20,6 @@ plot_height = 6
 plot_width = 8
 plot_dpi = 72
 
-if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser(description='Processes RUN_XXXXXX.csv files '
-            'from the Radio Collar Tracker software to generate maps of radio collar '
-            'signal strength')
-
-    parser.add_argument('-r', '--run', type = int, help = 'Run number for this data file', metavar = 'run_num', dest = 'run_num', default = 1075)
-    parser.add_argument('-n', '--collar', type = int, help = 'Collar number for this data file', metavar = 'collar', dest = 'collar', default = 1)
-    parser.add_argument('-i', '--input', help = 'Input file to be processed', metavar = 'data_file', dest = 'filename', required = True)
-    parser.add_argument('-o', '--output_dir', help = 'Output directory', metavar = 'output_dir', dest = 'output_path', required = True)
-    parser.add_argument('-c', '--definitions', help = "Collar Definitions", metavar = 'collar_definitions', dest = 'col_def', required = True)
-
-    # Get configuration
-    args = parser.parse_args()
-    run_num = args.run_num
-    num_col = args.collar
-    filename = args.filename
-    output_path = args.output_path
-    col_def = args.col_def
-    
-    display_data(run_num,num_col,filename,output_path,col_def)
     
 def display_data(run_num,num_col,filename,output_path,col_def):
 
@@ -155,3 +134,27 @@ def display_data(run_num,num_col,filename,output_path,col_def):
       </Folder>
     </kml>""" % (run_num, run_num, collars[i - 1] / 1000000.0, '%s/RUN_%06d_COL%0.3ftx.png' % (output_path, run_num, collars[i - 1] / 1000000.0),north, south, east, west))
         f.close()
+        
+        
+        
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description='Processes RUN_XXXXXX.csv files '
+            'from the Radio Collar Tracker software to generate maps of radio collar '
+            'signal strength')
+
+    parser.add_argument('-r', '--run', type = int, help = 'Run number for this data file', metavar = 'run_num', dest = 'run_num', default = 1075)
+    parser.add_argument('-n', '--collar', type = int, help = 'Collar number for this data file', metavar = 'collar', dest = 'collar', default = 1)
+    parser.add_argument('-i', '--input', help = 'Input file to be processed', metavar = 'data_file', dest = 'filename', required = True)
+    parser.add_argument('-o', '--output_dir', help = 'Output directory', metavar = 'output_dir', dest = 'output_path', required = True)
+    parser.add_argument('-c', '--definitions', help = "Collar Definitions", metavar = 'collar_definitions', dest = 'col_def', required = True)
+
+    # Get configuration
+    args = parser.parse_args()
+    run_num = args.run_num
+    num_col = args.collar
+    filename = args.filename
+    output_path = args.output_path
+    col_def = args.col_def
+    
+    display_data(run_num,num_col,filename,output_path,col_def)

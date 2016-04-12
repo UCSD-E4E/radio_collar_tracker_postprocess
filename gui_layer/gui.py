@@ -4,6 +4,7 @@ import tkFileDialog as filedialog
 import tkSimpleDialog as simpledialog
 import ttk
 
+from osgeo import gdal,ogr
 import os
 import sys
 
