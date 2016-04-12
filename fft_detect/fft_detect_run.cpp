@@ -1,11 +1,5 @@
 #include <iostream>
 #include <unistd.h>
-#include <getopt.h>
-#include <string>
-#include <fstream>
-#include <cstdint>
-#include <complex>
-#include <fftw3.h>
 
 extern "C"{
 	#include "fft_detect.h"
