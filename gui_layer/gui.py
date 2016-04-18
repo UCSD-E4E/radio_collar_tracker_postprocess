@@ -27,14 +27,7 @@ class Application(tk.Frame):
     HEIGHT = 300
     def __init__(self, master = None):
         tk.Frame.__init__(self, master, bg = "#F0F0F0")
-        self.grid()
-
-        self.firstF = tk.Frame(self)
-        self.firstF.grid(row=0,column=0)
-        self.secondF = tk.Frame(self)
-        self.secondF.grid(row=0,column=1)
-        self.thirdF = tk.Frame(self)
-        self.thirdF.grid(row=0,column=2)
+        self.grid(sticky="nsew")
 
         self.placeFrames()
         self.update()
@@ -69,17 +62,34 @@ class Application(tk.Frame):
         #TODO: Move script stuff here
 
     def placeFrames(self):
-        self.firstFrame = newDataEntryPanel(self.firstF, 200, '#F0F0F0', self.beginCalculations)
-        separatorFrame1 = separatorFrame(self.firstF, self.HEIGHT);
-        self.secondFrame = imageDisplayPanel(self.secondF, self.HEIGHT);
-        separatorFrame2 = separatorFrame(self.thirdF, self.HEIGHT);
-        self.thirdFrame = dirExportPanel(self.thirdF)
+        self.firstFrame = newDataEntryPanel(self, 200, '#F0F0F0', self.beginCalculations)
+        separatorFrame1 = separatorFrame(self, self.HEIGHT);
+        self.secondFrame = imageDisplayPanel(self, self.HEIGHT);
+        separatorFrame2 = separatorFrame(self, self.HEIGHT);
+        self.thirdFrame = dirExportPanel(self)
+        
+        self.rowconfigure(0,weight=1)
+        #self.columnconfigure(0,weight=1)
+        #self.columnconfigure(1,weight=0)
+        self.columnconfigure(2,weight=1)
+        #self.columnconfigure(3,weight=0)
+        #self.columnconfigure(4,weight=0)
+        
+        top = self.winfo_toplevel()
+        
+        top.rowconfigure(0,weight=1)
+        top.columnconfigure(0,weight=1)
+        #top.columnconfigure(1,weight=0)
+        #top.columnconfigure(2,weight=0)
+        #top.columnconfigure(3,weight=0)
+        #top.columnconfigure(4,weight=0)
 
-        self.firstFrame.grid(row=0,column=0)
-        separatorFrame1.grid(row=0,column=1)
-        self.secondFrame.grid(row=0,column=2)
-        separatorFrame2.grid(row=0,column=3)
-        self.thirdFrame.grid(row=0,column=4)
+        self.firstFrame.grid(row=0,column=0,sticky="nsw")
+        separatorFrame1.grid(row=0,column=1,sticky="ns")
+        self.secondFrame.grid(row=0,column=2,sticky="nsew")
+        separatorFrame2.grid(row=0,column=3,sticky="ns")
+        self.thirdFrame.grid(row=0,column=4,sticky="nse")
+        
 
 
         #self.firstFrame.lift()
@@ -93,7 +103,7 @@ class Application(tk.Frame):
 class separatorFrame(tk.Frame):
     def __init__(self,parent,HEIGHT):
         data_dir = tk.StringVar()
-        tk.Frame.__init__(self,parent,width=2,height=HEIGHT,bg='black')
+        tk.Frame.__init__(self,parent,width=2,bg='black')
 
 top = Application()
 top.master.title('Radio Collar Tracker')
