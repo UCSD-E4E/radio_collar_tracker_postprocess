@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+#NOTE: I had to comment out plot.close, it seems to be closing my gui (cntr+f (TODO))
+
 import sys
 import numpy as np
 import matplotlib.pyplot as plot
@@ -20,6 +23,27 @@ plot_height = 6
 plot_width = 8
 plot_dpi = 72
 
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description='Processes RUN_XXXXXX.csv files '
+            'from the Radio Collar Tracker software to generate maps of radio collar '
+            'signal strength')
+
+    parser.add_argument('-r', '--run', type = int, help = 'Run number for this data file', metavar = 'run_num', dest = 'run_num', default = 1075)
+    parser.add_argument('-n', '--collar', type = int, help = 'Collar number for this data file', metavar = 'collar', dest = 'collar', default = 1)
+    parser.add_argument('-i', '--input', help = 'Input file to be processed', metavar = 'data_file', dest = 'filename', required = True)
+    parser.add_argument('-o', '--output_dir', help = 'Output directory', metavar = 'output_dir', dest = 'output_path', required = True)
+    parser.add_argument('-c', '--definitions', help = "Collar Definitions", metavar = 'collar_definitions', dest = 'col_def', required = True)
+
+    # Get configuration
+    args = parser.parse_args()
+    run_num = args.run_num
+    num_col = args.collar
+    filename = args.filename
+    output_path = args.output_path
+    col_def = args.col_def
+    
+    display_data(run_num,num_col,filename,output_path,col_def)
     
 def display_data(run_num,num_col,filename,output_path,col_def):
 
@@ -50,7 +74,7 @@ def display_data(run_num,num_col,filename,output_path,col_def):
     fig = plot.figure()
     fig.set_size_inches(plot_width, plot_height)
     fig.set_dpi(plot_dpi)
-    plot.grid()
+    #plot.grid()
     ax = plot.gca()
     ax.get_xaxis().get_major_formatter().set_useOffset(False)
     ax.get_yaxis().get_major_formatter().set_useOffset(False)
@@ -75,9 +99,11 @@ def display_data(run_num,num_col,filename,output_path,col_def):
     print('Collar %d: %s/RUN_%06d_COL_%06d.png' %
         (num_col, output_path, run_num, num_col))
     # plot.show(block=False)
-    #plot.close() #NATHANTODO: Uncomment at some point maybe
+    #plot.close() TODO: Uncomment at some point maybe
+    
 
     if(kml_output):
+        print("doing kml_output")
         from PIL import Image
         fig = plot.figure()
         fig.patch.set_facecolor('none')
@@ -110,7 +136,7 @@ def display_data(run_num,num_col,filename,output_path,col_def):
         new_image = Image.fromarray(image_data_new)
         new_image.save('%s/RUN_%06d_COL%06dtx.png' % (output_path, run_num, num_col))
         os.remove('tmp.png')
-
+        image.close()
         f = open('%s/RUN_%06d_COL%06d.kml' % (output_path, run_num, num_col), 'w')
         f.write("""<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <kml xmlns="http://www.opengis.net/kml/2.2">
@@ -134,27 +160,3 @@ def display_data(run_num,num_col,filename,output_path,col_def):
       </Folder>
     </kml>""" % (run_num, run_num, collars[i - 1] / 1000000.0, '%s/RUN_%06d_COL%0.3ftx.png' % (output_path, run_num, collars[i - 1] / 1000000.0),north, south, east, west))
         f.close()
-        
-        
-        
-if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser(description='Processes RUN_XXXXXX.csv files '
-            'from the Radio Collar Tracker software to generate maps of radio collar '
-            'signal strength')
-
-    parser.add_argument('-r', '--run', type = int, help = 'Run number for this data file', metavar = 'run_num', dest = 'run_num', default = 1075)
-    parser.add_argument('-n', '--collar', type = int, help = 'Collar number for this data file', metavar = 'collar', dest = 'collar', default = 1)
-    parser.add_argument('-i', '--input', help = 'Input file to be processed', metavar = 'data_file', dest = 'filename', required = True)
-    parser.add_argument('-o', '--output_dir', help = 'Output directory', metavar = 'output_dir', dest = 'output_path', required = True)
-    parser.add_argument('-c', '--definitions', help = "Collar Definitions", metavar = 'collar_definitions', dest = 'col_def', required = True)
-
-    # Get configuration
-    args = parser.parse_args()
-    run_num = args.run_num
-    num_col = args.collar
-    filename = args.filename
-    output_path = args.output_path
-    col_def = args.col_def
-    
-    display_data(run_num,num_col,filename,output_path,col_def)
