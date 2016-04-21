@@ -28,7 +28,7 @@ class newDataEntryPanel(tk.Frame):
         self.bgcolor = color
         self.parent = parent
         data_dir = tk.StringVar()
-        tk.Frame.__init__(self, parent, bg = self.bgcolor)
+        tk.Frame.__init__(self, parent, width = width, bg = self.bgcolor)
         self.width = width
         self.doCalculations = calculationHandler
 

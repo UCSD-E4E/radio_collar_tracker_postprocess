@@ -62,27 +62,28 @@ class imageDisplayPanel(tk.Frame):
     buttonList = [];
     numcol=0
     def __init__(self,parent,HEIGHT):
-        tk.Frame.__init__(self,parent,bg='#F0F0F0',width=100)
+        tk.Frame.__init__(self,parent,width=210,height=HEIGHT,bg='#F0F0F0')
 
         number = 0
 
-        self.top=tk.Frame(self)
-        self.top.grid(row=0,column=0)
+        self.pack(side="top",fill="both",expand=True)
+	self.top=tk.Frame(self)
+	self.top.pack(side="top")
 
-        self.container = tk.Frame(self,bg='#F0F0F0',width=50)
-        self.container.grid(row=1,column=0)
-        self.container.grid_rowconfigure(0,weight=1)
-        self.container.grid_columnconfigure(0,weight=1)
+	self.container = tk.Frame(self,width=600,height=HEIGHT,bg='#F0F0F0')
+	self.container.pack(side="top",fill="both",expand=True)
+	self.container.grid_rowconfigure(0,weight=1)
+	self.container.grid_columnconfigure(0,weight=1)
+	
+	self.frames = {}
+
+	#for F in (1,2):
+	    #frame = f1(container,F)
+	    #self.frames[F]=frame
+	    #frame.grid(row=0,column=0,sticky="nsew")
         
-        self.frames = {}
-
-        #for F in (1,2):
-            #frame = f1(container,F)
-            #self.frames[F]=frame
-            #frame.grid(row=0,column=0,sticky="nsew")
-            
-            #self.imageCanvas = tk.Canvas(self,width=190,height=HEIGHT,bg='#F0F0F0')
-            #self.imageCanvas.pack(side='bottom',fill='both',expand=True)
+        #self.imageCanvas = tk.Canvas(self,width=190,height=HEIGHT,bg='#F0F0F0')
+        #self.imageCanvas.pack(side='bottom',fill='both',expand=True)
         
     def show_frame(self,curr):
 
