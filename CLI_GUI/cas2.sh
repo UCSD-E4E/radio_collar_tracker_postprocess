@@ -158,3 +158,5 @@ do
 		exit 1
 	fi
 done
+
+rm ${data_dir}/*.raw
