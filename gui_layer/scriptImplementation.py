@@ -10,7 +10,6 @@ import fileinput
 #lib_path = os.path.abspath(os.path.join('..', 'collarDisplay'))
 #sys.path.append(lib_path)
 
-
 import subprocess
 
 import sys
@@ -41,7 +40,6 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
     collar_file_prefix = "%s/RUN_%06d_" % (data_dir,int(run))
     meta_file = "%s/META_%06d" % (data_dir,int(run))
     sdr_center_freq = read_meta_file(meta_file, 'center_freq')
-
     print "sdr: \n"
     print SDRPath
     sdr_ppm = read_meta_file(SDRPath, 'sdr_ppm')
@@ -94,7 +92,6 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
     while curCol <= num_col:
         data_file = "%s/RUN_%06d_COL_%06d.csv" %(data_dir,int(run), int(curCol))
         display_data(int(run),int(curCol),data_file,data_dir,configCOLPath)
-        #subprocess.call(display_data(int(run),int(curCol),data_file,data_dir,configCOLPath))
         curCol = curCol + 1
            
         
@@ -118,6 +115,5 @@ def getBeatFrequency(center_freq,collar_freq,ppm):
         actual_center = int(center_freq) / 1.e6 * int(ppm) + int(center_freq)
 
         beat_freq = int(collar_freq) - int(actual_center)
-        print('center_freq = %d, collar_freq = %d, ppm= %d, actual_center = %d, beat_freq = %d'%( center_freq,collar_freq,ppm,actual_center,beat_freq))
         return(int(beat_freq))
     
