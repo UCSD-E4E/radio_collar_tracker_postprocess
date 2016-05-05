@@ -47,7 +47,7 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
     #if os.path.exists(raw_file):
     #   os.remove(raw_file)
     
-    cat_relevant(data_dir,int(run)) 
+    #cat_relevant(data_dir,int(run)) 
     #UNCOMMENT
     
     curCol = 1
@@ -81,7 +81,7 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
 
         argString = '-f ' + str(beat_freq) + ' -i ' + str(raw_file) + ' -o ' + str(collarFile)
 
-        p = subprocess.call(GNU_RADIO_PIPELINE + ' ' + argString, shell=True)
+        #p = subprocess.call(GNU_RADIO_PIPELINE + ' ' + argString, shell=True)
         #UNCOMMENT
             
             #TODO: Error checking

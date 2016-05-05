@@ -28,18 +28,17 @@ def display_data(run_num,num_col,filename,output_path,col_def):
 
     # make list of columns
     # Expects the csv to have the following columns: time, lat, lon, [collars]
-    names = ['time', 'lat', 'lon', 'col']
 
     # Read CSV
-    data = np.genfromtxt(filename, delimiter=',', names=names)
+    data = np.genfromtxt(filename, delimiter=',', names=True)
     # Modify values
-    lat = [x / 1e7 for x in data['lat']]
-    lon = [x / 1e7 for x in data['lon']]
+    lat = data['latitude']
+    lon = data['longitude']
 
     # convert deg to utm
     zone = "X"
     zonenum = 60
-    for i in range(len(data['lat'])):
+    for i in range(len(lat)):
         utm_coord = utm.from_latlon(lat[i], lon[i])
         lon[i] = utm_coord[0]
         lat[i] = utm_coord[1]

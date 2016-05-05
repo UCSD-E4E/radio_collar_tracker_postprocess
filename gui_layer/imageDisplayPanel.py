@@ -1,6 +1,4 @@
 import Tkinter as tk
-import tkFileDialog as filedialog
-import tkSimpleDialog as simpledialog
 
 import sys
 import os
@@ -39,6 +37,7 @@ from cat_relevant import cat_relevant
 from raw_gps_analysis import raw_gps_analysis
 from display_data import display_data
 from interactiveImage import interactiveImage
+from simpleDialogs import *
 
 import numpy as np
 # USING utm 0.4.0 from https://pypi.python.org/pypi/utm
@@ -55,24 +54,44 @@ class imageDisplayPanel(tk.Frame):
     numImages = 0
     VERTICLE_PADDING = 3;
     image_dir =""
+    csv_dir = ""
     imageList = [];
+    csvList = []
     buttonList = [];
-    def __init__(self,parent,HEIGHT):
-        tk.Frame.__init__(self,parent,width=210,height=HEIGHT,bg='#F0F0F0')
+    locationText = ""
+    changeTiffButton = 0
+    def __init__(self,parent,HEIGHT,WIDTH=210):
+        tk.Frame.__init__(self,parent,width=WIDTH,height=HEIGHT,bg='#F0F0F0')
 
         number = 0
 
-
+        
         
         self.frames = {}
         
-        self.imageCanvas = interactiveImage(self)
-        self.imageCanvas.grid(row=1,column=0,columnspan=100)
+        self.locationText = tk.Text(self,height=2,state='disable',bg='#F0F0F0',bd=0,wrap='char',width=25)
+        self.locationText.config(state='normal')
+        self.locationText.delete(1.0, 'end')
+        self.locationText.config(state='disable',fg='#F0F0F0')
+        self.locationText.grid(row=1,columnspan=100)
         
-        self.addTiffButton = tk.Button(self,text="Add Tiff File")
-        self.addTiffButton.grid(row=2,sticky="s")
-
-    def newImages(self,numImages,imageIN_dir,imageNames):
+        self.imageCanvas = interactiveImage(self)
+        self.imageCanvas.grid(row=2,column=0,columnspan=100,sticky="nsew")
+        self.imageCanvas.bind("<Motion>",self.mouseMoved)
+        self.imageCanvas.bind("<Leave>",self.mouseLeft)
+        self.imageCanvas.bind("<Configure>", self.imageCanvas.changeImage)
+        self.columnconfigure(0,weight=1)
+        self.rowconfigure(2,weight=1)
+        
+        self.addTiffButton = tk.Button(self,text="Add Tiff File",command=self.updateTiff)
+        self.addTiffButton.grid(row=3,columnspan=100,sticky="s")
+        
+        
+    
+    
+    
+    
+    def newDataSet(self,numImages,imageIN_dir,imageNames,csvNames):
         #self.imageCanvas.delete("all")
         self.image_dir = imageIN_dir;
     
@@ -83,10 +102,7 @@ class imageDisplayPanel(tk.Frame):
         
         while len(self.imageList) > 0:
             del self.imageList[0]
-            
-        length = len(self.buttonList)
-        print("len ButtonList = %d"%(length))    
-            
+                       
             
         i = 0
         buttonOffset = 0;
@@ -95,11 +111,12 @@ class imageDisplayPanel(tk.Frame):
             number = str(i)
             newButton = tk.Button(self,text=number,command=lambda i=i:self.changeImage(i))
             self.buttonList.append(newButton);
-            newButton.grid(row=0,column=i)
+            newButton.grid(row=0,column=i,sticky="w")
             self.update()
             buttonOffset+=newButton.winfo_height();
             
             self.imageList.append(imageNames[i])
+            self.csvList.append(csvNames[i])
             i = i+1;
             
         self.numImages = numImages    
@@ -111,18 +128,57 @@ class imageDisplayPanel(tk.Frame):
         #else:
             #self.enlargeImageButton.lower()
             
-            
+    def updateTiff(self):
+        tiffFile = getFile()
+        self.imageCanvas.changeTiff(tiffFile)
     def changeImage(self,number):
+        #Make this find the correct CSV
         self.imageID = number
-        imagePath = "%s%s" %(self.image_dir,self.imageList[number])
-        self.imageCanvas.changeImage(imagePath)
+        csvPath = "%s%s" %(self.image_dir,self.csvList[number])
+        self.imageCanvas.changeDataset(csvPath)
         
         
         i =0
         while i < self.numImages:
-            self.buttonList[i].grid(row=0,column=i)
+            #self.buttonList[i].grid(row=0,column=i)
             i=i+1
         
         
         return;
+    def mouseMoved(self,event):
+        x = event.x
+        y = event.y
+        
+        boundingBox = self.imageCanvas.getBoundingBox() #This is the geographic size    [left,top,right,bottom]
+        imageSize = self.imageCanvas.getImageSize()     #This is the image's size       [width,height]
+        
+        if(boundingBox[0] == boundingBox[1] and boundingBox[0] == 0):
+            #assume if BB,(0,0) there is nothing loaded
+            return
+        
+        xResolution = (boundingBox[2] - boundingBox[0]) / imageSize[0]
+        yResolution = (boundingBox[3] - boundingBox[1]) / imageSize[1]
+        
+        Xpos = boundingBox[0] + x * xResolution
+        Ypos = boundingBox[3] - y * yResolution
+        
+        textString = "longitude: %f\nLatitude: %f"%(Xpos,Ypos)
+        
+        self.locationText.config(state='normal')
+        self.locationText.delete(1.0, 'end')
+        self.locationText.insert('insert',textString)
+        self.locationText.config(state='disable',fg='black')
+        
+    def mouseLeft(self,event):
+        self.locationText.config(state='normal')
+        self.locationText.delete(1.0, 'end')
+        self.locationText.config(state='disable',fg='#F0F0F0')
+        
+    def getTiffFile(self):
+        return self.imageCanvas.getTiffPath()
+    def setTempDataDir(self,data_dir):
+        self.imageCanvas.setTempDataDir(data_dir)
+    def attachGenerateMapImage(self,func):
+        self.imageCanvas.attachGenerateMapImage(func)
+
         
