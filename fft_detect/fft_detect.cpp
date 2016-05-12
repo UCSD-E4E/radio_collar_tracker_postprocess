@@ -11,6 +11,8 @@
 
 
 #define FFT_LENGTH 1024
+#define SAMPLE_RATE 2048000
+#define SIG_LENGTH (int) (0.06 * SAMPLE_RATE / FFT_LENGTH)
 
 using namespace std;
 
@@ -64,6 +66,9 @@ int main(int argc, char** argv) {
 	float sbuf[2];
 	double mbuf[2];
 	int counter = 0;
+	double* history = (double*) calloc(2 * sizeof(double), SIG_LENGTH);
+	unsigned int history_idx = 0;
+	float convolution[2] = {0, 0};
 
 	fft_buffer_in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * FFT_LENGTH);
 	fft_buffer_out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * FFT_LENGTH);
@@ -97,7 +102,18 @@ int main(int argc, char** argv) {
 			fftw_execute(p);
 			sbuf[0] = (float)fft_buffer_out[fft_index][0] / FFT_LENGTH;
 			sbuf[1] = (float)fft_buffer_out[fft_index][1] / FFT_LENGTH;
-			out_file_stream.write(reinterpret_cast<char*>(sbuf), 2 * sizeof(float));
+
+			history[history_idx * 2] = sbuf[0] * sbuf[0];
+			history[history_idx * 2 + 1] = sbuf[1] * sbuf[1];
+			convolution[0] = 0;
+			convolution[1] = 0;
+			for(int i = 0; i < SIG_LENGTH; i++){
+				convolution[0] += history[i * 2];
+				convolution[1] += history[i * 2 + 1];
+			}
+			history_idx = (history_idx + 1) % SIG_LENGTH;
+
+			out_file_stream.write(reinterpret_cast<char*>(convolution), 2 * sizeof(float));
 			mbuf[0] = 0;
 			mbuf[1] = 0;
 		}
