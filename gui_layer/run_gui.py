@@ -9,6 +9,7 @@ from gui import GUI
 
 from scriptImplementation import scriptImplementation
 from gen_overlayed_image import generateMapImage
+from create_shapefile import create_shapefile
 from getFileName import *
 
 
@@ -37,6 +38,7 @@ class Application():
         self.GUI.attachBeginCalculations(self.beginCalculations)
         self.GUI.attachPrepareConfigCol(self.prepareConfigCOLFile)
         self.GUI.attachGenerateMapImage(self.generateMapImage)
+        self.GUI.attachGenerateShapeFiles(self.generateShapeFiles)
 
     def setupValues(self):
         self.GUI.setTempDataDir(self.getTempDir())
@@ -50,20 +52,22 @@ class Application():
         CONFIGPath = self.configDir
         col = 0
         
-        scriptImplementation(programPath,data_dir,CONFIGPath,run_num,flt_alt,num_col,frequencyList)
+        scriptImplementation(programPath,data_dir,CONFIGPath,run_num,flt_alt,num_col,frequencyList,self.tempDirPath)
         
         i=1
         imageListFullPath = []
         csvListFullPath = []
+        frequencyListINT = []
         while i <= num_col:
             fileName = "RUN_%06d_COL_%06d"%(run_num,i)
             imageList.append(fileName+".png")
             csvList.append(fileName+".csv")
-            imageListFullPath.append("%s/%s" %(data_dir,imageList[i-1]))
-            csvListFullPath.append("%s/%s" %(data_dir,csvList[i-1]))
+            imageListFullPath.append("%s/%s" %(self.tempDirPath,imageList[i-1]))
+            csvListFullPath.append("%s/%s" %(self.tempDirPath,csvList[i-1]))
+            frequencyListINT.append(int(frequencyList[i-1])/1000000.)
             i = i+1
             
-        self.GUI.updateImageDataSet(num_col,"%s/"%(data_dir),imageList,csvList)
+        self.GUI.updateImageDataSet(num_col,frequencyListINT,"%s/"%(self.tempDirPath),imageList,csvList)
         self.GUI.updateExportSources(imageListFullPath,csvListFullPath)
         
         
@@ -92,10 +96,12 @@ class Application():
             lastIndex = tiffPath.rindex('/')
             outName = tiffPath[lastIndex+1:].replace(".tif",".png")
     
-        outImage = outDir+"/"+outName
+        outImage = outDir+"/"+outName.replace(".png","_OVERLAY.png")
         boundingBox = generateMapImage(tiffPath=tiffPath,csvPath=csvPath,outImage=outImage,mapWidth=mapWidth,mapHeight=mapHeight)
         return [boundingBox,outImage]
-                    
+    
+    def generateShapeFiles(self=None,file="",outdir="",outname=""):
+        create_shapefile(file=file,outdir=outdir,outname=outname)
                     
                     
                     

@@ -58,6 +58,7 @@ class imageDisplayPanel(tk.Frame):
     imageList = [];
     csvList = []
     buttonList = [];
+    frequencyList = []
     locationText = ""
     changeTiffButton = 0
     def __init__(self,parent,HEIGHT,WIDTH=210):
@@ -69,7 +70,7 @@ class imageDisplayPanel(tk.Frame):
         
         self.frames = {}
         
-        self.locationText = tk.Text(self,height=2,state='disable',bg='#F0F0F0',bd=0,wrap='char',width=25)
+        self.locationText = tk.Text(self,height=3,state='disable',bg='#F0F0F0',bd=0,wrap='char',width=25)
         self.locationText.config(state='normal')
         self.locationText.delete(1.0, 'end')
         self.locationText.config(state='disable',fg='#F0F0F0')
@@ -91,8 +92,10 @@ class imageDisplayPanel(tk.Frame):
     
     
     
-    def newDataSet(self,numImages,imageIN_dir,imageNames,csvNames):
+    def newDataSet(self,numImages,frequencyList,imageIN_dir,imageNames,csvNames):
         #self.imageCanvas.delete("all")
+        self.frequencyList = frequencyList
+        self.curFrequency = 0
         self.image_dir = imageIN_dir;
     
     #this loop deletes all buttons
@@ -136,6 +139,7 @@ class imageDisplayPanel(tk.Frame):
         self.imageID = number
         csvPath = "%s%s" %(self.image_dir,self.csvList[number])
         self.imageCanvas.changeDataset(csvPath)
+        self.curFrequency = number
         
         
         i =0
@@ -162,7 +166,8 @@ class imageDisplayPanel(tk.Frame):
         Xpos = boundingBox[0] + x * xResolution
         Ypos = boundingBox[3] - y * yResolution
         
-        textString = "longitude: %f\nLatitude: %f"%(Xpos,Ypos)
+        #textString = "longitude: %f\nLatitude: %f"%(Xpos,Ypos)
+        textString = "%06f MHz\nLatitude: %f\nLongitude: %f"%(self.frequencyList[self.curFrequency],Ypos,Xpos)
         
         self.locationText.config(state='normal')
         self.locationText.delete(1.0, 'end')
@@ -172,7 +177,9 @@ class imageDisplayPanel(tk.Frame):
     def mouseLeft(self,event):
         self.locationText.config(state='normal')
         self.locationText.delete(1.0, 'end')
-        self.locationText.config(state='disable',fg='#F0F0F0')
+        if(len(self.frequencyList) !=0):
+            self.locationText.insert('insert',"%f MHz"%(self.frequencyList[self.curFrequency]))
+        self.locationText.config(state='disable')
         
     def getTiffFile(self):
         return self.imageCanvas.getTiffPath()

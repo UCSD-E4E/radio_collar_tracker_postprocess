@@ -60,12 +60,12 @@ def display_data(run_num,num_col,filename,output_path,col_def):
     plot.xticks(rotation='vertical')
 
     # Calculate colorplot
-    maxCol = np.amax(data['col'])
-    minCol = np.amin(data['col'])
+    maxCol = np.amax(data['value'])
+    minCol = np.amin(data['value'])
     curColMap = plot.cm.get_cmap('jet')
 
     # Plot data
-    sc = plot.scatter(lon, lat, c=data['col'], cmap=curColMap, vmin = minCol, vmax = maxCol)
+    sc = plot.scatter(lon, lat, c=data['value'], cmap=curColMap, vmin = minCol, vmax = maxCol)
     colorbar = plot.colorbar(sc)
     colorbar.set_label('Maximum Signal Amplitude')
 

@@ -2,10 +2,10 @@ import gdal
 import os
 from gdalconst import *
 
-from osgeo import ogr
 
 import mapnik
 from mapnik import Raster, Layer
+import numpy as np
 
 
 
@@ -30,7 +30,8 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
         if dataset is None:
             print 'Could not open file'
         else:
-            print("Image loaded")
+            x=1
+            #print("Image loaded")
         
             #Get details of image
             cols = dataset.RasterXSize
@@ -71,13 +72,97 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
         #NOTE: Requires csv to have line 1 be "time,latitude,longitude,value"
         #Lat/Long must also be divided properly
         
+        #This section calculates the cutoffs for each image png
+        array = np.genfromtxt(csvPath,delimiter=',',names=True)
+        minVal = np.amin(array['value'])
+        maxVal = np.amax(array['value'])
+        cutOffResolution = (maxVal-minVal)/10
+        cutoff0 = minVal
+        cutoff1 = minVal + cutOffResolution
+        cutoff2 = minVal + cutOffResolution *2
+        cutoff3 = minVal + cutOffResolution *3
+        cutoff4 = minVal + cutOffResolution *4
+        cutoff5 = minVal + cutOffResolution *5
+        cutoff6 = minVal + cutOffResolution *6
+        cutoff7 = minVal + cutOffResolution *7
+        cutoff8 = minVal + cutOffResolution *8
+        cutoff9 = minVal + cutOffResolution *9
+        cutoff10 = maxVal
         
-        #Create style for point layer
-        pointSymbolizer = mapnik.PointSymbolizer()
-        pointRule = mapnik.Rule()
-        pointRule.symbols.append(pointSymbolizer)
+        
+        #Create style for each point color layer
+        detection1 = mapnik.PointSymbolizer(mapnik.PathExpression("pointImages/detector1.png"))
+        detection2 = mapnik.PointSymbolizer(mapnik.PathExpression("pointImages/detector2.png"))
+        detection3 = mapnik.PointSymbolizer(mapnik.PathExpression("pointImages/detector3.png"))
+        detection4 = mapnik.PointSymbolizer(mapnik.PathExpression("pointImages/detector4.png"))
+        detection5 = mapnik.PointSymbolizer(mapnik.PathExpression("pointImages/detector5.png"))
+        detection6 = mapnik.PointSymbolizer(mapnik.PathExpression("pointImages/detector6.png"))
+        detection7 = mapnik.PointSymbolizer(mapnik.PathExpression("pointImages/detector7.png"))
+        detection8 = mapnik.PointSymbolizer(mapnik.PathExpression("pointImages/detector8.png"))
+        detection9 = mapnik.PointSymbolizer(mapnik.PathExpression("pointImages/detector9.png"))
+        detection10 = mapnik.PointSymbolizer(mapnik.PathExpression("pointImages/detector10.png"))
+        
+        pointFilter1 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff0,cutoff1))
+        pointFilter2 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff1,cutoff2))
+        pointFilter3 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff2,cutoff3))
+        pointFilter4 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff3,cutoff4))
+        pointFilter5 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff4,cutoff5))
+        pointFilter6 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff5,cutoff6))
+        pointFilter7 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff6,cutoff7))
+        pointFilter8 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff7,cutoff8))
+        pointFilter9 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff8,cutoff9))
+        pointFilter10 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff9,cutoff10))
+        
+        pointRule1 = mapnik.Rule()
+        pointRule2 = mapnik.Rule()
+        pointRule3 = mapnik.Rule()
+        pointRule4 = mapnik.Rule()
+        pointRule5 = mapnik.Rule()
+        pointRule6 = mapnik.Rule()
+        pointRule7 = mapnik.Rule()
+        pointRule8 = mapnik.Rule()
+        pointRule9 = mapnik.Rule()
+        pointRule10 = mapnik.Rule()
+        
+        pointRule1.symbols.append(detection1)
+        pointRule2.symbols.append(detection2)
+        pointRule3.symbols.append(detection3)
+        pointRule4.symbols.append(detection4)
+        pointRule5.symbols.append(detection5)
+        pointRule6.symbols.append(detection6)
+        pointRule7.symbols.append(detection7)
+        pointRule8.symbols.append(detection8)
+        pointRule9.symbols.append(detection9)
+        pointRule10.symbols.append(detection10)
+        
+        pointRule1.filter = pointFilter1
+        pointRule2.filter = pointFilter2
+        pointRule3.filter = pointFilter3
+        pointRule4.filter = pointFilter4
+        pointRule5.filter = pointFilter5
+        pointRule6.filter = pointFilter6
+        pointRule7.filter = pointFilter7
+        pointRule8.filter = pointFilter8
+        pointRule9.filter = pointFilter9
+        pointRule10.filter = pointFilter10
+        
+        
+        
+        
+        
+        #pointRule = mapnik.Rule()
+        #pointRule.symbols.append(pointSymbolizer)
         pointStyle = mapnik.Style()
-        pointStyle.rules.append(pointRule)
+        pointStyle.rules.append(pointRule1)
+        pointStyle.rules.append(pointRule2)
+        pointStyle.rules.append(pointRule3)
+        pointStyle.rules.append(pointRule4)
+        pointStyle.rules.append(pointRule5)
+        pointStyle.rules.append(pointRule6)
+        pointStyle.rules.append(pointRule7)
+        pointStyle.rules.append(pointRule8)
+        pointStyle.rules.append(pointRule9)
+        pointStyle.rules.append(pointRule10)
         map.append_style('Point Style',pointStyle)
 
 
@@ -118,7 +203,7 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
     if(outImage != ""):
         #TODO error checking
         outImage = outImage.replace("\\","/")
-        print(outImage)
+        #print(outImage)
         mapnik.render_to_file(map,str(outImage), 'png')
 
     return boundingBox

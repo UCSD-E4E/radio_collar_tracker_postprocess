@@ -42,11 +42,13 @@ class GUI(tk.Toplevel):
         self.mainFrame.attachBeginCalculations(func)
     def attachGenerateMapImage(self,func):
         self.mainFrame.attachGenerateMapImage(func)
+    def attachGenerateShapeFiles(self,func):
+        self.mainFrame.attachGenerateShapeFiles(func)
         
     def setTempDataDir(self,dataDir):
         self.mainFrame.setTempDataDir(dataDir)
-    def updateImageDataSet(self,num_col,data_dir,imageList,csvList):
-        self.mainFrame.updateImageDataSet(num_col,"%s/"%(data_dir),imageList,csvList)
+    def updateImageDataSet(self,num_col,frequencyList,data_dir,imageList,csvList):
+        self.mainFrame.updateImageDataSet(num_col,frequencyList,"%s/"%(data_dir),imageList,csvList)
     def updateExportSources(self,imageListFullPath,csvListFullPath):
         self.mainFrame.updateExportSources(imageListFullPath,csvListFullPath)
 
@@ -100,8 +102,8 @@ class mainFrame(tk.Frame):
         self.firstFrame.attachCalculationHandler(func)
         
 #-------Functions to Second Frame-------------
-    def updateImageDataSet(self,num_col,data_dir,imageList,csvList):
-        self.secondFrame.newDataSet(num_col,data_dir,imageList,csvList)
+    def updateImageDataSet(self,num_col,frequencyList,data_dir,imageList,csvList):
+        self.secondFrame.newDataSet(num_col,frequencyList,data_dir,imageList,csvList)
     def attachGenerateMapImage(self,func):
         self.secondFrame.attachGenerateMapImage(func)
         self.thirdFrame.attachGenerateMapImage(func)
@@ -112,6 +114,8 @@ class mainFrame(tk.Frame):
     def updateExportSources(self,imageListFullPath,csvListFullPath):
         self.thirdFrame.updateImageList(imageListFullPath)
         self.thirdFrame.updateCSVList(csvListFullPath)
+    def attachGenerateShapeFiles(self,func):
+        self.thirdFrame.attachGenerateShapeFiles(func)
 
         
     def quit(self=None):

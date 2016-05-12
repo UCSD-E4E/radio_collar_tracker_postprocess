@@ -29,7 +29,7 @@ import glob
 
 
 
-def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,frequencyList=[]):
+def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,frequencyList=[],tempFolder=""):
 
     configCOLPath = config_dir + '/COL'
     SDRPath = config_dir + '/SDR.cfg'
@@ -40,19 +40,19 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
     collar_file_prefix = "%s/RUN_%06d_" % (data_dir,int(run))
     meta_file = "%s/META_%06d" % (data_dir,int(run))
     sdr_center_freq = read_meta_file(meta_file, 'center_freq')
-    print "sdr: \n"
-    print SDRPath
+    #print "sdr: \n"
+    #print SDRPath
     sdr_ppm = read_meta_file(SDRPath, 'sdr_ppm')
     
     #if os.path.exists(raw_file):
     #   os.remove(raw_file)
     
-    #cat_relevant(data_dir,int(run)) 
+    cat_relevant(data_dir,int(run)) 
     #UNCOMMENT
     
     curCol = 1
     while curCol <= num_col:
-        print("entering calculation pipeline: %d <= %d" % (curCol,num_col))
+        #print("entering calculation pipeline: %d <= %d" % (curCol,num_col))
         if(len(frequencyList) == 0):
             
             frequency = read_meta_file(configCOLPath,str(curCol))
@@ -69,29 +69,34 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
             #TODO: Error checking
         beat_freq = getBeatFrequency(int(sdr_center_freq), int(frequency), int(sdr_ppm))
   
-  
-        GNU_RADIO_PIPELINE = programPath + '/fft_detect/fft_detect'
+        
+        GNU_RADIO_PIPELINE = programPath + '/../fft_detect/fft_detect'
         collarFile = "%s%06d.raw" % (collar_file_prefix, curCol)
-        print("collarFile: %s" %(collarFile))
+        #print("collarFile: %s" %(collarFile))
 
 
 
 
         #os.execl(GNU_RADIO_PIPELINE,'fft_detect','-f',str(beat_freq),'-i',str(raw_file),'-o',str(collarFile))
-
+        print(raw_file)
+        print(GNU_RADIO_PIPELINE)
         argString = '-f ' + str(beat_freq) + ' -i ' + str(raw_file) + ' -o ' + str(collarFile)
 
-        #p = subprocess.call(GNU_RADIO_PIPELINE + ' ' + argString, shell=True)
+        p = subprocess.call(GNU_RADIO_PIPELINE + ' ' + argString, shell=True)
         #UNCOMMENT
             
             #TODO: Error checking
-        raw_gps_analysis(data_dir,data_dir,int(run),int(curCol),int(flt_alt))
+        print(tempFolder)
+        if(tempFolder == ""):
+            raw_gps_analysis(data_dir,data_dir,int(run),int(curCol),int(flt_alt))
+        else:
+            raw_gps_analysis(data_dir,tempFolder,int(run),int(curCol),int(flt_alt))
         curCol = curCol + 1
      
     curCol = 1
     while curCol <= num_col:
-        data_file = "%s/RUN_%06d_COL_%06d.csv" %(data_dir,int(run), int(curCol))
-        display_data(int(run),int(curCol),data_file,data_dir,configCOLPath)
+        data_file = "%s/RUN_%06d_COL_%06d.csv" %(tempFolder,int(run), int(curCol))
+        display_data(int(run),int(curCol),data_file,tempFolder,configCOLPath)
         curCol = curCol + 1
            
         

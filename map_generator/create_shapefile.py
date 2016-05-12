@@ -42,10 +42,10 @@ def create_shapefile(self=None,file="",outdir="",outname=""):
         else:
             outfile = outdir + "/" + outname
             
-    #print(file)
-    #print(outdir)
-    #print(outname)
-    #print(outfile)
+    print(file)
+    print(outdir)
+    print(outname)
+    print(outfile)
         
 
     # Read CSV
@@ -53,7 +53,7 @@ def create_shapefile(self=None,file="",outdir="",outname=""):
     # Modify values
     lat = data['latitude']
     lon = data['longitude']
-    col = data['col']
+    col = data['value']
     #print(col)
     
     
