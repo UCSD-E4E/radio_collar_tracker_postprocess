@@ -172,8 +172,11 @@ class directoryPanel(tk.Frame):
     def updateDirectory(self,data_dir=""):
         #self.dirTB.config(state='normal')
         if(data_dir == ""):
-            self.data_dir = getDir() #'C:/Users/Work/Documents/Files/Projects/RadioCollar/SampleData/RCT_SAMPLE/RUN_002027-copy'\
+            data_dir = getDir() #'C:/Users/Work/Documents/Files/Projects/RadioCollar/SampleData/RCT_SAMPLE/RUN_002027-copy'\
         #self.parent.parent.quitter()
+        if(data_dir==""):
+            return
+        self.data_dir = data_dir
         self.dirTB.delete(0, 'end')
         self.dirTB.insert(0, self.data_dir)
         #Decided not to disable dirTB
@@ -321,20 +324,19 @@ class frequencyPanel(tk.Frame):
         return outList
         
     def setCollarFrequencies(self,newList):
-        print("In setCollarFrequencies")
         print(newList)
         self.clearFrequencies()
         
         #This does not do checking for if integer or not
         for s in newList:
-            print("adding entry%s" %(s))
+            print("Adding [%s] to frequency list" %(s))
             self.createEntry(s)
             
         self.updateNumEntries()
             
     def clearFrequencies(self):
         i = len(self.freqPanelList)-1
-        while i > 0:
+        while i >= 0:
             self.deleteEntry(i)
             i=i-1
             
@@ -346,12 +348,6 @@ class frequencyPanel(tk.Frame):
     def deleteEntry(self,ID):
         self.freqPanelList[ID].deleteSelf()
         #del self.frequencyList[ID]
-        
-    def clearFrequencies(self):
-        i = len(self.freqPanelList)-1
-        while i > 0:
-            self.deleteEntry(i)
-            i=i-1
             
     def updateNumEntries(self):
         count = 0

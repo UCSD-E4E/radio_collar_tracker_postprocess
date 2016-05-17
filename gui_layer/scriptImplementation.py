@@ -3,7 +3,6 @@
 import shutil
 import os
 import fileinput
-
 #import sys
 #lib_path = os.path.abspath(os.path.join('..', 'raw_gps_analysis'))
 #sys.path.append(lib_path)
@@ -37,7 +36,10 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
     num_raw_files = glob.glob(data_dir+'/RAW_DATA_*')
     #num_collars = self.getNumCollars(ConfigCOLPath)
     raw_file = "%s/RUN_%06d.raw" % (data_dir,int(run))
-    collar_file_prefix = "%s/RUN_%06d_" % (data_dir,int(run))
+    if(tempFolder !=""):
+        collar_file_prefix = "%s/RUN_%06d_" % (tempFolder,int(run))
+    else:
+        collar_file_prefix = "%s/RUN_%06d_" % (data_dir,int(run)) 
     meta_file = "%s/META_%06d" % (data_dir,int(run))
     sdr_center_freq = read_meta_file(meta_file, 'center_freq')
     #print "sdr: \n"
@@ -47,7 +49,9 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
     #if os.path.exists(raw_file):
     #   os.remove(raw_file)
     
-    cat_relevant(data_dir,int(run)) 
+    if(not os.path.isfile(raw_file)):
+        print("Concatenating raw files")
+        cat_relevant(data_dir,int(run)) 
     #UNCOMMENT
     
     curCol = 1
@@ -78,19 +82,18 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
 
 
         #os.execl(GNU_RADIO_PIPELINE,'fft_detect','-f',str(beat_freq),'-i',str(raw_file),'-o',str(collarFile))
-        print(raw_file)
-        print(GNU_RADIO_PIPELINE)
+        #print(raw_file)
+        #print(GNU_RADIO_PIPELINE)
         argString = '-f ' + str(beat_freq) + ' -i ' + str(raw_file) + ' -o ' + str(collarFile)
-
+        print("Generating raw file for collar %d"%(curCol))
         p = subprocess.call(GNU_RADIO_PIPELINE + ' ' + argString, shell=True)
         #UNCOMMENT
             
             #TODO: Error checking
-        print(tempFolder)
         if(tempFolder == ""):
             raw_gps_analysis(data_dir,data_dir,int(run),int(curCol),int(flt_alt))
         else:
-            raw_gps_analysis(data_dir,tempFolder,int(run),int(curCol),int(flt_alt))
+            raw_gps_analysis(data_dir,tempFolder,int(run),int(curCol),int(flt_alt),raw_dir=tempFolder)
         curCol = curCol + 1
      
     curCol = 1

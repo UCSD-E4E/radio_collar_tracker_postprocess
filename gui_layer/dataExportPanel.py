@@ -30,13 +30,15 @@ class dataExportPanel(tk.Frame):
         self.exportShapeFilesButton.grid(row=2,column=0)
         
     def exportFunction(self):
-	# dest_path = filedialog.askdirectory()
-	# check for existence of the file path if not ask for path again
-	dest_path = filedialog.askdirectory()
-	if os.path.exists(dest_path):
-		for file in self.imageFileNameList:
-			shutil.copy2(file, dest_path)
-			#print 'here'
+        # dest_path = filedialog.askdirectory()
+        # check for existence of the file path if not ask for path again
+        dest_path = filedialog.askdirectory()
+        if(dest_path==""):
+            return
+        if os.path.exists(dest_path):
+            for file in self.imageFileNameList:
+                shutil.copy2(file, dest_path)
+                #print 'here'
 		
     def reset(self):
         self.updateImageList([])
@@ -62,6 +64,8 @@ class dataExportPanel(tk.Frame):
             return
         tiffPath = self.getTiffPath()
         dest_dir = getDir()
+        if(dest_dir==""):
+            return
         
         i=0
         while i < length:
@@ -74,14 +78,15 @@ class dataExportPanel(tk.Frame):
         length = len(self.csvFileNameList)
         if(length <= 0):
             return
-        dest_dir = getDir()
+        base_dir = getDir()
+        if(base_dir==""):
+            return
         i=0
         while i < length:
             csvPath = self.csvFileNameList[i]
             rindex = csvPath.rfind('/')
             outName=csvPath[rindex+1:].replace(".csv","")
-            if(i==0):
-                dest_dir=dest_dir + outName
+            dest_dir=base_dir + '/' + outName
             self.generateShapeFiles(file=csvPath,outdir=dest_dir,outname=outName)
             i=i+1
     def attachGetTiffPath(self,func):

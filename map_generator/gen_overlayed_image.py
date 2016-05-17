@@ -11,7 +11,7 @@ import numpy as np
 
 
 def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=600,PV_BUFFER_CONST=.1,PH_BUFFER_CONST=.1):
-
+    csvPath=csvPath.replace("//","/")
     #tiffPath           Absolute path to tiff file
     #csv path           Absolute path to csv
     #outImage           Absolute path to desired out image (Will overwrite)
@@ -67,6 +67,8 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
             
             map.layers.append(tifflayer)
             boundingBox = [leftEdge,topEdge,rightEdge,bottomEdge]
+    else:
+        print("Gen_overlayed_image:Tiff file not found:%s"%(tiffPath))
 
     if(os.path.isfile(csvPath)):
         #NOTE: Requires csv to have line 1 be "time,latitude,longitude,value"
@@ -101,6 +103,8 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
         detection8 = mapnik.PointSymbolizer(mapnik.PathExpression("pointImages/detector8.png"))
         detection9 = mapnik.PointSymbolizer(mapnik.PathExpression("pointImages/detector9.png"))
         detection10 = mapnik.PointSymbolizer(mapnik.PathExpression("pointImages/detector10.png"))
+        
+        
         
         pointFilter1 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff0,cutoff1))
         pointFilter2 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff1,cutoff2))
@@ -196,7 +200,8 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
         #print(pointsBufferedBounds)
         #NOTE: This will overwrite bounding box of tiff, this is intended
         boundingBox = [pointsLeftEdgeBuffered,pointsTopEdgeBuffered,pointsRightEdgeBuffered,pointsBottomEdgeBuffered]
-    
+    else:
+        print("Gen_overlayed_image:CSV not found: %s"%(csvPath))
     zoomBoundBox = mapnik.Box2d(boundingBox[0],boundingBox[1],boundingBox[2],boundingBox[3])
     map.zoom_to_box(zoomBoundBox)
     

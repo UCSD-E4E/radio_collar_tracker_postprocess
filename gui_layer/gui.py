@@ -48,9 +48,15 @@ class GUI(tk.Toplevel):
     def setTempDataDir(self,dataDir):
         self.mainFrame.setTempDataDir(dataDir)
     def updateImageDataSet(self,num_col,frequencyList,data_dir,imageList,csvList):
-        self.mainFrame.updateImageDataSet(num_col,frequencyList,"%s/"%(data_dir),imageList,csvList)
+        self.mainFrame.updateImageDataSet(num_col,frequencyList,"%s"%(data_dir),imageList,csvList)
     def updateExportSources(self,imageListFullPath,csvListFullPath):
         self.mainFrame.updateExportSources(imageListFullPath,csvListFullPath)
+        
+    def resetImageFrame(self):
+        self.mainFrame.resetImageFrame()
+        
+    def resetExportFrame(self):
+        self.mainFrame.resetExportFrame()
 
 class mainFrame(tk.Frame):
 #-------Functions pertinent to mainframe-------------
@@ -88,6 +94,10 @@ class mainFrame(tk.Frame):
         separatorFrame2.grid(row=0,column=3,sticky="ns")
         self.thirdFrame.grid(row=0,column=4,sticky="nse")
     def resetFrames(self):
+        self.thirdFrame.reset()
+    def resetImageFrame(self):
+        self.secondFrame.reset()
+    def resetExportFrame(self):
         self.thirdFrame.reset()
     def getTiffFile(self):
         return self.secondFrame.getTiffFile()

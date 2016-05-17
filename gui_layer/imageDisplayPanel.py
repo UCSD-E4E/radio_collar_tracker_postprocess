@@ -103,8 +103,8 @@ class imageDisplayPanel(tk.Frame):
             self.buttonList[0].destroy()
             del self.buttonList[0]
         
-        while len(self.imageList) > 0:
-            del self.imageList[0]
+        self.imageList=[]
+        self.csvList=[]
                        
             
         i = 0
@@ -140,6 +140,9 @@ class imageDisplayPanel(tk.Frame):
         csvPath = "%s%s" %(self.image_dir,self.csvList[number])
         self.imageCanvas.changeDataset(csvPath)
         self.curFrequency = number
+        print(csvPath)
+        #This is called to update the text box
+        self.mouseLeft(2)#2 is filler for event
         
         
         i =0
@@ -187,5 +190,8 @@ class imageDisplayPanel(tk.Frame):
         self.imageCanvas.setTempDataDir(data_dir)
     def attachGenerateMapImage(self,func):
         self.imageCanvas.attachGenerateMapImage(func)
-
+    def reset(self):
+        #numImages,frequencyList,imageIN_dir,imageNames,csvNames)
+        self.newDataSet(0,[],"",[],[])
+        self.imageCanvas.reset()
         

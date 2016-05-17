@@ -1,7 +1,7 @@
 #This will be application level, and will have all non-gui functions
 import sys
 import os
-
+import glob
 
 import Tkinter as tk
 
@@ -47,7 +47,10 @@ class Application():
         #print("run_num= %d, flt_alt= %d, num_col= %d" % (run_num,flt_alt,num_col))
         imageList = []
         csvList = []
-
+        self.clearTempFolder()
+        self.GUI.resetImageFrame()
+        self.GUI.resetExportFrame()
+        
         programPath = self.programPath
         CONFIGPath = self.configDir
         col = 0
@@ -60,6 +63,7 @@ class Application():
         frequencyListINT = []
         while i <= num_col:
             fileName = "RUN_%06d_COL_%06d"%(run_num,i)
+            print("run_gui: csvPath=%s"%(self.tempDirPath+fileName+".csv"))
             imageList.append(fileName+".png")
             csvList.append(fileName+".csv")
             imageListFullPath.append("%s/%s" %(self.tempDirPath,imageList[i-1]))
@@ -67,9 +71,29 @@ class Application():
             frequencyListINT.append(int(frequencyList[i-1])/1000000.)
             i = i+1
             
+        print("run_gui: %s"%(self.tempDirPath))
         self.GUI.updateImageDataSet(num_col,frequencyListINT,"%s/"%(self.tempDirPath),imageList,csvList)
         self.GUI.updateExportSources(imageListFullPath,csvListFullPath)
         
+    def clearTempFolder(self=None):
+        tempPath = self.tempDirPath
+        print("Clearing Temp Folder")
+        print(tempPath)
+        if(not "guiTempData" in tempPath):
+            print("temp folder appears to not have been set properly")
+            return
+        
+        for file in glob.glob(tempPath + "/*.png"):
+            print("Removing file %s"%(file))
+            os.remove(file)
+            
+        for file in glob.glob(tempPath + "/*.csv"):
+            print("Removing file %s"%(file))
+            os.remove(file)
+            
+        for file in glob.glob(tempPath + "/*.raw"):
+            print("Removing file %s"%(file))
+            os.remove(file)
         
     def prepareConfigCOLFile(self,data_dir,updatedFrequencyList):
         COLPath = data_dir + '/COL'

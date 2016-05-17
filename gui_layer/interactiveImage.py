@@ -75,7 +75,12 @@ class interactiveImage(tk.Canvas):
     def attachGenerateMapImage(self,func):
         self.generateMapImage = func
         
-        
+    def reset(self):
+        #self.tiffPath = "" NOTE: I could clear the tiff, but I assume most runs will be in same area
+        #There is no risk of multiple tiff files being loading
+        self.csvPath=""
+        self.imagePath=""
+        self.changeImage()
             
         
             
