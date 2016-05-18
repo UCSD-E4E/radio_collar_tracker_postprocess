@@ -69,8 +69,6 @@ class mainFrame(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master, bg = "#F0F0F0")
 
-        self.placeFrames()
-        self.update()
         self.programDataDir = getDataDir(os.path.dirname(os.path.realpath(__file__)))
         
 

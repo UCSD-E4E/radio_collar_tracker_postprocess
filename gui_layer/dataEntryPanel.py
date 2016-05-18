@@ -162,29 +162,35 @@ class directoryPanel(tk.Frame):
 
     def initializeWidgets(self):
         self.dirText = tk.Label(self, text = "Data Directory/Folder", bg = self.bgcolor)
-        self.dirTB = tk.Entry(self, width = 29)
+        self.dirTV = tk.StringVar()
+        self.dirTV.trace("w",lambda name, index, mode, dirtv=self.dirTV.get():self.dirTVUpdated())
+        self.dirTB = tk.Entry(self, width = 29,textvariable=self.dirTV)
         self.selectDirButton = tk.Button(self, text = '...', command = self.updateDirectory, width = 3, bg = directoryPanel.buttonColor)
 
         self.dirText.grid(row=0,column=0,sticky="w")
         self.dirTB.grid(row=0,column=1,sticky="w")
         self.selectDirButton.grid(row=0,column=2,sticky="w")
-
+    def dirTVUpdated(self):
+        self.updateDirectory(self.dirTV.get())
     def updateDirectory(self,data_dir=""):
         #self.dirTB.config(state='normal')
         if(data_dir == ""):
             data_dir = getDir() #'C:/Users/Work/Documents/Files/Projects/RadioCollar/SampleData/RCT_SAMPLE/RUN_002027-copy'\
+            self.data_dir = data_dir
+            self.dirTB.delete(0, 'end')
+            self.dirTB.insert(0, self.data_dir)
         #self.parent.parent.quitter()
         if(data_dir==""):
             return
-        self.data_dir = data_dir
-        self.dirTB.delete(0, 'end')
-        self.dirTB.insert(0, self.data_dir)
+        #self.data_dir = data_dir
+        #self.dirTB.delete(0, 'end')
+        #self.dirTB.insert(0, self.data_dir)
         #Decided not to disable dirTB
 
         self.updateDirFunc()
 
     def getDirectory(self=None):
-        return self.data_dir
+        return self.dirTV.get()
 
         
 #------------------------------------------------------------------------------      
