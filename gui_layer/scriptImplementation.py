@@ -50,9 +50,9 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
     #if os.path.exists(raw_file):
     #   os.remove(raw_file)
     
-    if(not os.path.isfile(raw_file)):
-        print("Concatenating raw files")
-        cat_relevant(data_dir,int(run)) 
+    #if(not os.path.isfile(raw_file)):
+    #    print("Concatenating raw files")
+    #    cat_relevant(data_dir,int(run)) 
     #UNCOMMENT
     
     curCol = 1
@@ -75,7 +75,7 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
         beat_freq = getBeatFrequency(int(sdr_center_freq), int(frequency), int(sdr_ppm))
   
         
-        GNU_RADIO_PIPELINE = programPath + '/../fft_detect/fft_detect'
+        GNU_RADIO_PIPELINE = programPath + '/../fft_detect/NEWfft_detect'
         collarFile = "%s%09d.raw" % (collar_file_prefix, frequency)
         #print("collarFile: %s" %(collarFile))
 
@@ -85,7 +85,9 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
         #os.execl(GNU_RADIO_PIPELINE,'fft_detect','-f',str(beat_freq),'-i',str(raw_file),'-o',str(collarFile))
         #print(raw_file)
         #print(GNU_RADIO_PIPELINE)
-        argString = '-f ' + str(beat_freq) + ' -i ' + str(raw_file) + ' -o ' + str(collarFile)
+        argString = '-f ' + str(beat_freq) + ' -i ' + str(data_dir) + ' -o ' + str(collarFile) + ' -r ' + ("%06d"%(run))
+        print("ArgString: %s"%argString)
+        #argString = '-f ' + str(beat_freq) + ' -i ' + str(raw_file) + ' -o ' + str(collarFile)
         print("Generating raw file for collar %09d"%(frequency))
         
         p = subprocess.call(GNU_RADIO_PIPELINE + ' ' + argString, shell=True)
