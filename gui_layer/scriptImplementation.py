@@ -76,7 +76,7 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
   
         
         GNU_RADIO_PIPELINE = programPath + '/../fft_detect/fft_detect'
-        collarFile = "%s%06d.raw" % (collar_file_prefix, curCol)
+        collarFile = "%s%09d.raw" % (collar_file_prefix, frequency)
         #print("collarFile: %s" %(collarFile))
 
 
@@ -86,7 +86,7 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
         #print(raw_file)
         #print(GNU_RADIO_PIPELINE)
         argString = '-f ' + str(beat_freq) + ' -i ' + str(raw_file) + ' -o ' + str(collarFile)
-        print("Generating raw file for collar %d"%(curCol))
+        print("Generating raw file for collar %09d"%(frequency))
         p = subprocess.Popen(GNU_RADIO_PIPELINE + ' ' + argString, shell=True)
         while(p.poll() == None):
             #TODO: Insert waiting indicator here
@@ -96,14 +96,14 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
             
             #TODO: Error checking
         if(tempFolder == ""):
-            raw_gps_analysis(data_dir,data_dir,int(run),int(curCol),int(flt_alt))
+            raw_gps_analysis(data_dir,data_dir,int(run),frequency,int(flt_alt))
         else:
-            raw_gps_analysis(data_dir,tempFolder,int(run),int(curCol),int(flt_alt),raw_dir=tempFolder)
+            raw_gps_analysis(data_dir,tempFolder,int(run),frequency,int(flt_alt),raw_dir=tempFolder)
         curCol = curCol + 1
      
     curCol = 1
     while curCol <= num_col:
-        data_file = "%s/RUN_%06d_COL_%06d.csv" %(tempFolder,int(run), int(curCol))
+        data_file = "%s/RUN_%06d_COL_%09d.csv" %(tempFolder,int(run), frequency)
         display_data(int(run),int(curCol),data_file,tempFolder,configCOLPath)
         curCol = curCol + 1
            

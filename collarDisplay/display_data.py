@@ -21,10 +21,13 @@ plot_width = 8
 plot_dpi = 72
 
     
-def display_data(run_num,num_col,filename,output_path,col_def):
+def display_data(run_num,num_col,filename,output_path,col_def,col_freq=0):
 
     # Get collar frequency
-    col_freq = float(read_meta_file(col_def, str(num_col))) / 1.e6
+    if(col_freq == 0):
+        col_freq = float(read_meta_file(col_def, str(num_col))) / 1.e6
+    else:
+        col_freq = float(col_freq) / 1.e6
 
     # make list of columns
     # Expects the csv to have the following columns: time, lat, lon, [collars]
@@ -68,11 +71,13 @@ def display_data(run_num,num_col,filename,output_path,col_def):
     sc = plot.scatter(lon, lat, c=data['value'], cmap=curColMap, vmin = minCol, vmax = maxCol)
     colorbar = plot.colorbar(sc)
     colorbar.set_label('Maximum Signal Amplitude')
-
+    
     # Save plot
-    plot.savefig('%s/RUN_%06d_COL_%06d.png' % (output_path, run_num, num_col), bbox_inches = 'tight')
-    print('Collar %d: %s/RUN_%06d_COL_%06d.png' %
-        (num_col, output_path, run_num, num_col))
+    #cl_freq in MHz, want in KHz, so multiply by 1000
+    col_id = col_freq * 1000000
+    plot.savefig('%s/RUN_%06d_COL_%09d.png' % (output_path, run_num, col_id), bbox_inches = 'tight')
+    print('Collar %d: %s/RUN_%06d_COL_%09d.png' %
+        (num_col, output_path, run_num, col_id))
     # plot.show(block=False)
     #plot.close() #NATHANTODO: Uncomment at some point maybe
 

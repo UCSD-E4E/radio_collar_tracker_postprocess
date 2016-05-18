@@ -112,9 +112,10 @@ class imageDisplayPanel(tk.Frame):
         #buttonWidth = 25 / numImages; #Width / numImages
         while i < numImages:
             number = str(i)
-            newButton = tk.Button(self,text=number,command=lambda i=i:self.changeImage(i))
+            textNumber = str(i+1)
+            newButton = tk.Button(self,text=textNumber,command=lambda i=i:self.changeImage(i))
             self.buttonList.append(newButton);
-            newButton.grid(row=0,column=i,sticky="w")
+            newButton.grid(row=0,column=i+1,sticky="w")
             self.update()
             buttonOffset+=newButton.winfo_height();
             

@@ -10,6 +10,9 @@
 #include <cstdlib>
 
 
+#define DEBUG false
+#define DEBUG_PROGRESS true
+
 #define FFT_LENGTH 1024
 #define SAMPLE_RATE 2048000
 #define SIG_LENGTH (int) (0.06 * SAMPLE_RATE / FFT_LENGTH)
@@ -47,7 +50,7 @@ int main(int argc, char** argv) {
 	}
 
 	if(!(hasOutput && hasInput && hasFreq)){
-		cerr << "Not enough args!" << endl;
+		cerr << "FFT_DETECT Error: Not enough args!" << endl;
 		return -1;
 	}
 
@@ -55,9 +58,9 @@ int main(int argc, char** argv) {
 	if(fft_index < 0){
 		fft_index = FFT_LENGTH + fft_index;
 	}
-
-	cerr << "Index: " << fft_index << endl;
-
+    #if DEBUG
+        cerr << "Index: " << fft_index << endl;
+    #endif
 	ifstream in_file_stream;
 	ofstream out_file_stream;
 	fftw_complex *fft_buffer_in, *fft_buffer_out;
@@ -74,14 +77,18 @@ int main(int argc, char** argv) {
 	fft_buffer_out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * FFT_LENGTH);
 	p = fftw_plan_dft_1d(FFT_LENGTH, fft_buffer_in, fft_buffer_out, FFTW_FORWARD,
 	                     FFTW_ESTIMATE);
-
-	cerr << "Input: " << input_file << endl;
+    #if DEBUG
+        cerr << "Input: " << input_file << endl;
+        cerr << "Output: " << output_file << endl;
+    #endif
 	in_file_stream.open(input_file, ios::in | ios::binary);
-	cerr << "Output: " << output_file << endl;
+    #if DEBUG
+        cerr << "Output: " << output_file << endl;
+    #endif
 	out_file_stream.open(output_file, ios::out | ios::binary);
 
 	if (in_file_stream.fail() || out_file_stream.fail()) {
-		cerr << "Error: Failed to open file!" << endl;
+		cerr << "FFT_DETECT Error: Failed to open file!" << endl;
 		return -1;
 	}
     
@@ -124,16 +131,21 @@ int main(int argc, char** argv) {
 		}
 		counter++;
         
-        charCount+=2;
-        if(charCount >= notificationSeparation)
-        {
-            resetCount++;
-            charCount = 0;
-            cout <<"\rMBytes read: "<<(notificationSeparation * resetCount)/1048576;
-        }
+        #if DEBUG_PROGRESS
+            charCount+=2;
+            if(charCount >= notificationSeparation)
+            {
+                resetCount++;
+                charCount = 0;
+                cout <<"\rMBytes read: "<<(notificationSeparation * resetCount)/1048576;
+            }
+        #endif
             
         
 	}
+    #if DEBUG_PROGRESS
+        cout <<endl;
+    #endif
 	//fftw_free(fft_buffer_in);
 	//fftw_free(fft_buffer_out);
 	fftw_destroy_plan(p);

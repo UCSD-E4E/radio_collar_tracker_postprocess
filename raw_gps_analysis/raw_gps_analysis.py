@@ -33,14 +33,14 @@ if __name__ == "__main__":
 #args = parser.parse_args()
 
 def raw_gps_analysis(input_dir,output_dir,run_num,col_num,tar_alt,raw_dir=""):
-
+    #col_num is now the frequency in KHZ
     # Set configuration
     
     # Configure variables
-    signal_file = '/RUN_%06d_%06d.raw' % (run_num, col_num)
+    signal_file = '/RUN_%06d_%09d.raw' % (run_num, col_num)
     gps_file = '/GPS_%06d' % (run_num)
     meta_file = '/META_%06d' % (run_num)
-    output_file = '/RUN_%06d_COL_%06d.csv' % (run_num, col_num)
+    output_file = '/RUN_%06d_COL_%09d.csv' % (run_num, col_num)
     period = 1.5
     # Import META file
     meta_file_stream = open(input_dir + meta_file, 'r')
@@ -87,11 +87,13 @@ def raw_gps_analysis(input_dir,output_dir,run_num,col_num,tar_alt,raw_dir=""):
             continue
 
         # throw out if not within 20% of target altitude
-        if math.fabs(gps_alt - tar_alt) / tar_alt > 0.2:
+        #Commented out so altitude is not an issue
+        '''if math.fabs(gps_alt - tar_alt) / tar_alt > 0.2:
             line = gps_stream.readline()
             line_counter += 1
             continue
 
+        '''    
         # Extract position
         latitude = int(line.split(',')[1].strip()) / 10000000.
         longitude = int(line.split(',')[2].strip()) / 10000000.

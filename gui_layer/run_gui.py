@@ -62,7 +62,7 @@ class Application():
         csvListFullPath = []
         frequencyListINT = []
         while i <= num_col:
-            fileName = "RUN_%06d_COL_%06d"%(run_num,i)
+            fileName = "RUN_%06d_COL_%09d"%(run_num,frequencyList[i-1])
             print("run_gui: csvPath=%s"%(self.tempDirPath+fileName+".csv"))
             imageList.append(fileName+".png")
             csvList.append(fileName+".csv")
