@@ -119,8 +119,8 @@ class Application():
             outName = tiffPath[lastIndex+1:].replace(".tif",".png")
     
         outImage = outDir+"/"+outName.replace(".png","_OVERLAY.png")
-        boundingBox = generateMapImage(tiffPath=tiffPath,csvPath=csvPath,outImage=outImage,mapWidth=mapWidth,mapHeight=mapHeight)
-        return [boundingBox,outImage]
+        [boundingBox,measurementRange] = generateMapImage(tiffPath=tiffPath,csvPath=csvPath,outImage=outImage,mapWidth=mapWidth,mapHeight=mapHeight)
+        return [boundingBox,outImage,measurementRange]
     
     def generateShapeFiles(self=None,file="",outdir="",outname=""):
         create_shapefile(file=file,outdir=outdir,outname=outname)

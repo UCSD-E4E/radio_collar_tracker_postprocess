@@ -12,6 +12,7 @@ from glob import glob
 
 
 class interactiveImage(tk.Canvas):
+    measurementRange = [0,0]
     boundingBox = [0,0,0,0]
     imageFrame = 0
     IMSize = [190, 270]
@@ -58,7 +59,7 @@ class interactiveImage(tk.Canvas):
         self.IMSize[0] = self.winfo_width()
         self.IMSize[1] = self.winfo_height()
             
-        [self.boundingBox,self.imagePath] = self.generateMapImage(tiffPath=self.tiffPath,csvPath=self.csvPath,mapWidth=self.IMSize[0],mapHeight=self.IMSize[1])
+        [self.boundingBox,self.imagePath,self.measurementRange] = self.generateMapImage(tiffPath=self.tiffPath,csvPath=self.csvPath,mapWidth=self.IMSize[0],mapHeight=self.IMSize[1])
         
         self.photoimage = ImageTk.PhotoImage(file=self.imagePath)
         self.create_image(1, 1, image=self.photoimage,anchor="nw")
@@ -67,9 +68,12 @@ class interactiveImage(tk.Canvas):
         return self.boundingBox
     
     def getImageSize(self):
+        
         return self.IMSize
     def getTiffPath(self):
         return self.tiffPath
+    def getMeasurementRange(self):
+        return self.measurementRange
     def setTempDataDir(self,imageDir):
         self.imageDir = imageDir
     def attachGenerateMapImage(self,func):

@@ -24,6 +24,7 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
     #create map
     map = mapnik.Map(mapWidth,mapHeight)
     map.background = mapnik.Color('#F0F0F0')
+    measurementRange = [0,0]
     
     if(os.path.isfile(tiffPath)):
         dataset = gdal.Open(tiffPath, GA_ReadOnly)
@@ -81,6 +82,8 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
         #minVal = np.amin(array['value'])
         minVal = np.mean(array['value'])
         maxVal = np.amax(array['value'])
+        
+        measurementRange = [np.min(array['value']),np.max(array['value'])]
         
         
         
@@ -236,7 +239,7 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
         #print(outImage)
         mapnik.render_to_file(map,str(outImage), 'png')
 
-    return boundingBox
+    return [boundingBox,measurementRange]
 
 if __name__ == "__main__":
     csvPath = os.path.dirname(os.path.realpath(__file__)) + '/run2070Edited.csv'
