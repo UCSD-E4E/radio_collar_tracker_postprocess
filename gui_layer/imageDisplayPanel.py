@@ -141,7 +141,6 @@ class imageDisplayPanel(tk.Frame):
         csvPath = "%s%s" %(self.image_dir,self.csvList[number])
         self.imageCanvas.changeDataset(csvPath)
         self.curFrequency = number
-        print(csvPath)
         #This is called to update the text box
         self.mouseLeft(2)#2 is filler for event
         

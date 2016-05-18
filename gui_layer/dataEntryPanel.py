@@ -93,7 +93,7 @@ class dataEntryPanel(tk.Frame):
 
         i = 0
         while i < len(frequencyList ):
-            print(frequencyList[i])
+            #print(frequencyList[i])
             i = i+1
 
         colValue = 0
@@ -116,13 +116,12 @@ class dataEntryPanel(tk.Frame):
         self.updatedFrequencyList = []
 
         data_dir = self.dirFrame.getDirectory()
-
         #TODO: Move these out to their own .py files
         RUNPath = data_dir + '/RUN'
         ALTPath = data_dir + '/ALT'
         COLPath = data_dir + '/COL'
 
-        run = 0; alt = 0; col = 0;
+        run = 0; alt = 0; col = 0; center_freq = 0
         if os.path.exists(RUNPath):
             run = read_meta_file(RUNPath, 'run_num')
 
@@ -131,10 +130,13 @@ class dataEntryPanel(tk.Frame):
 
         if os.path.exists(COLPath):
             self.updatedFrequencyList = getOldCollarsClean(COLPath);
-
-
+            
+        METAPath = data_dir + ('/META_%06d'%int(run))
+        if os.path.exists(METAPath):
+            center_freq = read_meta_file(METAPath,"center_freq")
         self.runFrame.setRunID(run)
         self.altFrame.setAlt(alt)
+        self.colFrame.setCenterFreq(center_freq)
         self.colFrame.setCollarFrequencies(self.updatedFrequencyList)
 
     def reset(self):
@@ -234,7 +236,7 @@ class runIDPanel(tk.Frame):
             run = int(self.runID.get())
         except ValueError:
             run = -1
-        print('run = %d' %(run))
+        #print('run = %d' %(run))
         if run < 0:
             #self.errorText.config(foreground='red')
             self.runIDTB.config(bg='red')
@@ -312,30 +314,43 @@ class altitudePanel(tk.Frame):
 #------------------------------------------------------------------------------   
 
 class frequencyPanel(tk.Frame):
+    FREQUENCY_VARIANCE = .2
     def __init__(self,parent,width,color="#F0F0F0"):
         self.freqPanelList = []
         tk.Frame.__init__(self,parent,width=width, bg=color)
         self.initWidgets()
-        
     def getCollarFrequencies(self):
         outList = []
         for panel in self.freqPanelList:
             entry = panel.getValue()
+            isInt = False
+            isValid = True
             try:
                 val = int(entry)
-                outList.append(val)#TODO: May be append entry, see if needs list of strings or ints
+                isInt = True
             except ValueError:
-                print("%s is not an integer, not adding to frequency list"%(entry))
+                if(entry != ""):
+                    print("%s is not an integer, not adding to frequency list"%(entry))
+                continue
+            center_freq = int(self.centerFreqTV.get())      
+            if(center_freq != 0 and isInt == True):
+                if(val < float(center_freq)*(1.-self.FREQUENCY_VARIANCE) or val > float(center_freq)*(1.+self.FREQUENCY_VARIANCE)):
+                    print("%s is too far from center frequency %d, not adding to frequency list"%(entry,center_freq)) 
+                    continue
+                
+            outList.append(val)#TODO: May be append entry, see if needs list of strings or ints
                 
         return outList
-        
+    def setCenterFreq(self,center_freq):
+        self.changeCenterFreq(center_freq)
+        self.setCollarFrequencies(self.getCollarFrequencies())
     def setCollarFrequencies(self,newList):
-        print(newList)
+        #print(newList)
         self.clearFrequencies()
         
         #This does not do checking for if integer or not
         for s in newList:
-            print("Adding [%s] to frequency list" %(s))
+            #print("Adding [%s] to frequency list" %(s))
             self.createEntry(s)
             
         self.updateNumEntries()
@@ -347,9 +362,10 @@ class frequencyPanel(tk.Frame):
             i=i-1
             
     def createEntry(self,newValue=""):
-        newPanel = frequencySubPanel(self,self.updateNumEntries,newValue)
+        newPanel = frequencySubPanel(self,self.updateNumEntries,newValue,FREQUENCY_VARIANCE=self.FREQUENCY_VARIANCE)
         self.freqPanelList.append(newPanel)
         newPanel.grid()
+        newPanel.setCenterFreq(self.center_freq)
         
     def deleteEntry(self,ID):
         self.freqPanelList[ID].deleteSelf()
@@ -362,7 +378,33 @@ class frequencyPanel(tk.Frame):
                 count = count+1
                 
         self.numColsTV.set(str(count))
+    def changeCenterFreq(self,center_freq=-1):
+        
+        if(center_freq == -1):
+            #No value passed, get from TV
+            self.center_freq = self.centerFreqTV.get()
+            for panel in self.freqPanelList:
+                panel.setCenterFreq(self.center_freq)
+        elif(center_freq ==0): 
+            #Not found in above code
+            self.centerFreqTV.set(center_freq)
+            print("NOTE: Center frequency is 0, please input a more sensical frequency")
+        else:
+            self.centerFreqTV.set(center_freq)
+        
     def initWidgets(self):
+        self.centerFreqTV = tk.StringVar()
+        self.centerFreqTV.trace("w", lambda name, index, mode, centerFreqTV=self.centerFreqTV.get(): self.changeCenterFreq())
+        self.centerFreqText = tk.Text(self,width=19,height=1,bg="#F0F0F0",bd=0)
+        self.centerFreqTB = tk.Entry(self,textvariable=self.centerFreqTV)
+        
+        self.centerFreqText.grid(row=0,column=0)
+        self.centerFreqTB.grid(row=0,column=1,columnspan=5)
+    
+        self.centerFreqText.insert("insert","Center Frequency: ")
+        self.centerFreqText.config(state="disabled")
+    
+    
         self.numColsTV = tk.StringVar()
         self.numColsText = tk.Text(self,width=19,height=1,bg="#F0F0F0",bd=0)
         self.numColsTB = tk.Entry(self,state="disable",textvariable=self.numColsTV)
@@ -370,20 +412,20 @@ class frequencyPanel(tk.Frame):
         self.addColFreqButton = tk.Button(self,text="Add Frequency",command=self.createEntry)
         #self.numSubPanels = 
         
-        self.numColsText.grid(row=0,column=0,sticky="w")
-        self.numColsTB.grid(row=0,column=1)
-        self.addColFreqButton.grid(row=0,column=2)
+        self.numColsText.grid(row=1,column=0,sticky="w")
+        self.numColsTB.grid(row=1,column=1)
+        self.addColFreqButton.grid(row=1,column=2)
         
         
         self.numColsText.insert("insert","Number of collars: ")
         self.numColsText.config(state="disabled")
             
 class frequencySubPanel(tk.Frame):
-
-    def __init__(self,parent,UF,value="",color="#F0F0F0"):
+    center_freq = 0
+    def __init__(self,parent,UF,value="",color="#F0F0F0",FREQUENCY_VARIANCE=.2):
         tk.Frame.__init__(self,parent,bg=color)
         self.updateNumCount = UF
-        
+        self.FREQUENCY_VARIANCE = FREQUENCY_VARIANCE
         
         
         self.initWidgets()
@@ -406,21 +448,35 @@ class frequencySubPanel(tk.Frame):
         self.updateNumCount()
         
         self.destroy()
+    def setCenterFreq(self,center_freq):
+        self.center_freq = center_freq
+        self.freqValTV.set(self.freqValTV.get())
     def changeFreq(self):
-        
+        isInt = False
         string = self.freqValTV.get()
         self.updateNumCount()
         try:
             val = int(string)
             self.freqTB.config(bg="white")
+            isInt = True
             
         except ValueError:
             if(string != ""):
                 self.freqTB.config(bg="red")
+                return
+        
+        if(self.center_freq != 0 and isInt == True):
+            if(val < float(self.center_freq)*(1.-self.FREQUENCY_VARIANCE) or val > float(self.center_freq)*(1.+self.FREQUENCY_VARIANCE)):
+                self.freqTB.config(bg="red")
+                return
     def getValue(self):
+        isInt = False
         string = self.freqValTV.get()
         try:
             val=int(string)
-            return string
+            isInt = True
         except ValueError:
             return ""
+                
+                
+        return string

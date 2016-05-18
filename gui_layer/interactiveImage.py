@@ -80,7 +80,7 @@ class interactiveImage(tk.Canvas):
         #There is no risk of multiple tiff files being loading
         self.csvPath=""
         self.imagePath=""
-        self.changeImage()
+        self.photoimage = None
             
         
             

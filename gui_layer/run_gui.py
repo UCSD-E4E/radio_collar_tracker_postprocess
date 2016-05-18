@@ -63,7 +63,6 @@ class Application():
         frequencyListINT = []
         while i <= num_col:
             fileName = "RUN_%06d_COL_%09d"%(run_num,frequencyList[i-1])
-            print("run_gui: csvPath=%s"%(self.tempDirPath+fileName+".csv"))
             imageList.append(fileName+".png")
             csvList.append(fileName+".csv")
             imageListFullPath.append("%s/%s" %(self.tempDirPath,imageList[i-1]))
@@ -71,7 +70,6 @@ class Application():
             frequencyListINT.append(int(frequencyList[i-1])/1000000.)
             i = i+1
             
-        print("run_gui: %s"%(self.tempDirPath))
         self.GUI.updateImageDataSet(num_col,frequencyListINT,"%s/"%(self.tempDirPath),imageList,csvList)
         self.GUI.updateExportSources(imageListFullPath,csvListFullPath)
         
