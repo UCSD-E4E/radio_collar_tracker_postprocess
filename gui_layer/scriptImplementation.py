@@ -87,11 +87,11 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
         #print(GNU_RADIO_PIPELINE)
         argString = '-f ' + str(beat_freq) + ' -i ' + str(raw_file) + ' -o ' + str(collarFile)
         print("Generating raw file for collar %09d"%(frequency))
-        p = subprocess.Popen(GNU_RADIO_PIPELINE + ' ' + argString, shell=True)
-        while(p.poll() == None):
-            #TODO: Insert waiting indicator here
-            #print("Waiting for raw files to be processed, this may take a few moments")
-            time.sleep(5)
+        
+        p = subprocess.call(GNU_RADIO_PIPELINE + ' ' + argString, shell=True)
+        
+        #non-blocking
+        #p = subprocess.Popen(GNU_RADIO_PIPELINE + ' ' + argString, shell=True)
         #UNCOMMENT
             
             #TODO: Error checking
@@ -121,7 +121,6 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
             
     #    if signal_dist_outpt == 1:
     #        signal_distance_angle(data_file,data_dir,run,curCol,ConfigCOLPath)
-    
     
 def getBeatFrequency(center_freq,collar_freq,ppm):
     

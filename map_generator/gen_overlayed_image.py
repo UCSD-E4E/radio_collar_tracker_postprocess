@@ -115,15 +115,32 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
         
         
         pointFilter1 = mapnik.Filter("[value] < %f"%(cutoff1))
-        pointFilter2 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff1,cutoff2))
-        pointFilter3 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff2,cutoff3))
-        pointFilter4 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff3,cutoff4))
-        pointFilter5 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff4,cutoff5))
-        pointFilter6 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff5,cutoff6))
-        pointFilter7 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff6,cutoff7))
-        pointFilter8 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff7,cutoff8))
-        pointFilter9 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff8,cutoff9))
-        pointFilter10 = mapnik.Filter("[value] > %f"%(cutoff9))
+        pointFilter2 = mapnik.Filter("[value] > %f and [value] <= %f"%(cutoff1,cutoff2))
+        pointFilter3 = mapnik.Filter("[value] > %f and [value] <= %f"%(cutoff2,cutoff3))
+        pointFilter4 = mapnik.Filter("[value] > %f and [value] <= %f"%(cutoff3,cutoff4))
+        pointFilter5 = mapnik.Filter("[value] > %f and [value] <= %f"%(cutoff4,cutoff5))
+        pointFilter6 = mapnik.Filter("[value] > %f and [value] <= %f"%(cutoff5,cutoff6))
+        pointFilter7 = mapnik.Filter("[value] > %f and [value] <= %f"%(cutoff6,cutoff7))
+        pointFilter8 = mapnik.Filter("[value] > %f and [value] <= %f"%(cutoff7,cutoff8))
+        pointFilter9 = mapnik.Filter("[value] > %f and [value] <= %f"%(cutoff8,cutoff9))
+        pointFilter10 = mapnik.Filter("[value] >= %f"%(cutoff9))
+        
+        #Do not want smaller numbers to overlap
+        #detection1.allow_overlap = True
+        detection2.allow_overlap = True
+        detection3.allow_overlap = True
+        detection4.allow_overlap = True
+        detection5.allow_overlap = True
+        detection6.allow_overlap = True
+        detection7.allow_overlap = True
+        detection8.allow_overlap = True
+        detection9.allow_overlap = True
+        detection10.allow_overlap = True
+        
+        
+        
+        
+        
         
         pointRule1 = mapnik.Rule()
         pointRule2 = mapnik.Rule()

@@ -20,7 +20,7 @@ class Application():
         self.root = tk.Tk()
         self.root.withdraw()
         self.GUI = GUI(self.root)
-        self.GUI.protocol("WM_DELETE_WINDOW", self.root.destroy)
+        self.GUI.protocol("WM_DELETE_WINDOW", self.quit)
         self.GUI.title('Radio Collar Tracker')
         
         self.attachFunctions()
@@ -160,6 +160,9 @@ class Application():
         
     def getConfigDir(self):
         return self.configDir
+    def quit(self):
+        self.root.destroy()
+        sys.exit()
     
     
     

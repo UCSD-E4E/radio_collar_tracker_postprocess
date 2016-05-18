@@ -95,9 +95,9 @@ int main(int argc, char** argv) {
 	// Loop through all of the samples
 	mbuf[0] = 0;
 	mbuf[1] = 0;
-    int charCount = 0;
-    int resetCount = 0;
-    int notificationSeparation= 1048576 * 16; //about 64MB
+    long charCount = 0;
+    long resetCount = 0;
+    long notificationSeparation= 1048576 * 16; //about 64MB
 	while (in_file_stream.peek() != EOF) 
     {
 		in_file_stream.read(reinterpret_cast <char*>(buffer), 2);
