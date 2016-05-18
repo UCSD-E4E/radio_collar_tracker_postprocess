@@ -75,7 +75,7 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
         beat_freq = getBeatFrequency(int(sdr_center_freq), int(frequency), int(sdr_ppm))
   
         
-        GNU_RADIO_PIPELINE = programPath + '/../fft_detect/NEWfft_detect'
+        GNU_RADIO_PIPELINE = programPath + '/../fft_detect/fft_detect'
         collarFile = "%s%09d.raw" % (collar_file_prefix, frequency)
         #print("collarFile: %s" %(collarFile))
 

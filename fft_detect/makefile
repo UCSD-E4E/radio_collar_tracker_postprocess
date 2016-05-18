@@ -1,17 +1,48 @@
-CC = g++
+CXX = g++
+CC = gcc
 LD = g++
-LFLAGS = -lm -L/fftw-3.3.4-64 -I./fftw-3.3.4-64 -llibfftw3-3 -L.
-CFLAGS = -std=c++11 -c -Wall -g -O4
-.PHONY: clean all
+LFLAGS = -lfftw3 -lm -O4
+WINLFLAGS = -lm -O4 -L./windowsFFT3 -llibfftw3-3 -L.
+WININC = -I./windowsFFT3
+INC = 
+CPPFLAGS = -std=c++11 -c -Wall -g ${INC}
+CFLAGS = -std=gnu99 -c -Wall -g ${INC}
+PYTHON = python
+.PHONY: clean all install_python build_python test
 
 all: fft_detect
 
+test: all
+	./fft_detect -i /home/ntlhui/workspace/RUN_002070 -o /home/ntlhui/workspace/RUN_002070/RUN_002070_000004.raw -f 1000 -r 2070
+
 clean:
-	-rm -rf fft_detect.o
+	-rm -rf *.o
 	-rm -rf fft_detect
+	-rm -r build dist
 
-fft_detect.o: fft_detect.cpp
-	${CC} ${CFLAGS} ${LFLAGS} fft_detect.cpp
+fft_detect_run.o: fft_detect_run.cpp
+	${CXX} ${CPPFLAGS} fft_detect_run.cpp
 
-fft_detect: fft_detect.o
-	${LD} fft_detect.o -o fft_detect ${LFLAGS}
+fft_detect: fft_detect_run.o fft_detect.o
+	${LD} $^ ${LFLAGS} -o fft_detect
+
+fft_detect.o: fft_detect.c fft_detect.h
+	gcc $< -std=gnu99 -c -Wall -O4 ${INC}
+
+install_python: setup.py fft_detect.c
+	${PYTHON} setup.py install
+
+build_python: setup.py fft_detect.c
+	${PYTHON} setup.py build_ext
+    
+    
+win_all: win_fft_detect
+    
+win_fft_detect: win_fft_detect_run.o win_fft_detect.o
+	${LD} $^ ${WINLFLAGS} ${WININC}  -o fft_detect
+    
+win_fft_detect_run.o: fft_detect_run.cpp
+	${CXX} ${CPPFLAGS} ${WINLFLAGS} fft_detect_run.cpp -o win_fft_detect_run.o
+    
+win_fft_detect.o: fft_detect.c fft_detect.h
+	gcc $< -std=gnu99 -c -Wall -O4 ${WININC} ${WINLFLAGS} -o win_fft_detect.o
