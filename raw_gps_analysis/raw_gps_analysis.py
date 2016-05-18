@@ -32,15 +32,15 @@ if __name__ == "__main__":
 
 #args = parser.parse_args()
 
-def raw_gps_analysis(input_dir,output_dir,run_num,col_num,tar_alt):
-
+def raw_gps_analysis(input_dir,output_dir,run_num,col_num,tar_alt,raw_dir=""):
+    #col_num is now the frequency in KHZ
     # Set configuration
     
     # Configure variables
-    signal_file = '/RUN_%06d_%06d.raw' % (run_num, col_num)
+    signal_file = '/RUN_%06d_%09d.raw' % (run_num, col_num)
     gps_file = '/GPS_%06d' % (run_num)
     meta_file = '/META_%06d' % (run_num)
-    output_file = '/RUN_%06d_COL_%06d.csv' % (run_num, col_num)
+    output_file = '/RUN_%06d_COL_%09d.csv' % (run_num, col_num)
     period = 1.5
     # Import META file
     meta_file_stream = open(input_dir + meta_file, 'r')
@@ -54,11 +54,13 @@ def raw_gps_analysis(input_dir,output_dir,run_num,col_num,tar_alt):
     gps_stream = open(input_dir + gps_file, 'r')
 
     # Initialize Signal stream
-    signal_stream = open(input_dir + signal_file, 'rb')
-
+    if(raw_dir==""):
+        signal_stream = open(input_dir + signal_file, 'rb')
+    else:
+        signal_stream = open(raw_dir + signal_file, 'rb')
     # Initialize output stream
     out_stream = open(output_dir + output_file, 'w')
-
+    out_stream.write("time,latitude,longitude,value\n")
     signal_index = 0
     done = False
     line_counter = 0
@@ -85,14 +87,16 @@ def raw_gps_analysis(input_dir,output_dir,run_num,col_num,tar_alt):
             continue
 
         # throw out if not within 20% of target altitude
-        if math.fabs(gps_alt - tar_alt) / tar_alt > 0.2:
+        #Commented out so altitude is not an issue
+        '''if math.fabs(gps_alt - tar_alt) / tar_alt > 0.2:
             line = gps_stream.readline()
             line_counter += 1
             continue
 
+        '''    
         # Extract position
-        latitude = int(line.split(',')[1].strip())
-        longitude = int(line.split(',')[2].strip())
+        latitude = int(line.split(',')[1].strip()) / 10000000.
+        longitude = int(line.split(',')[2].strip()) / 10000000.
 
         # Samples prior to this gps point
         #signal_bring_forward = gps_time - ((float(signal_index) / sampling_freq) + start_time )
@@ -125,7 +129,7 @@ def raw_gps_analysis(input_dir,output_dir,run_num,col_num,tar_alt):
         if done:
             break
         max_amplitude = 10 * math.log10(max_amplitude)
-        out_stream.write("%f,%d,%d,%f\n" % (gps_time, latitude, longitude, max_amplitude))
+        out_stream.write("%f,%f,%f,%f\n" % (gps_time, latitude, longitude, max_amplitude))
         line = gps_stream.readline()
         line_counter += 1
 

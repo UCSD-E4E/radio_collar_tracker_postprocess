@@ -60,6 +60,7 @@ def cat_relevant(input_dir,run_num):
     # concatenate files
     dest = open(input_dir + output_file, 'wb')
     for i in range(start_file, last_file):
+        print("Cancatenating file %d of %d"%(i,last_file))
         shutil.copyfileobj(open(input_dir + signal_file_prefix + "%06d" % (i), 'rb'), dest)
 
     dest.close()    

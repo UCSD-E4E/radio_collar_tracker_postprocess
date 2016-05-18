@@ -3,13 +3,12 @@
 import shutil
 import os
 import fileinput
-
+import time
 #import sys
 #lib_path = os.path.abspath(os.path.join('..', 'raw_gps_analysis'))
 #sys.path.append(lib_path)
 #lib_path = os.path.abspath(os.path.join('..', 'collarDisplay'))
 #sys.path.append(lib_path)
-
 
 import subprocess
 
@@ -30,7 +29,7 @@ import glob
 
 
 
-def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,frequencyList=[]):
+def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,frequencyList=[],tempFolder=""):
 
     configCOLPath = config_dir + '/COL'
     SDRPath = config_dir + '/SDR.cfg'
@@ -38,23 +37,27 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
     num_raw_files = glob.glob(data_dir+'/RAW_DATA_*')
     #num_collars = self.getNumCollars(ConfigCOLPath)
     raw_file = "%s/RUN_%06d.raw" % (data_dir,int(run))
-    collar_file_prefix = "%s/RUN_%06d_" % (data_dir,int(run))
+    if(tempFolder !=""):
+        collar_file_prefix = "%s/RUN_%06d_" % (tempFolder,int(run))
+    else:
+        collar_file_prefix = "%s/RUN_%06d_" % (data_dir,int(run)) 
     meta_file = "%s/META_%06d" % (data_dir,int(run))
     sdr_center_freq = read_meta_file(meta_file, 'center_freq')
-
-    print "sdr: \n"
-    print SDRPath
+    #print "sdr: \n"
+    #print SDRPath
     sdr_ppm = read_meta_file(SDRPath, 'sdr_ppm')
     
     #if os.path.exists(raw_file):
     #   os.remove(raw_file)
     
-    cat_relevant(data_dir,int(run)) 
+    #if(not os.path.isfile(raw_file)):
+    #    print("Concatenating raw files")
+    #    cat_relevant(data_dir,int(run)) 
     #UNCOMMENT
     
     curCol = 1
     while curCol <= num_col:
-        print("entering calculation pipeline: %d <= %d" % (curCol,num_col))
+        #print("entering calculation pipeline: %d <= %d" % (curCol,num_col))
         if(len(frequencyList) == 0):
             
             frequency = read_meta_file(configCOLPath,str(curCol))
@@ -71,30 +74,39 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
             #TODO: Error checking
         beat_freq = getBeatFrequency(int(sdr_center_freq), int(frequency), int(sdr_ppm))
   
-  
-        GNU_RADIO_PIPELINE = programPath + '/fft_detect/fft_detect'
-        collarFile = "%s%06d.raw" % (collar_file_prefix, curCol)
-        print("collarFile: %s" %(collarFile))
+        
+        GNU_RADIO_PIPELINE = programPath + '/../fft_detect/fft_detect'
+        collarFile = "%s%09d.raw" % (collar_file_prefix, frequency)
+        #print("collarFile: %s" %(collarFile))
 
 
 
 
         #os.execl(GNU_RADIO_PIPELINE,'fft_detect','-f',str(beat_freq),'-i',str(raw_file),'-o',str(collarFile))
-
-        argString = '-f ' + str(beat_freq) + ' -i ' + str(raw_file) + ' -o ' + str(collarFile)
-
+        #print(raw_file)
+        #print(GNU_RADIO_PIPELINE)
+        argString = '-f ' + str(beat_freq) + ' -i ' + str(data_dir) + ' -o ' + str(collarFile) + ' -r ' + ("%06d"%(run))
+        print("ArgString: %s"%argString)
+        #argString = '-f ' + str(beat_freq) + ' -i ' + str(raw_file) + ' -o ' + str(collarFile)
+        print("Generating raw file for collar %09d"%(frequency))
+        
         p = subprocess.call(GNU_RADIO_PIPELINE + ' ' + argString, shell=True)
+        
+        #non-blocking
+        #p = subprocess.Popen(GNU_RADIO_PIPELINE + ' ' + argString, shell=True)
         #UNCOMMENT
             
             #TODO: Error checking
-        raw_gps_analysis(data_dir,data_dir,int(run),int(curCol),int(flt_alt))
+        if(tempFolder == ""):
+            raw_gps_analysis(data_dir,data_dir,int(run),frequency,int(flt_alt))
+        else:
+            raw_gps_analysis(data_dir,tempFolder,int(run),frequency,int(flt_alt),raw_dir=tempFolder)
         curCol = curCol + 1
      
     curCol = 1
     while curCol <= num_col:
-        data_file = "%s/RUN_%06d_COL_%06d.csv" %(data_dir,int(run), int(curCol))
-        display_data(int(run),int(curCol),data_file,data_dir,configCOLPath)
-        #subprocess.call(display_data(int(run),int(curCol),data_file,data_dir,configCOLPath))
+        data_file = "%s/RUN_%06d_COL_%09d.csv" %(tempFolder,int(run), frequency)
+        display_data(int(run),int(curCol),data_file,tempFolder,configCOLPath)
         curCol = curCol + 1
            
         
@@ -112,12 +124,10 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
     #    if signal_dist_outpt == 1:
     #        signal_distance_angle(data_file,data_dir,run,curCol,ConfigCOLPath)
     
-    
 def getBeatFrequency(center_freq,collar_freq,ppm):
     
         actual_center = int(center_freq) / 1.e6 * int(ppm) + int(center_freq)
 
         beat_freq = int(collar_freq) - int(actual_center)
-        print('center_freq = %d, collar_freq = %d, ppm= %d, actual_center = %d, beat_freq = %d'%( center_freq,collar_freq,ppm,actual_center,beat_freq))
         return(int(beat_freq))
     

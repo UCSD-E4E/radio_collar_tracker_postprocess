@@ -10,9 +10,7 @@
 #include <Python.h>
 #endif
 
-#ifdef __unix__
 #include <dirent.h>
-#endif
 
 #define FFT_LENGTH 1024
 #define SAMPLE_RATE 2048000
@@ -42,7 +40,6 @@ int process(const char* run_dir, const char* ofile, const int freq_bin, const in
 		return -1;
 	}
 
-#ifdef __unix__
 	int num_files = 0;
 	DIR* dirp;
 	struct dirent* entry;
@@ -57,7 +54,6 @@ int process(const char* run_dir, const char* ofile, const int freq_bin, const in
     	free(data_prefix);
 	}
 	closedir(dirp);
-#endif
 
 	fftw_complex *fft_buffer_in, *fft_buffer_out;
 	fftw_plan p;
@@ -90,7 +86,6 @@ int process(const char* run_dir, const char* ofile, const int freq_bin, const in
 
 	int i;
 
-#ifdef __unix__
 	char* progress_bar = (char*) calloc(sizeof(char), PROGRESS_BAR_LEN + 1);
 	char* format_string = malloc(sizeof(char) * 17);
 	sprintf(format_string, "%s%d%s", "\r[%-", PROGRESS_BAR_LEN, "s]%3.0f%%");
@@ -99,7 +94,6 @@ int process(const char* run_dir, const char* ofile, const int freq_bin, const in
 	}
 	printf(format_string, progress_bar, 100.0 * (file_num - 1) / num_files);
 	fflush(stdout);
-#endif
 
 	while(!feof(in_file)){
 		if(!(counter < FFT_LENGTH)){
@@ -123,14 +117,14 @@ int process(const char* run_dir, const char* ofile, const int freq_bin, const in
 			sprintf(ifile, "%s/RAW_DATA_%06d_%06d", run_dir, run_num, ++file_num);
 			fclose(in_file);
 			in_file = fopen(ifile, "rb");
-#ifdef __unix__
+            
+            
 			int j;
 			for(j = 0; j < (int)round((float)PROGRESS_BAR_LEN * file_num / num_files); ++j){
 				progress_bar[j] = '#';
 			}
 			printf(format_string, progress_bar, 100.0 * (file_num - 1) / num_files);
 			fflush(stdout);
-#endif
 
 			if(!in_file){
 				break;

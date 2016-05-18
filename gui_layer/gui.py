@@ -14,75 +14,120 @@ sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'python_dialogs'))
 from read_meta_file import read_meta_file
 from getCollars import GET_NUM_COLLARS
 
-from newImageDisplayPanel import imageDisplayPanel
+from imageDisplayPanel import imageDisplayPanel
 from auxiliaryOptionsPanel import auxiliaryOptionsPanel
-from dirExportPanel import dirExportPanel
-from newDataEntryPanel import newDataEntryPanel
+from dataExportPanel import dataExportPanel
+from dataEntryPanel import dataEntryPanel
 
-class Application(tk.Frame):
+from getFileName import *
+from scriptImplementation import scriptImplementation
+
+
+class GUI(tk.Toplevel):
+    def __init__(self,parent=None):
+        tk.Toplevel.__init__(self,parent,bg='#F0F0F0',bd=1,relief='sunken')
+        self.mainFrame = mainFrame(self)
+        self.mainFrame.grid(row=0,column=0,sticky="nswe")
+        
+        self.rowconfigure(0,weight=1)
+        self.columnconfigure(0,weight=1)
+        
+        self.setupMenu()
+        
+    def setupMenu(self):
+        print("TODO: Setup Menus")
+    def attachPrepareConfigCol(self,func):
+        self.mainFrame.attachPrepareConfigCol(func)
+    def attachBeginCalculations(self,func):
+        self.mainFrame.attachBeginCalculations(func)
+    def attachGenerateMapImage(self,func):
+        self.mainFrame.attachGenerateMapImage(func)
+    def attachGenerateShapeFiles(self,func):
+        self.mainFrame.attachGenerateShapeFiles(func)
+        
+    def setTempDataDir(self,dataDir):
+        self.mainFrame.setTempDataDir(dataDir)
+    def updateImageDataSet(self,num_col,frequencyList,data_dir,imageList,csvList):
+        self.mainFrame.updateImageDataSet(num_col,frequencyList,"%s"%(data_dir),imageList,csvList)
+    def updateExportSources(self,imageListFullPath,csvListFullPath):
+        self.mainFrame.updateExportSources(imageListFullPath,csvListFullPath)
+        
+    def resetImageFrame(self):
+        self.mainFrame.resetImageFrame()
+        
+    def resetExportFrame(self):
+        self.mainFrame.resetExportFrame()
+
+class mainFrame(tk.Frame):
+#-------Functions pertinent to mainframe-------------
     record = 0
     SDO = 0
     clean = 0
     randValue = 20
     HEIGHT = 300
-    def __init__(self, master = None):
+    beginCalculations = 0
+    def __init__(self, master):
         tk.Frame.__init__(self, master, bg = "#F0F0F0")
-        self.grid()
-
-        self.firstF = tk.Frame(self)
-        self.firstF.grid(row=0,column=0)
-        self.secondF = tk.Frame(self)
-        self.secondF.grid(row=0,column=1)
-        self.thirdF = tk.Frame(self)
-        self.thirdF.grid(row=0,column=2)
 
         self.placeFrames()
         self.update()
+        self.programDataDir = getDataDir(os.path.dirname(os.path.realpath(__file__)))
+        
 
-    def beginCalculations(self, data_dir, run_num, flt_alt, num_col, frequencyList):
-        print("run_num= %d, flt_alt= %d, num_col= %d" % (run_num,flt_alt,num_col))
-        imageList = []
-
-        COLPath = data_dir + '/COL'
-        CONFIGPath = os.path.dirname(os.path.realpath(__file__))
-        CONFIGPath = CONFIGPath.replace("\\","/")
-        lastIndex = CONFIGPath.rindex('/')
-        CONFIGPath = CONFIGPath[0:lastIndex]
-        programPath = CONFIGPath
-        CONFIGPath = CONFIGPath + '/config'
-        ConfigCOLPath = CONFIGPath + '/COL'
-        col = 0
-
-        self.secondFrame.scriptImplementation(programPath,data_dir,CONFIGPath,run_num,flt_alt,num_col,frequencyList)
-        i=1
-        imageListFullPath = []
-        while i <= num_col:
-            imageList.append("RUN_%06d_COL_%06d.png"%(run_num,i))
-            imageListFullPath.append("%s/%s" %(data_dir,imageList[i-1]))
-            i = i+1
-        #self.secondFrame.newImages(num_col,"%s/"%(data_dir),imageList)
-
-        #self.secondFrame.displayImage(data_dir,CONFIGPath,run_num,flt_alt,num_col,frequencyList)
-
-        self.thirdFrame.updateList(imageListFullPath)
-
-        #TODO: Move script stuff here
-
-    def placeFrames(self):
-        self.firstFrame = newDataEntryPanel(self.firstF, 200, '#F0F0F0', self.beginCalculations)
-        separatorFrame1 = separatorFrame(self.firstF, self.HEIGHT);
-        self.secondFrame = imageDisplayPanel(self.secondF, self.HEIGHT);
-        separatorFrame2 = separatorFrame(self.thirdF, self.HEIGHT);
-        self.thirdFrame = dirExportPanel(self.thirdF)
+        self.firstFrame = dataEntryPanel(self, 200, '#F0F0F0')
+        separatorFrame1 = separatorFrame(self, self.HEIGHT);
+        self.secondFrame = imageDisplayPanel(self, self.HEIGHT);
+        separatorFrame2 = separatorFrame(self, self.HEIGHT);
+        self.thirdFrame = dataExportPanel(self)
+        
+        self.rowconfigure(0,weight=1)
+        self.columnconfigure(2,weight=1)
+        
+        top = self.winfo_toplevel()
+        
+        #top.rowconfigure(0,weight=1)
+        #top.columnconfigure(0,weight=1)
 
         self.firstFrame.grid(row=0,column=0)
-        separatorFrame1.grid(row=0,column=1)
-        self.secondFrame.grid(row=0,column=2)
-        separatorFrame2.grid(row=0,column=3)
-        self.thirdFrame.grid(row=0,column=4)
+        separatorFrame1.grid(row=0,column=1,sticky="ns")
+        self.secondFrame.grid(row=0,column=2,sticky="nsew")
+        separatorFrame2.grid(row=0,column=3,sticky="ns")
+        self.thirdFrame.grid(row=0,column=4,sticky="nse")
+    def resetFrames(self):
+        self.thirdFrame.reset()
+    def resetImageFrame(self):
+        self.secondFrame.reset()
+    def resetExportFrame(self):
+        self.thirdFrame.reset()
+    def getTiffFile(self):
+        return self.secondFrame.getTiffFile()
+        
+        
+    def setTempDataDir(self,dataDir):
+        self.secondFrame.setTempDataDir(dataDir)
+#-------Functions to First Frame-------------
+    def attachPrepareConfigCol(self,func):
+        self.firstFrame.attachPrepareConfigCol(func)
+    def attachBeginCalculations(self,func):
+        self.firstFrame.attachCalculationHandler(func)
+        
+#-------Functions to Second Frame-------------
+    def updateImageDataSet(self,num_col,frequencyList,data_dir,imageList,csvList):
+        self.secondFrame.newDataSet(num_col,frequencyList,data_dir,imageList,csvList)
+    def attachGenerateMapImage(self,func):
+        self.secondFrame.attachGenerateMapImage(func)
+        self.thirdFrame.attachGenerateMapImage(func)
+        self.thirdFrame.attachGetTiffPath(self.getTiffFile)
+        
+        
+#-------Functions to Third Frame-------------
+    def updateExportSources(self,imageListFullPath,csvListFullPath):
+        self.thirdFrame.updateImageList(imageListFullPath)
+        self.thirdFrame.updateCSVList(csvListFullPath)
+    def attachGenerateShapeFiles(self,func):
+        self.thirdFrame.attachGenerateShapeFiles(func)
 
-
-        #self.firstFrame.lift()
+        
     def quit(self=None):
         root.destroy()
 
@@ -92,9 +137,5 @@ class Application(tk.Frame):
 
 class separatorFrame(tk.Frame):
     def __init__(self,parent,HEIGHT):
-        data_dir = tk.StringVar()
-        tk.Frame.__init__(self,parent,width=2,height=HEIGHT,bg='black')
+        tk.Frame.__init__(self,parent,width=2,bg='black')
 
-top = Application()
-top.master.title('Radio Collar Tracker')
-top.mainloop()

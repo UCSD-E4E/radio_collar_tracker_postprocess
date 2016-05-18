@@ -2,7 +2,9 @@ CXX = g++
 CC = gcc
 LD = g++
 LFLAGS = -lfftw3 -lm -O4
-INC =
+WINLFLAGS = -lm -O4 -L./windowsFFT3 -llibfftw3-3 -L.
+WININC = -I./windowsFFT3
+INC = 
 CPPFLAGS = -std=c++11 -c -Wall -g ${INC}
 CFLAGS = -std=gnu99 -c -Wall -g ${INC}
 PYTHON = python
@@ -32,3 +34,15 @@ install_python: setup.py fft_detect.c
 
 build_python: setup.py fft_detect.c
 	${PYTHON} setup.py build_ext
+    
+    
+win_all: win_fft_detect
+    
+win_fft_detect: win_fft_detect_run.o win_fft_detect.o
+	${LD} $^ ${WINLFLAGS} ${WININC}  -o fft_detect
+    
+win_fft_detect_run.o: fft_detect_run.cpp
+	${CXX} ${CPPFLAGS} ${WINLFLAGS} fft_detect_run.cpp -o win_fft_detect_run.o
+    
+win_fft_detect.o: fft_detect.c fft_detect.h
+	gcc $< -std=gnu99 -c -Wall -O4 ${WININC} ${WINLFLAGS} -o win_fft_detect.o
