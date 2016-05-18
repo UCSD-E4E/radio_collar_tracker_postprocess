@@ -68,7 +68,8 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
             map.layers.append(tifflayer)
             boundingBox = [leftEdge,topEdge,rightEdge,bottomEdge]
     else:
-        print("Gen_overlayed_image:Tiff file not found:%s"%(tiffPath))
+        #print("Gen_overlayed_image:Tiff file not found:%s"%(tiffPath))
+        x=1
 
     if(os.path.isfile(csvPath)):
         #NOTE: Requires csv to have line 1 be "time,latitude,longitude,value"
@@ -76,8 +77,15 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
         
         #This section calculates the cutoffs for each image png
         array = np.genfromtxt(csvPath,delimiter=',',names=True)
-        minVal = np.amin(array['value'])
+        
+        #minVal = np.amin(array['value'])
+        minVal = np.mean(array['value'])
         maxVal = np.amax(array['value'])
+        
+        
+        
+        
+        
         cutOffResolution = (maxVal-minVal)/10
         cutoff0 = minVal
         cutoff1 = minVal + cutOffResolution
@@ -106,7 +114,7 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
         
         
         
-        pointFilter1 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff0,cutoff1))
+        pointFilter1 = mapnik.Filter("[value] < %f"%(cutoff1))
         pointFilter2 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff1,cutoff2))
         pointFilter3 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff2,cutoff3))
         pointFilter4 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff3,cutoff4))
@@ -115,7 +123,7 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
         pointFilter7 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff6,cutoff7))
         pointFilter8 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff7,cutoff8))
         pointFilter9 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff8,cutoff9))
-        pointFilter10 = mapnik.Filter("[value] > %f and [value] < %f"%(cutoff9,cutoff10))
+        pointFilter10 = mapnik.Filter("[value] > %f"%(cutoff9))
         
         pointRule1 = mapnik.Rule()
         pointRule2 = mapnik.Rule()

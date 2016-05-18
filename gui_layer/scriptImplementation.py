@@ -3,6 +3,7 @@
 import shutil
 import os
 import fileinput
+import time
 #import sys
 #lib_path = os.path.abspath(os.path.join('..', 'raw_gps_analysis'))
 #sys.path.append(lib_path)
@@ -86,7 +87,11 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
         #print(GNU_RADIO_PIPELINE)
         argString = '-f ' + str(beat_freq) + ' -i ' + str(raw_file) + ' -o ' + str(collarFile)
         print("Generating raw file for collar %d"%(curCol))
-        p = subprocess.call(GNU_RADIO_PIPELINE + ' ' + argString, shell=True)
+        p = subprocess.Popen(GNU_RADIO_PIPELINE + ' ' + argString, shell=True)
+        while(p.poll() == None):
+            #TODO: Insert waiting indicator here
+            #print("Waiting for raw files to be processed, this may take a few moments")
+            time.sleep(5)
         #UNCOMMENT
             
             #TODO: Error checking

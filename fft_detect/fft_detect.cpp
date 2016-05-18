@@ -84,10 +84,15 @@ int main(int argc, char** argv) {
 		cerr << "Error: Failed to open file!" << endl;
 		return -1;
 	}
+    
 	// Loop through all of the samples
 	mbuf[0] = 0;
 	mbuf[1] = 0;
-	while (in_file_stream.peek() != EOF) {
+    int charCount = 0;
+    int resetCount = 0;
+    int notificationSeparation= 1048576 * 16; //about 64MB
+	while (in_file_stream.peek() != EOF) 
+    {
 		in_file_stream.read(reinterpret_cast <char*>(buffer), 2);
 		fft_buffer_in[counter][0] = buffer[0] / 128.0 - 1.0;
 		mbuf[0] += fft_buffer_in[counter][0];
@@ -118,6 +123,16 @@ int main(int argc, char** argv) {
 			mbuf[1] = 0;
 		}
 		counter++;
+        
+        charCount+=2;
+        if(charCount >= notificationSeparation)
+        {
+            resetCount++;
+            charCount = 0;
+            cout <<"\rMBytes read: "<<(notificationSeparation * resetCount)/1048576;
+        }
+            
+        
 	}
 	//fftw_free(fft_buffer_in);
 	//fftw_free(fft_buffer_out);
