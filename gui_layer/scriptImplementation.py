@@ -27,7 +27,7 @@ from display_data import display_data
 
 import glob
 
-DEBUG = True
+DEBUG = False
 
 def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,frequencyList=[],tempFolder=""):
 

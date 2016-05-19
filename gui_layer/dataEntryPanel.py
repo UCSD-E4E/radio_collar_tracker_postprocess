@@ -20,7 +20,7 @@ from datetime import datetime, timedelta
 import glob
 #from newFrequencyPanel import frequencyPanel
 
-DEBUG = True
+DEBUG = False
 
 class dataEntryPanel(tk.Frame):
     #TODO: Need to add functionality for collecting collar frequencies

@@ -152,6 +152,9 @@ class overlayOutputsDialog(tk.Toplevel):
         size = self.outputSize
         bounds = self.outputBounds
         if(not(size[0] == 0 or size[1] == 0 or  bounds[0] ==0 or bounds[1] ==0 or bounds[2] == 0 or bounds[3] == 0)):
+            size = [int(size[0]),int(size[1])]
+            self.outputSize = size
+            
             self.exportFunc(self.outputBounds,self.outputSize)
         self.destroy()
     def updateText(self,text,string):
