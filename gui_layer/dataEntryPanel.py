@@ -5,6 +5,8 @@ import re
 import os
 import sys
 
+from datetime import datetime, timedelta
+
 sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'meta_file_reader'))
 sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'python_dialogs'))
 from read_meta_file import read_meta_file
@@ -13,6 +15,7 @@ from simpleDialogs import getDir
 
 import fileinput
 import shutil
+from datetime import datetime, timedelta
 
 import glob
 #from newFrequencyPanel import frequencyPanel
@@ -137,19 +140,38 @@ class dataEntryPanel(tk.Frame):
             METAPath = METAPath[0]
         else:
             METAPath = ""
-        if os.path.exists(METAPath):
+        if os.path.isfile(METAPath):
             center_freq = int(read_meta_file(METAPath,"center_freq"))
             sampling_freq = int(read_meta_file(METAPath,"sampling_freq"))
             minFreq = int(center_freq - (sampling_freq / 2))
             maxFreq = int(center_freq + (sampling_freq / 2))
             frequencyRange=[minFreq,maxFreq]
             
-        print(frequencyRange)
+            
+            
+        GPSPath = glob.glob(data_dir + ('/GPS_*'))
+        if(len(GPSPath)>0):
+            GPSPath = GPSPath[0]
+        else:
+            GPSPath = ""
+            
+        runTime = ""
+        if os.path.isfile(GPSPath):
+            gpsFile = open(GPSPath,"r")
+            GPSstring = gpsFile.readline()
+            timeString = GPSstring.split(",")[0]
+            gpsFile.close()
+            timeFloat = float(timeString)
+            GMT = self.getGMT()
+            
+            runTime = datetime(1970, 1, 1, 0, 0, 10) + timedelta(seconds=timeFloat,hours=GMT)
+            
+        
         self.runFrame.setRunID(run)
+        self.runFrame.setTime(runTime)
         self.altFrame.setAlt(alt)
         self.colFrame.setFrequencyRange(frequencyRange)
         self.colFrame.setCollarFrequencies(self.updatedFrequencyList)
-
     def reset(self):
         self.dirFrame.updateDirectory("")
         self.colFrame.clearFrequencies()
@@ -158,6 +180,10 @@ class dataEntryPanel(tk.Frame):
         self.prepareConfigCOLFile = func
     def attachCalculationHandler(self,func):
         self.doCalculations = func
+    def attachGetGMT(self,func):
+        self.getGMT = func
+    def setGMT(self,newGMT):
+        print("Currently the time string does not update when GMT is set, must select new data source first")
 
 #------------------------------------------------------------------------------      
 #                       Directory Panel
@@ -190,8 +216,7 @@ class directoryPanel(tk.Frame):
         if(data_dir == ""):
             data_dir = getDir() #'C:/Users/Work/Documents/Files/Projects/RadioCollar/SampleData/RCT_SAMPLE/RUN_002027-copy'\
             self.data_dir = data_dir
-            self.dirTB.delete(0, 'end')
-            self.dirTB.insert(0, self.data_dir)
+            self.dirTV.set(self.data_dir)
         #self.parent.parent.quitter()
         if(data_dir==""):
             return
@@ -224,6 +249,9 @@ class runIDPanel(tk.Frame):
         self.runID = tk.StringVar()
         self.runID.trace("w", lambda name, index, mode, runID = self.runID.get() : self.changeRunID())
 
+        self.timeText = tk.Text(self,height=1,state='disable',bg='#F0F0F0',bd=0,wrap='none',width=28,fg='black')
+        
+        
         self.runIDText = tk.Label(self, text = "Run ID: ", width = 12, bg = self.bgcolor)
         self.runIDTB = tk.Entry(self,width = 23, textvariable = self.runID)
 
@@ -231,11 +259,17 @@ class runIDPanel(tk.Frame):
         #self.errorText.insert('insert','Please input an integer')
         #self.errorText.config(bg=self.bgcolor)
         #self.errorText.config(foreground=self.bgcolor)
-
-        self.runIDText.grid(row=0,column=0,sticky="w")
-        self.runIDTB.grid(row=0,column=1,sticky="w")
+        self.timeText.grid(row=0,column=0,columnspan=10)
+        self.runIDText.grid(row=1,column=0,sticky="w")
+        self.runIDTB.grid(row=1,column=1,sticky="w")
         #self.errorText.pack(side='left',padx=3)
 
+    def setTime(self,timeString):
+        self.timeText.config(state="normal")
+        self.timeText.delete(1.0,"end")
+        self.timeText.insert("insert",timeString)
+        self.timeText.config(state="disable")
+        
     def setRunID(self,newID='-1'):
         #Changing this should call changeRunID automatically
         self.runID.set(newID)
@@ -374,7 +408,7 @@ class frequencyPanel(tk.Frame):
     def createEntry(self,newValue=""):
         newPanel = frequencySubPanel(self,self.updateNumEntries,newValue,frequencyRange=self.frequencyRange)
         self.freqPanelList.append(newPanel)
-        newPanel.grid()
+        newPanel.grid(columnspan=50)
         
     def deleteEntry(self,ID):
         self.freqPanelList[ID].deleteSelf()
@@ -459,8 +493,11 @@ class frequencySubPanel(tk.Frame):
         
         self.delButton = tk.Button(self,command=self.deleteSelf,text="Delete")
         
+        self.errorText = tk.Text(self,width=15,height=1,bg="#F0F0F0",bd=0,fg="red",wrap="none")
+        
         self.freqTB.grid(row=0,column=0)
         self.delButton.grid(row=0,column=1)
+        self.errorText.grid(row=0,column=2)
         
     def deleteSelf(self,event=None):
         #These two lines ensure number of collars is updated correctly
@@ -479,15 +516,18 @@ class frequencySubPanel(tk.Frame):
         try:
             val = int(string)
             self.freqTB.config(bg="white")
+            self.setText("")
             isInt = True
             
         except ValueError:
             if(string != ""):
                 self.freqTB.config(bg="red")
+                self.setText("Not an integer")
                 return
         if(self.frequencyRange[0] != 0 and isInt == True):
             if(val < self.frequencyRange[0] or val > self.frequencyRange[1]):
                 self.freqTB.config(bg="red")
+                self.setText("Out of range")
                 return
     def getValue(self):
         isInt = False
@@ -500,3 +540,9 @@ class frequencySubPanel(tk.Frame):
                 
                 
         return string
+        
+    def setText(self,string):
+        self.errorText.config(state="normal")
+        self.errorText.delete(1.0,"end")
+        self.errorText.insert("insert",string)
+        self.errorText.config(state="disabled")

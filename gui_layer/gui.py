@@ -20,10 +20,12 @@ from dataExportPanel import dataExportPanel
 from dataEntryPanel import dataEntryPanel
 
 from getFileName import *
+from getGMT import getGMTDialog
 from scriptImplementation import scriptImplementation
 
 
 class GUI(tk.Toplevel):
+    GMT = 0
     def __init__(self,parent=None):
         tk.Toplevel.__init__(self,parent,bg='#F0F0F0',bd=1,relief='sunken')
         self.mainFrame = mainFrame(self)
@@ -34,8 +36,25 @@ class GUI(tk.Toplevel):
         
         self.setupMenu()
         
+        self.attachGetGMT()
+        
     def setupMenu(self):
         print("TODO: Setup Menus")
+        self.menuBar = tk.Menu(self)
+        
+        self.GMTMenu = tk.Menu(self.menuBar,tearoff=0)
+        self.GMTMenu.add_command(label="Set GMT",command=self.setGMT)
+        self.menuBar.add_cascade(label="Set GMT",menu=self.GMTMenu)
+        
+        
+        
+        
+        
+        
+        self.config(menu=self.menuBar)
+        
+        
+        
     def attachPrepareConfigCol(self,func):
         self.mainFrame.attachPrepareConfigCol(func)
     def attachBeginCalculations(self,func):
@@ -57,6 +76,14 @@ class GUI(tk.Toplevel):
         
     def resetExportFrame(self):
         self.mainFrame.resetExportFrame()
+    def setGMT(self):
+        print("TODO: Set GMT request thing")
+        self.GMT = getGMTDialog()
+        self.mainFrame.updateGMT(self.GMT)
+    def getGMT(self):
+        return self.GMT
+    def attachGetGMT(self):
+        self.mainFrame.attachGetGMT(self.getGMT)
 
 class mainFrame(tk.Frame):
 #-------Functions pertinent to mainframe-------------
@@ -91,6 +118,13 @@ class mainFrame(tk.Frame):
         self.secondFrame.grid(row=0,column=2,sticky="nsew")
         separatorFrame2.grid(row=0,column=3,sticky="ns")
         self.thirdFrame.grid(row=0,column=4,sticky="nse")
+        
+        
+        
+        self.attachGetDataBoundingBox()
+        self.attachGetVisibleBoundingBox()
+        
+        
     def resetFrames(self):
         self.thirdFrame.reset()
     def resetImageFrame(self):
@@ -103,11 +137,15 @@ class mainFrame(tk.Frame):
         
     def setTempDataDir(self,dataDir):
         self.secondFrame.setTempDataDir(dataDir)
+    def updateGMT(self,newGMT):
+        self.firstFrame.setGMT(newGMT)
 #-------Functions to First Frame-------------
     def attachPrepareConfigCol(self,func):
         self.firstFrame.attachPrepareConfigCol(func)
     def attachBeginCalculations(self,func):
         self.firstFrame.attachCalculationHandler(func)
+    def attachGetGMT(self,func):
+        self.firstFrame.attachGetGMT(func)
         
 #-------Functions to Second Frame-------------
     def updateImageDataSet(self,num_col,frequencyList,data_dir,imageList,csvList):
@@ -116,6 +154,7 @@ class mainFrame(tk.Frame):
         self.secondFrame.attachGenerateMapImage(func)
         self.thirdFrame.attachGenerateMapImage(func)
         self.thirdFrame.attachGetTiffPath(self.getTiffFile)
+    
         
         
 #-------Functions to Third Frame-------------
@@ -124,6 +163,12 @@ class mainFrame(tk.Frame):
         self.thirdFrame.updateCSVList(csvListFullPath)
     def attachGenerateShapeFiles(self,func):
         self.thirdFrame.attachGenerateShapeFiles(func)
+    def attachGetDataBoundingBox(self):
+        GBBFunc = self.secondFrame.getDataBoundingBox
+        self.thirdFrame.attachGetDataBoundingBox(GBBFunc)
+    def attachGetVisibleBoundingBox(self):
+        GBBFunc = self.secondFrame.getVisibleBoundingBox
+        self.thirdFrame.attachGetVisibleBoundingBox(GBBFunc)
 
         
     def quit(self=None):

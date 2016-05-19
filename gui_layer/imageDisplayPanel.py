@@ -61,6 +61,9 @@ class imageDisplayPanel(tk.Frame):
     frequencyList = []
     locationText = ""
     changeTiffButton = 0
+    curFrequency = 0
+    
+    buttonPressedPos = [-1,-1]
     def __init__(self,parent,HEIGHT,WIDTH=210):
         tk.Frame.__init__(self,parent,width=WIDTH,height=HEIGHT,bg='#F0F0F0')
 
@@ -81,12 +84,16 @@ class imageDisplayPanel(tk.Frame):
         self.imageCanvas.bind("<Motion>",self.mouseMoved)
         self.imageCanvas.bind("<Leave>",self.mouseLeft)
         self.imageCanvas.bind("<Configure>", self.imageCanvas.changeImage)
+        self.imageCanvas.bind("<ButtonPress-1>",self.imageButtonPressed)
+        self.imageCanvas.bind("<ButtonRelease-1>",self.imageButtonReleased)
         self.columnconfigure(0,weight=1)
         self.rowconfigure(2,weight=1)
         
         self.addTiffButton = tk.Button(self,text="Add Tiff File",command=self.updateTiff)
         self.addTiffButton.grid(row=3,columnspan=100,sticky="s")
         
+        self.resetViewButton = tk.Button(self,text="Reset View",command=self.imageCanvas.resetView)
+        self.resetViewButton.grid(row=3,columnspan=100,sticky="w")
         
     
     
@@ -94,6 +101,7 @@ class imageDisplayPanel(tk.Frame):
     
     def newDataSet(self,numImages,frequencyList,imageIN_dir,imageNames,csvNames):
         #self.imageCanvas.delete("all")
+        self.imageCanvas.resetCustBounds()
         self.frequencyList = frequencyList
         self.curFrequency = 0
         self.image_dir = imageIN_dir;
@@ -157,7 +165,7 @@ class imageDisplayPanel(tk.Frame):
         x = event.x
         y = event.y
         
-        boundingBox = self.imageCanvas.getBoundingBox() #This is the geographic size    [left,top,right,bottom]
+        boundingBox = self.imageCanvas.getVisBoundingBox() #This is the geographic size    [left,top,right,bottom]
         imageSize = self.imageCanvas.getImageSize()     #This is the image's size       [width,height]
         
         if(boundingBox[0] == boundingBox[1] and boundingBox[0] == 0):
@@ -172,24 +180,64 @@ class imageDisplayPanel(tk.Frame):
         measurementRange = self.imageCanvas.getMeasurementRange()
         
         #textString = "longitude: %f\nLatitude: %f"%(Xpos,Ypos)
-        textString = "%f MHz\nMeasurementRange: [%.2f <-> %.2f]\nLatitude: %f\nLongitude: %f"%(self.frequencyList[self.curFrequency],measurementRange[0],measurementRange[1],Ypos,Xpos)
-        
-        self.locationText.config(state='normal')
-        self.locationText.delete(1.0, 'end')
-        self.locationText.insert('insert',textString)
-        self.locationText.config(state='disable',fg='black')
+        if(len(self.frequencyList)> 0):
+            textString = "%f MHz\nMeasurementRange: [%.2fdb <-> %.2fdb]\nLatitude: %f\nLongitude: %f"%(self.frequencyList[self.curFrequency],measurementRange[0],measurementRange[1],Ypos,Xpos)
+            
+            self.locationText.config(state='normal')
+            self.locationText.delete(1.0, 'end')
+            self.locationText.insert('insert',textString)
+            self.locationText.config(state='disable',fg='black')
         
     def mouseLeft(self,event):
-        print("MouseLeft")
-        print(self.frequencyList)
         if(len(self.frequencyList) !=0):
             self.locationText.config(state='normal')
             self.locationText.delete(1.0, 'end')
             measurementRange = self.imageCanvas.getMeasurementRange()
-            print(measurementRange)
-            self.locationText.insert('insert',"%f MHz\nMeasurementRange: [%.2f <-> %.2f]\n"%(self.frequencyList[self.curFrequency],measurementRange[0],measurementRange[1]))
+            self.locationText.insert('insert',"%f MHz\nMeasurementRange: [%.2fdb <-> %.2fdb]\n"%(self.frequencyList[self.curFrequency],measurementRange[0],measurementRange[1]))
             self.locationText.config(state='disable',fg='black')
-        
+    def imageButtonPressed(self,event):
+        if(len(self.frequencyList) !=0):
+            self.buttonPressedPos = [event.x,event.y]
+    def imageButtonReleased(self,event):
+        if(len(self.frequencyList) !=0):
+            x = event.x
+            y = event.y
+            
+            boundingBox = self.imageCanvas.getVisBoundingBox() #This is the geographic size    [left,top,right,bottom]
+            imageSize = self.imageCanvas.getImageSize()     #This is the image's size       [width,height]
+            
+            if(boundingBox[0] == boundingBox[1] and boundingBox[0] == 0):
+                #assume if BB,(0,0) there is nothing loaded
+                return
+            
+            xResolution = (boundingBox[2] - boundingBox[0]) / imageSize[0]
+            yResolution = (boundingBox[3] - boundingBox[1]) / imageSize[1]
+            
+            XApos = boundingBox[0] + self.buttonPressedPos[0] * xResolution
+            YApos = boundingBox[3] - self.buttonPressedPos[1] * yResolution
+            
+            
+            XBpos = boundingBox[0] + x * xResolution
+            YBpos = boundingBox[3] - y * yResolution
+            
+            if(XBpos < XApos):
+                leftEdge = XBpos
+                rightEdge = XApos
+            else:
+                leftEdge = XApos
+                rightEdge = XBpos
+                
+            if(YApos < YBpos):
+                topEdge = YBpos
+                botEdge = YApos
+            else:
+                topEdge = YApos
+                botEdge = YBpos
+                
+            newBoundingBox = [leftEdge,topEdge,rightEdge,botEdge]
+            self.imageCanvas.changeImage(newBounds = newBoundingBox)
+    
+        self.buttonPressedPos = [-1,-1]
     def getTiffFile(self):
         return self.imageCanvas.getTiffPath()
     def setTempDataDir(self,data_dir):
@@ -200,4 +248,8 @@ class imageDisplayPanel(tk.Frame):
         #numImages,frequencyList,imageIN_dir,imageNames,csvNames)
         self.newDataSet(0,[],"",[],[])
         self.imageCanvas.reset()
+    def getDataBoundingBox(self):
+        return self.imageCanvas.getDataBoundingBox()
+    def getVisibleBoundingBox(self):
+        return self.imageCanvas.getVisBoundingBox()
         

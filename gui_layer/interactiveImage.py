@@ -13,16 +13,19 @@ from glob import glob
 
 class interactiveImage(tk.Canvas):
     measurementRange = [0,0]
-    boundingBox = [0,0,0,0]
+    dataBoundingBox = [0,0,0,0]
+    visBoundingBox = [0,0,0,0]
     imageFrame = 0
     IMSize = [190, 270]
     tiffPath = ""
     csvPath = ""
     imagePath = ""
     imageDir = ""
+    
+    custBounds = [-1,-1,-1,-1]
 
     def __init__(self,parent):
-        tk.Canvas.__init__(self,parent,width=210,bg='#F0F0F0')
+        tk.Canvas.__init__(self,parent,width=210,bg='white')
         
         
         
@@ -33,8 +36,7 @@ class interactiveImage(tk.Canvas):
             if(extension == ".csv"):
                 if(os.path.isfile(csvPath)):
                     self.csvPath = csvPath
-                    self.imagePath = csvPath.replace(".csv",".png")
-                    
+                    self.imagePath = csvPath.replace(".csv",".png")            
         self.changeImage()
             
         
@@ -54,18 +56,28 @@ class interactiveImage(tk.Canvas):
         self.changeImage()
         
     
-    def changeImage(self,event=None):
+    def changeImage(self,event=None,newBounds=None):
         #Event is none so it can be called by eventhandler
         self.IMSize[0] = self.winfo_width()
         self.IMSize[1] = self.winfo_height()
             
-        [self.boundingBox,self.imagePath,self.measurementRange] = self.generateMapImage(tiffPath=self.tiffPath,csvPath=self.csvPath,mapWidth=self.IMSize[0],mapHeight=self.IMSize[1])
+        if(newBounds == None):
+            print(self.custBounds)
+            if(self.custBounds != [-1,-1,-1,-1]):
+                [self.dataBoundingBox,self.visBoundingBox,self.imagePath,self.measurementRange] = self.generateMapImage(tiffPath=self.tiffPath,csvPath=self.csvPath,mapWidth=self.IMSize[0],mapHeight=self.IMSize[1],custBoundingBox=self.custBounds)
+            else:
+                [self.dataBoundingBox,self.visBoundingBox,self.imagePath,self.measurementRange] = self.generateMapImage(tiffPath=self.tiffPath,csvPath=self.csvPath,mapWidth=self.IMSize[0],mapHeight=self.IMSize[1])
+        else:
+            self.custBounds = newBounds
+            [self.dataBoundingBox,self.visBoundingBox,self.imagePath,self.measurementRange] = self.generateMapImage(tiffPath=self.tiffPath,csvPath=self.csvPath,mapWidth=self.IMSize[0],mapHeight=self.IMSize[1],custBoundingBox=newBounds)
         
         self.photoimage = ImageTk.PhotoImage(file=self.imagePath)
         self.create_image(1, 1, image=self.photoimage,anchor="nw")
         
-    def getBoundingBox(self):
-        return self.boundingBox
+    def getDataBoundingBox(self):
+        return self.dataBoundingBox
+    def getVisBoundingBox(self):
+        return self.visBoundingBox
     
     def getImageSize(self):
         
@@ -82,9 +94,15 @@ class interactiveImage(tk.Canvas):
     def reset(self):
         #self.tiffPath = "" NOTE: I could clear the tiff, but I assume most runs will be in same area
         #There is no risk of multiple tiff files being loading
+        self.resetCustBounds()
         self.csvPath=""
         self.imagePath=""
         self.photoimage = None
+    def resetCustBounds(self):
+        self.custBounds = [-1,-1,-1,-1]
+    def resetView(self):
+        self.resetCustBounds()
+        self.changeImage()
             
         
             

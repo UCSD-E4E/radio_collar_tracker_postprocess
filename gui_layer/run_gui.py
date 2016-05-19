@@ -108,7 +108,8 @@ class Application():
                 while col < len(updatedFrequencyList):
                     concolFile.write("%d: %s\n" %(col+1,updatedFrequencyList[col]))
                     col = col+1
-    def generateMapImage(self,tiffPath="",csvPath="",outDir="",outName="temp.png",mapWidth=200,mapHeight=400):
+    def generateMapImage(self,tiffPath="",csvPath="",outDir="",outName="temp.png",mapWidth=200,mapHeight=400,
+                            custBoundingBox=[-1,-1,-1,-1],includeLegend=False):
         if(outDir == ""):
             outDir = self.tempDirPath
         if(csvPath != ""):
@@ -119,8 +120,9 @@ class Application():
             outName = tiffPath[lastIndex+1:].replace(".tif",".png")
     
         outImage = outDir+"/"+outName.replace(".png","_OVERLAY.png")
-        [boundingBox,measurementRange] = generateMapImage(tiffPath=tiffPath,csvPath=csvPath,outImage=outImage,mapWidth=mapWidth,mapHeight=mapHeight)
-        return [boundingBox,outImage,measurementRange]
+        [dataBoundingBox,visBoundingBox,measurementRange] = generateMapImage(tiffPath=tiffPath,csvPath=csvPath,outImage=outImage,mapWidth=mapWidth,mapHeight=mapHeight,
+                        custBoundingBox=custBoundingBox,includeLegend=includeLegend)
+        return [dataBoundingBox,visBoundingBox,outImage,measurementRange]
     
     def generateShapeFiles(self=None,file="",outdir="",outname=""):
         create_shapefile(file=file,outdir=outdir,outname=outname)

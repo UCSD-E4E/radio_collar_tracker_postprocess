@@ -10,7 +10,9 @@ import numpy as np
 
 
 
-def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=600,PV_BUFFER_CONST=.1,PH_BUFFER_CONST=.1):
+def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=600,
+                        PV_BUFFER_CONST=.1,PH_BUFFER_CONST=.1,custBoundingBox=[-1,-1,-1,-1],
+                        includeLegend=False):
     csvPath=csvPath.replace("//","/")
     #tiffPath           Absolute path to tiff file
     #csv path           Absolute path to csv
@@ -101,18 +103,6 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
         cutoff8 = minVal + cutOffResolution *8
         cutoff9 = minVal + cutOffResolution *9
         cutoff10 = maxVal
-        
-        print("Cutoff0: %f"%(cutoff0))
-        print("Cutoff1: %f"%(cutoff1))
-        print("Cutoff2: %f"%(cutoff2))
-        print("Cutoff3: %f"%(cutoff3))
-        print("Cutoff4: %f"%(cutoff4))
-        print("Cutoff5: %f"%(cutoff5))
-        print("Cutoff6: %f"%(cutoff6))
-        print("Cutoff7: %f"%(cutoff7))
-        print("Cutoff8: %f"%(cutoff8))
-        print("Cutoff9: %f"%(cutoff9))
-        print("Cutoff10: %f"%(cutoff10))
         
         
         #Create style for each point color layer
@@ -253,16 +243,30 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
     else:
         print("Gen_overlayed_image:CSV not found: %s"%(csvPath))
     zoomBoundBox = mapnik.Box2d(boundingBox[0],boundingBox[1],boundingBox[2],boundingBox[3])
-    map.zoom_to_box(zoomBoundBox)
+    
+    if(custBoundingBox != [-1,-1,-1,-1]):
+        custBox2D = mapnik.Box2d(custBoundingBox[0],custBoundingBox[1],custBoundingBox[2],custBoundingBox[3])
+        map.zoom_to_box(custBox2D)
+    else:
+        map.zoom_to_box(zoomBoundBox)
+    
+    
+    #Need to get actual bounds of image
+    mapBox = map.envelope()
+    outBoundingBox = [mapBox[0],mapBox[1],mapBox[2],mapBox[3]]
     
     if(outImage != ""):
         #TODO error checking
         outImage = outImage.replace("\\","/")
         #print(outImage)
         mapnik.render_to_file(map,str(outImage), 'png')
+        
+        if(includeLegend and os.path.isfile(csvPath)):
+            addLegend(outImage,csvPath)
 
-    return [boundingBox,measurementRange]
-
+    return [boundingBox,outBoundingBox,measurementRange]
+def addLegend(imagePath,csvPath):
+    print("TODO: Add legend here")
 if __name__ == "__main__":
     csvPath = os.path.dirname(os.path.realpath(__file__)) + '/run2070Edited.csv'
     tiffPath = os.path.dirname(os.path.realpath(__file__)) + '/run2070.tif'

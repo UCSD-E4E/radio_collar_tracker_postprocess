@@ -4,6 +4,9 @@ import shutil
 import os.path
 
 from simpleDialogs import *
+from selectTiffOutSize import overlayOutputsDialog
+
+import gdal #TODO: Move this to some other file, getTiffBoundsRes()
 
 class dataExportPanel(tk.Frame):
     imageFileNameList = []
@@ -58,11 +61,21 @@ class dataExportPanel(tk.Frame):
             self.exportButton.config(state='normal')
         else:
             self.exportButton.config(state='disabled')
-    def exportOverlays(self):
+    def exportOverlays(self,boundingBox = [0,0,0,0],outputSize=[0,0]):
         length = len(self.csvFileNameList)
         if(length <= 0):
             return
+        
+            
+        
         tiffPath = self.getTiffPath()
+        if(boundingBox == [0,0,0,0]):
+            print("TODO: add dialog for sizing selections")
+            custBoundingBox = self.getVisibleBoundingBox()
+            dataBoundingBox = self.getDataBoundingBox()
+            [tiffBounds,tiffRes] = self.getTiffBoundsRes(tiffPath)
+            dialog=overlayOutputsDialog(self.exportOverlays,tiffPath,self.csvFileNameList[0],
+                custBoundingBox,dataBoundingBox,tiffBounds,tiffRes)
         dest_dir = getDir()
         if(dest_dir==""):
             return
@@ -71,8 +84,7 @@ class dataExportPanel(tk.Frame):
         while i < length:
             csvPath = self.csvFileNameList[i]
             #print(csvPath)
-            self.generateMapImage(tiffPath=tiffPath,csvPath=csvPath,outDir=dest_dir,mapWidth=2000,mapHeight=2000)
-            
+            self.generateMapImage(tiffPath=tiffPath,csvPath=csvPath,outDir=dest_dir,mapWidth=2000,mapHeight=2000,includeLegend=True)
             i=i+1
     def exportShapes(self):
         length = len(self.csvFileNameList)
@@ -89,10 +101,44 @@ class dataExportPanel(tk.Frame):
             dest_dir=base_dir + '/' + outName
             self.generateShapeFiles(file=csvPath,outdir=dest_dir,outname=outName)
             i=i+1
+            
+            
+    def getTiffBoundsRes(self,tiffPath):
+        Tiffbounds = [0,0,0,0]
+        TiffRes = [0,0]
+        if(os.path.isfile(tiffPath)):
+            dataset = gdal.Open(tiffPath, GA_ReadOnly)
+            if dataset is None:
+                print 'Could not open file'
+            else:
+                x=1
+                #print("Image loaded")
+            
+                #Get details of image
+                cols = dataset.RasterXSize
+                rows = dataset.RasterYSize
+                bands = dataset.RasterCount
+                transform = dataset.GetGeoTransform()
+                #print("cols=[%d],rows=[%d],bands=[%d]"%(cols,rows,bands))
+                
+                #Manually get bounds of tiff file
+                leftEdge = transform[0]
+                pixelWidth = transform[1]
+                topEdge = transform[3]
+                pixelHeight = transform[5]
+                rightEdge = leftEdge + pixelWidth* cols
+                bottomEdge = topEdge + rows* pixelHeight
+                Tiffbounds = [leftEdge,topEdge,rightEdge,bottomEdge]
+                TiffRes = [pixelWidth,pixelHeight]
+        
+        return [Tiffbounds,TiffRes]
     def attachGetTiffPath(self,func):
         self.getTiffPath = func
     def attachGenerateMapImage(self,func):
         self.generateMapImage=func
     def attachGenerateShapeFiles(self,func):
         self.generateShapeFiles=func
-        
+    def attachGetVisibleBoundingBox(self,func):
+        self.getVisibleBoundingBox = func
+    def attachGetDataBoundingBox(self,func):
+        self.getDataBoundingBox = func    
