@@ -71,7 +71,7 @@ class dataExportPanel(tk.Frame):
         while i < length:
             csvPath = self.csvFileNameList[i]
             #print(csvPath)
-            self.generateMapImage(tiffPath=tiffPath,csvPath=csvPath,outDir=dest_dir,mapWidth=600,mapHeight=800)
+            self.generateMapImage(tiffPath=tiffPath,csvPath=csvPath,outDir=dest_dir,mapWidth=2000,mapHeight=2000)
             
             i=i+1
     def exportShapes(self):

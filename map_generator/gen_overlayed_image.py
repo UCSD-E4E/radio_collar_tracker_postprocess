@@ -102,6 +102,18 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
         cutoff9 = minVal + cutOffResolution *9
         cutoff10 = maxVal
         
+        print("Cutoff0: %f"%(cutoff0))
+        print("Cutoff1: %f"%(cutoff1))
+        print("Cutoff2: %f"%(cutoff2))
+        print("Cutoff3: %f"%(cutoff3))
+        print("Cutoff4: %f"%(cutoff4))
+        print("Cutoff5: %f"%(cutoff5))
+        print("Cutoff6: %f"%(cutoff6))
+        print("Cutoff7: %f"%(cutoff7))
+        print("Cutoff8: %f"%(cutoff8))
+        print("Cutoff9: %f"%(cutoff9))
+        print("Cutoff10: %f"%(cutoff10))
+        
         
         #Create style for each point color layer
         detection1 = mapnik.PointSymbolizer(mapnik.PathExpression("pointImages/detector1.png"))
@@ -142,6 +154,16 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
         
         
         
+        detection1.ignore_placement= True
+        detection2.ignore_placement= True
+        detection3.ignore_placement= True
+        detection4.ignore_placement= True
+        detection5.ignore_placement= True
+        detection6.ignore_placement= True
+        #detection7.ignore_placement= True
+        #detection8.ignore_placement= True
+        #detection9.ignore_placement= True
+        #detection10.ignore_placement= True
         
         
         

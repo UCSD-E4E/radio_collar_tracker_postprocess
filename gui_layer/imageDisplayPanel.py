@@ -171,7 +171,7 @@ class imageDisplayPanel(tk.Frame):
         measurementRange = self.imageCanvas.getMeasurementRange()
         
         #textString = "longitude: %f\nLatitude: %f"%(Xpos,Ypos)
-        textString = "%06f MHz\nMeasurementRange: [%04f <-> %04f]\nLatitude: %f\nLongitude: %f"%(self.frequencyList[self.curFrequency],measurementRange[0],measurementRange[1],Ypos,Xpos)
+        textString = "%.3f MHz\nMeasurementRange: [%.2f <-> %.2f]\nLatitude: %f\nLongitude: %f"%(self.frequencyList[self.curFrequency],measurementRange[0],measurementRange[1],Ypos,Xpos)
         
         self.locationText.config(state='normal')
         self.locationText.delete(1.0, 'end')
