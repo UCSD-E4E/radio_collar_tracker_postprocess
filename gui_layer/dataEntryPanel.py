@@ -20,6 +20,7 @@ from datetime import datetime, timedelta
 import glob
 #from newFrequencyPanel import frequencyPanel
 
+DEBUG = True
 
 class dataEntryPanel(tk.Frame):
     #TODO: Need to add functionality for collecting collar frequencies
@@ -214,7 +215,10 @@ class directoryPanel(tk.Frame):
     def updateDirectory(self,data_dir=""):
         #self.dirTB.config(state='normal')
         if(data_dir == ""):
-            data_dir = getDir() #'C:/Users/Work/Documents/Files/Projects/RadioCollar/SampleData/RCT_SAMPLE/RUN_002027-copy'\
+            if(DEBUG):
+                data_dir = "C:\Users\e4e\Desktop\RCT_SAMPLE\RUN_002027-copy"
+            else:
+                data_dir = getDir() #'C:/Users/Work/Documents/Files/Projects/RadioCollar/SampleData/RCT_SAMPLE/RUN_002027-copy'\
             self.data_dir = data_dir
             self.dirTV.set(self.data_dir)
         #self.parent.parent.quitter()

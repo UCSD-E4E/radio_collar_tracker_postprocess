@@ -27,7 +27,7 @@ from display_data import display_data
 
 import glob
 
-
+DEBUG = True
 
 def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,frequencyList=[],tempFolder=""):
 
@@ -90,7 +90,8 @@ def scriptImplementation(programPath,data_dir,config_dir,run,flt_alt,num_col,fre
         #argString = '-f ' + str(beat_freq) + ' -i ' + str(raw_file) + ' -o ' + str(collarFile)
         print("Generating raw file for collar %09d"%(frequency))
         
-        p = subprocess.call(GNU_RADIO_PIPELINE + ' ' + argString, shell=True)
+        if(not DEBUG):
+            p = subprocess.call(GNU_RADIO_PIPELINE + ' ' + argString, shell=True)
         
         #non-blocking
         #p = subprocess.Popen(GNU_RADIO_PIPELINE + ' ' + argString, shell=True)

@@ -12,6 +12,8 @@ from gen_overlayed_image import generateMapImage
 from create_shapefile import create_shapefile
 from getFileName import *
 
+DEBUG = True
+
 
 class Application():
     tempDir = ""
@@ -47,7 +49,8 @@ class Application():
         #print("run_num= %d, flt_alt= %d, num_col= %d" % (run_num,flt_alt,num_col))
         imageList = []
         csvList = []
-        self.clearTempFolder()
+        if(not DEBUG):
+            self.clearTempFolder()
         self.GUI.resetImageFrame()
         self.GUI.resetExportFrame()
         

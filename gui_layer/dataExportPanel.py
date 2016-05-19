@@ -7,6 +7,7 @@ from simpleDialogs import *
 from selectTiffOutSize import overlayOutputsDialog
 
 import gdal #TODO: Move this to some other file, getTiffBoundsRes()
+from gdalconst import *
 
 class dataExportPanel(tk.Frame):
     imageFileNameList = []
@@ -61,7 +62,7 @@ class dataExportPanel(tk.Frame):
             self.exportButton.config(state='normal')
         else:
             self.exportButton.config(state='disabled')
-    def exportOverlays(self,boundingBox = [0,0,0,0],outputSize=[0,0]):
+    def exportOverlays(self,boundingBox=[0,0,0,0],size=[0,0]):
         length = len(self.csvFileNameList)
         if(length <= 0):
             return
@@ -69,13 +70,14 @@ class dataExportPanel(tk.Frame):
             
         
         tiffPath = self.getTiffPath()
-        if(boundingBox == [0,0,0,0]):
+        if(boundingBox[0] == 0 or boundingBox[1] == 0 or boundingBox[2] == 0 or boundingBox[3] == 0 or size[0] <= 0 or size[1] <= 0):
             print("TODO: add dialog for sizing selections")
             custBoundingBox = self.getVisibleBoundingBox()
             dataBoundingBox = self.getDataBoundingBox()
             [tiffBounds,tiffRes] = self.getTiffBoundsRes(tiffPath)
             dialog=overlayOutputsDialog(self.exportOverlays,tiffPath,self.csvFileNameList[0],
                 custBoundingBox,dataBoundingBox,tiffBounds,tiffRes)
+            return
         dest_dir = getDir()
         if(dest_dir==""):
             return
@@ -84,7 +86,7 @@ class dataExportPanel(tk.Frame):
         while i < length:
             csvPath = self.csvFileNameList[i]
             #print(csvPath)
-            self.generateMapImage(tiffPath=tiffPath,csvPath=csvPath,outDir=dest_dir,mapWidth=2000,mapHeight=2000,includeLegend=True)
+            self.generateMapImage(tiffPath=tiffPath,csvPath=csvPath,outDir=dest_dir,mapWidth=size[0],mapHeight=size[1],custBoundingBox=boundingBox,includeLegend=True)
             i=i+1
     def exportShapes(self):
         length = len(self.csvFileNameList)
@@ -129,7 +131,7 @@ class dataExportPanel(tk.Frame):
                 rightEdge = leftEdge + pixelWidth* cols
                 bottomEdge = topEdge + rows* pixelHeight
                 Tiffbounds = [leftEdge,topEdge,rightEdge,bottomEdge]
-                TiffRes = [pixelWidth,pixelHeight]
+                TiffRes = [pixelWidth,-pixelHeight]
         
         return [Tiffbounds,TiffRes]
     def attachGetTiffPath(self,func):

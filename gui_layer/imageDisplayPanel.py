@@ -202,7 +202,27 @@ class imageDisplayPanel(tk.Frame):
         if(len(self.frequencyList) !=0):
             x = event.x
             y = event.y
-            
+            xDif = x- self.buttonPressedPos[0]
+            yDif = y- self.buttonPressedPos[1]
+            if(xDif >= 0):
+                if(xDif < 5):
+                    self.buttonPressedPos = [-1,-1]
+                    return
+            elif(xDif <= 0):
+                if(xDif > -5):
+                    self.buttonPressedPos = [-1,-1]
+                    return
+            if(yDif >= 0):
+                if(yDif < 5):
+                    self.buttonPressedPos = [-1,-1]
+                    return
+            elif(yDif <= 0):
+                if(yDif > -5):
+                    self.buttonPressedPos = [-1,-1]
+                    return
+                            
+                    
+                    
             boundingBox = self.imageCanvas.getVisBoundingBox() #This is the geographic size    [left,top,right,bottom]
             imageSize = self.imageCanvas.getImageSize()     #This is the image's size       [width,height]
             
