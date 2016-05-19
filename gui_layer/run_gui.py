@@ -159,6 +159,7 @@ class Application():
     def getConfigDir(self):
         return self.configDir
     def quit(self):
+        self.clearTempFolder()
         self.root.destroy()
         sys.exit()
     

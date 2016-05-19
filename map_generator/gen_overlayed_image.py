@@ -142,15 +142,15 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
         
         #Do not want smaller numbers to overlap
         #detection1.allow_overlap = True
-        detection2.allow_overlap = True
-        detection3.allow_overlap = True
-        detection4.allow_overlap = True
-        detection5.allow_overlap = True
-        detection6.allow_overlap = True
-        detection7.allow_overlap = True
-        detection8.allow_overlap = True
-        detection9.allow_overlap = True
-        detection10.allow_overlap = True
+        #detection2.allow_overlap = True
+        #detection3.allow_overlap = True
+        #detection4.allow_overlap = True
+        #detection5.allow_overlap = True
+        #detection6.allow_overlap = True
+        #detection7.allow_overlap = True
+        #detection8.allow_overlap = True
+        #detection9.allow_overlap = True
+        #detection10.allow_overlap = True
         
         
         
@@ -160,7 +160,7 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
         detection4.ignore_placement= True
         detection5.ignore_placement= True
         detection6.ignore_placement= True
-        #detection7.ignore_placement= True
+        detection7.ignore_placement= True
         #detection8.ignore_placement= True
         #detection9.ignore_placement= True
         #detection10.ignore_placement= True
@@ -207,16 +207,16 @@ def generateMapImage(tiffPath="",csvPath="",outImage="",mapWidth=600,mapHeight=6
         #pointRule = mapnik.Rule()
         #pointRule.symbols.append(pointSymbolizer)
         pointStyle = mapnik.Style()
-        pointStyle.rules.append(pointRule1)
-        pointStyle.rules.append(pointRule2)
-        pointStyle.rules.append(pointRule3)
-        pointStyle.rules.append(pointRule4)
-        pointStyle.rules.append(pointRule5)
-        pointStyle.rules.append(pointRule6)
-        pointStyle.rules.append(pointRule7)
-        pointStyle.rules.append(pointRule8)
-        pointStyle.rules.append(pointRule9)
         pointStyle.rules.append(pointRule10)
+        pointStyle.rules.append(pointRule9)
+        pointStyle.rules.append(pointRule8)
+        pointStyle.rules.append(pointRule7)
+        pointStyle.rules.append(pointRule6)
+        pointStyle.rules.append(pointRule5)
+        pointStyle.rules.append(pointRule4)
+        pointStyle.rules.append(pointRule3)
+        pointStyle.rules.append(pointRule2)
+        pointStyle.rules.append(pointRule1)
         map.append_style('Point Style',pointStyle)
 
 

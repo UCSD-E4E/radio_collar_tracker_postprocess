@@ -70,7 +70,7 @@ class imageDisplayPanel(tk.Frame):
         
         self.frames = {}
         
-        self.locationText = tk.Text(self,height=4,state='disable',bg='#F0F0F0',bd=0,wrap='char',width=40)
+        self.locationText = tk.Text(self,height=4,state='disable',bg='#F0F0F0',bd=0,wrap='none',width=40)
         self.locationText.config(state='normal')
         self.locationText.delete(1.0, 'end')
         self.locationText.config(state='disable',fg='#F0F0F0')
@@ -125,6 +125,7 @@ class imageDisplayPanel(tk.Frame):
             
         self.numImages = numImages    
         if(numImages > 0):
+            print("Changing image")
             self.changeImage(0)
         
         #if self.numImages >0:
@@ -171,7 +172,7 @@ class imageDisplayPanel(tk.Frame):
         measurementRange = self.imageCanvas.getMeasurementRange()
         
         #textString = "longitude: %f\nLatitude: %f"%(Xpos,Ypos)
-        textString = "%.3f MHz\nMeasurementRange: [%.2f <-> %.2f]\nLatitude: %f\nLongitude: %f"%(self.frequencyList[self.curFrequency],measurementRange[0],measurementRange[1],Ypos,Xpos)
+        textString = "%f MHz\nMeasurementRange: [%.2f <-> %.2f]\nLatitude: %f\nLongitude: %f"%(self.frequencyList[self.curFrequency],measurementRange[0],measurementRange[1],Ypos,Xpos)
         
         self.locationText.config(state='normal')
         self.locationText.delete(1.0, 'end')
@@ -179,12 +180,15 @@ class imageDisplayPanel(tk.Frame):
         self.locationText.config(state='disable',fg='black')
         
     def mouseLeft(self,event):
+        print("MouseLeft")
+        print(self.frequencyList)
         if(len(self.frequencyList) !=0):
             self.locationText.config(state='normal')
             self.locationText.delete(1.0, 'end')
             measurementRange = self.imageCanvas.getMeasurementRange()
-            self.locationText.insert('insert',"%f MHz\nMeasurementRange: [%04f <-> %04f]\n"%(self.frequencyList[self.curFrequency],measurementRange[0],measurementRange[1]))
-            self.locationText.config(state='disable')
+            print(measurementRange)
+            self.locationText.insert('insert',"%f MHz\nMeasurementRange: [%.2f <-> %.2f]\n"%(self.frequencyList[self.curFrequency],measurementRange[0],measurementRange[1]))
+            self.locationText.config(state='disable',fg='black')
         
     def getTiffFile(self):
         return self.imageCanvas.getTiffPath()

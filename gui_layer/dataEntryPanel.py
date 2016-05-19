@@ -388,7 +388,6 @@ class frequencyPanel(tk.Frame):
                 
         self.numColsTV.set(str(count))
     def changeFrequencyRange(self,frequencyRange = [0,178000000]):
-        print("TODO: UPDATE MIN/MAX FREQ BOXES")
 
         if(frequencyRange[0] ==0): 
             print("NOTE: Center frequency is 0, please input a more sensical frequency")
@@ -396,8 +395,6 @@ class frequencyPanel(tk.Frame):
         self.minFreqTV.set(frequencyRange[0])
         self.maxFreqTV.set(frequencyRange[1])
         for panel in self.freqPanelList:
-            print("MainPanel")
-            print(frequencyRange)
             panel.setFrequencyRange(frequencyRange)
             
     def initWidgets(self):
@@ -472,10 +469,7 @@ class frequencySubPanel(tk.Frame):
         
         self.destroy()
     def setFrequencyRange(self,frequencyRange):
-        print("Set subpanel")
-        print(frequencyRange)
         self.frequencyRange = frequencyRange
-        print(self.frequencyRange)
         self.freqValTV.set(self.freqValTV.get())
         
     def changeFreq(self):
@@ -491,8 +485,6 @@ class frequencySubPanel(tk.Frame):
             if(string != ""):
                 self.freqTB.config(bg="red")
                 return
-        print("on panel")
-        print(self.frequencyRange)
         if(self.frequencyRange[0] != 0 and isInt == True):
             if(val < self.frequencyRange[0] or val > self.frequencyRange[1]):
                 self.freqTB.config(bg="red")
