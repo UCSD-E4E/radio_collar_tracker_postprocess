@@ -33,7 +33,8 @@ meta_file_stream = open(input_dir + meta_file, 'r')
 # Get start time
 start_time = float(meta_file_stream.readline().strip().split(':')[1].strip())
 center_freq = int(meta_file_stream.readline().strip().split(':')[1].strip())
-sampling_freq = int(meta_file_stream.readline().strip().split(':')[1].strip())/1024
+fft_length = 4096;
+sampling_freq = int(meta_file_stream.readline().strip().split(':')[1].strip()) / fft_length
 gain = float(meta_file_stream.readline().strip().split(':')[1].strip())
 
 # Initialize GPS stream

@@ -14,7 +14,7 @@
 #include <dirent.h>
 #endif
 
-#define FFT_LENGTH 1024
+#define FFT_LENGTH 4096
 #define SAMPLE_RATE 2048000
 #define SIG_LENGTH (int)(0.06 * SAMPLE_RATE / FFT_LENGTH)
 

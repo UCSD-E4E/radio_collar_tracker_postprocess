@@ -4,7 +4,7 @@
 extern "C"{
 	#include "fft_detect.h"
 }
-#define FFT_LENGTH 1024
+#define FFT_LENGTH 4096
 
 using namespace std;
 
@@ -53,10 +53,12 @@ int main(int argc, char** argv) {
 		return -1;
 	}
 
-	int fft_index = beat_freq * (1024.0 / 2048000);
+	int fft_index = beat_freq * ((float)FFT_LENGTH / 2048000);
 	if(fft_index < 0){
 		fft_index = FFT_LENGTH + fft_index;
 	}
+
+	printf("Using %d bin\n", fft_index);
 
 	return process(input_file.c_str(), output_file.c_str(), fft_index, run_num);
 
