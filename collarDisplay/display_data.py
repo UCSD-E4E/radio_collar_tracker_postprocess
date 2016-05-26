@@ -49,16 +49,21 @@ data = np.genfromtxt(filename, delimiter=',', names=names)
 # Modify values
 lat = [x / 1e7 for x in data['lat']]
 lon = [x / 1e7 for x in data['lon']]
+col = data['col']
 
 # convert deg to utm
 zone = "X"
 zonenum = 60
+avgCol = np.average(col)
 for i in range(len(data['lat'])):
 	utm_coord = utm.from_latlon(lat[i], lon[i])
 	lon[i] = utm_coord[0]
 	lat[i] = utm_coord[1]
 	zonenum = utm_coord[2]
 	zone = utm_coord[3]
+	if col[i] < avgCol:
+		col[i] = avgCol
+
 
 # Configure plot
 fig = plot.figure()
@@ -70,7 +75,7 @@ ax.get_xaxis().get_major_formatter().set_useOffset(False)
 ax.get_yaxis().get_major_formatter().set_useOffset(False)
 ax.set_xlabel('Easting')
 ax.set_ylabel('Northing')
-ax.set_title('Run %d, Collar %d at %3.3f MHz\nUTM Zone: %d %s' % (run_num, num_col, col_freq, zonenum, zone))
+ax.set_title('Run %d, Collar %d at %3.4f MHz\nUTM Zone: %d %s' % (run_num, num_col, col_freq, zonenum, zone))
 ax.set_aspect('equal')
 plot.xticks(rotation='vertical')
 
