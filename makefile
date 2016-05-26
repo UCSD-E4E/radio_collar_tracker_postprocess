@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-.PHONY: clean all install uninstall configure
+.PHONY: clean all install uninstall configure fft_detect/fft_detect
 
 all: fft_detect/fft_detect
 
@@ -15,6 +15,7 @@ install: fft_detect/fft_detect raw_gps_analysis/raw_gps_analysis.py\
 	python_dialogs/filechooser.py python_dialogs/getRunNum.py\
 	python_dialogs/getCollars.py CLI_GUI/cat_relevant.py\
 	python_dialogs/getFltAlt.py CLI_GUI/cas2.sh rct_bin_ref.sh
+
 	cp rct_bin_ref.sh /usr/bin/rct_bin_ref.sh
 	chmod +x /usr/bin/rct_bin_ref.sh
 	cp CLI_GUI/cas2.sh /usr/bin/rct_cas
@@ -51,7 +52,7 @@ uninstall:
 	-rm /usr/bin/rct_bin_ref.sh
 	-rm /usr/bin/rct_cas
 
-fft_detect/fft_detect: fft_detect/fft_detect.cpp
+fft_detect/fft_detect:
 	make -C fft_detect
 
 config/SDR.cfg: config

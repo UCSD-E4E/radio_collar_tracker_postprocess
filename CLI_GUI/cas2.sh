@@ -98,16 +98,16 @@ meta_file=`printf "%s/META_%06d" ${data_dir} ${run}`
 sdr_center_freq=`${META_FILE_READER} -i ${meta_file} -t center_freq`
 sdr_ppm=`${META_FILE_READER} -i ${CONFIG_DIR}/SDR.cfg -t sdr_ppm`
 
-# Concatenate raw files together
-if [[ -e $raw_file ]]
-then
-	rm ${raw_file}
-fi
-${CAT_RELEVANT} -i ${data_dir} -r ${run}
-if ! [[ $? -eq 0 ]]
-then
-	exit 1
-fi
+# # Concatenate raw files together
+# if [[ -e $raw_file ]]
+# then
+# 	rm ${raw_file}
+# fi
+# ${CAT_RELEVANT} -i ${data_dir} -r ${run}
+# if ! [[ $? -eq 0 ]]
+# then
+# 	exit 1
+# fi
 
 # Run through GNU Radio pipeline for each collar
 for i in `seq 1 ${num_collars}`
@@ -124,7 +124,7 @@ do
 		exit 1
 	fi
 	# Execute pipeline
-	${GNU_RADIO_PIPELINE} -f ${beat_freq} -i ${raw_file} -o `printf "%s%06d.raw" ${collar_file_prefix} ${i}`
+	${GNU_RADIO_PIPELINE} -f ${beat_freq} -i ${data_dir} -o `printf "%s%06d.raw" ${collar_file_prefix} ${i}` -r ${run}
 	if ! [[ $? -eq 0 ]]
 	then
 		exit 1
