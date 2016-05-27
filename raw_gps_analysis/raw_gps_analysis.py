@@ -33,6 +33,9 @@ if __name__ == "__main__":
 #args = parser.parse_args()
 
 def raw_gps_analysis(input_dir,output_dir,run_num,col_num,tar_alt,raw_dir=""):
+    fft_length = 4096;
+
+
     #col_num is now the frequency in KHZ
     # Set configuration
     
@@ -47,7 +50,8 @@ def raw_gps_analysis(input_dir,output_dir,run_num,col_num,tar_alt,raw_dir=""):
     # Get start time
     start_time = float(meta_file_stream.readline().strip().split(':')[1].strip())
     center_freq = int(meta_file_stream.readline().strip().split(':')[1].strip())
-    sampling_freq = int(meta_file_stream.readline().strip().split(':')[1].strip())/1024
+    
+    sampling_freq = int(meta_file_stream.readline().strip().split(':')[1].strip()) / fft_length
     gain = float(meta_file_stream.readline().strip().split(':')[1].strip())
 
     # Initialize GPS stream
