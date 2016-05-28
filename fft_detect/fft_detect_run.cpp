@@ -34,10 +34,10 @@ int main(int argc, char** argv) {
 				input_file = optarg;
 				hasInput = true;
 				break;
-			case 'f':
-				beat_freq = atoi(optarg);
-				hasFreq = true;
-				break;
+			// case 'f':
+			// 	beat_freq = atoi(optarg);
+			// 	hasFreq = true;
+			// 	break;
 			case 'r':
 				run_num = atoi(optarg);
 				hasRun = true;
@@ -48,18 +48,30 @@ int main(int argc, char** argv) {
 		}
 	}
 
+	if(optind == argc){
+		cerr << "No frequencies found!" << endl;
+		return -1;
+	}else{
+		hasFreq = true;
+	}
 	if(!(hasOutput && hasInput && hasFreq && hasRun)){
 		cerr << "Not enough args!" << endl;
 		return -1;
 	}
-
-	int fft_index = beat_freq * ((float)FFT_LENGTH / 2048000);
-	if(fft_index < 0){
-		fft_index = FFT_LENGTH + fft_index;
+	int* frequencies = (int*) malloc(sizeof(int) * (argc - optind));
+	int numFrequencies = argc - optind;
+	for(int i = optind; i < argc; ++i){
+		beat_freq = atoi(argv[i]);
+		frequencies[i - optind] = beat_freq * ((float)FFT_LENGTH / 2048000);
+		if(frequencies[i - optind] < 0 || frequencies[i - optind] > FFT_LENGTH){
+			return -1;
+		}
+		printf("Using %d bin\n", frequencies[i - optind]);
 	}
 
-	printf("Using %d bin\n", fft_index);
 
-	return process(input_file.c_str(), output_file.c_str(), fft_index, run_num);
+
+
+	return process(input_file.c_str(), output_file.c_str(), numFrequencies, frequencies, run_num);
 
 }

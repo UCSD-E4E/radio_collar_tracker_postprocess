@@ -34,13 +34,21 @@ PyMODINIT_FUNC initfft_detect(void){
 }
 #endif
 
-int process(const char* run_dir, const char* ofile, const int freq_bin, const int run_num){
+int process(const char* run_dir, const char* ofile, const int num_freqs, const int* freq_bins, const int run_num){
 	FILE* in_file;
-	FILE* out_file = fopen(ofile, "wb");
-
-	if(freq_bin < 0 || freq_bin >= FFT_LENGTH){
-		return -1;
+	FILE** out_file = malloc(sizeof(FILE*) * num_freqs);
+	int i;
+	for(i = 0; i < num_freqs; ++i){
+		char* filename = calloc(sizeof(char), 1024);
+		sprintf(filename, "RUN_%06d_%06d.raw", run_num, i + 1);
+		out_file[i] = fopen(filename, "wb");
+    	free(filename);
 	}
+
+
+	// if(freq_bins < 0 || freq_bins >= FFT_LENGTH){
+	// 	return -1;
+	// }
 
 #ifdef __unix__
 	int num_files = 0;
@@ -64,14 +72,24 @@ int process(const char* run_dir, const char* ofile, const int freq_bin, const in
 	// RAW IQ buffer
 	uint8_t buffer[2];
 	// Sample buffer
-	float sbuf[2];
+	float sbuf[num_freqs][2];
 	// Sample counter
 	int counter = 0;
 	int file_num = 0;
 
-	double* history = (double*) calloc(2 * sizeof(double), SIG_LENGTH);
-	unsigned int history_idx = 0;
-	float convolution[2] = {0, 0};
+	double** history = (double**) malloc(sizeof(double*) * num_freqs);
+	unsigned int history_idx[num_freqs];
+	float convolution[num_freqs][2];
+	for(i = 0; i < num_freqs; i++){
+		history[i] = (double*) calloc(2 * sizeof(double), SIG_LENGTH);
+		history_idx[i] = 0;
+	}
+
+	int convolution_row;
+	for(convolution_row = 0; convolution_row < num_freqs; convolution_row++){
+		convolution[convolution_row][0] = 0;
+		convolution[convolution_row][1] = 0;
+	}
 
 	fft_buffer_in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * FFT_LENGTH);
 	fft_buffer_out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * FFT_LENGTH);
@@ -88,7 +106,6 @@ int process(const char* run_dir, const char* ofile, const int freq_bin, const in
 		return -1;
 	}
 
-	int i;
 
 #ifdef __unix__
 	char* progress_bar = (char*) calloc(sizeof(char), PROGRESS_BAR_LEN + 1);
@@ -101,22 +118,26 @@ int process(const char* run_dir, const char* ofile, const int freq_bin, const in
 	fflush(stdout);
 #endif
 
+	int collar;
+
 	while(!feof(in_file)){
 		if(!(counter < FFT_LENGTH)){
 			counter = 0;
 			fftw_execute(p);
-			sbuf[0] = (float)fft_buffer_out[freq_bin][0] / FFT_LENGTH;
-			sbuf[1] = (float)fft_buffer_out[freq_bin][1] / FFT_LENGTH;
-			history[history_idx * 2] = sbuf[0] * sbuf[0];
-			history[history_idx * 2 + 1] = sbuf[1] * sbuf[1];
-			convolution[0] = 0;
-			convolution[1] = 0;
-			for(i = 0; i < SIG_LENGTH; i++){
-				convolution[0] += history[i * 2];
-				convolution[1] += history[i * 2 + 1];
+			for(collar = 0; collar < num_freqs; collar++){
+				sbuf[collar][0] = (float)fft_buffer_out[freq_bins[collar]][0] / FFT_LENGTH;
+				sbuf[collar][1] = (float)fft_buffer_out[freq_bins[collar]][1] / FFT_LENGTH;
+				history[collar][history_idx[collar] * 2] = sbuf[collar][0] * sbuf[collar][0];
+				history[collar][history_idx[collar] * 2 + 1] = sbuf[collar][1] * sbuf[collar][1];
+				convolution[collar][0] = 0;
+				convolution[collar][1] = 0;
+				for(i = 0; i < SIG_LENGTH; i++){
+					convolution[collar][0] += history[collar][i * 2];
+					convolution[collar][1] += history[collar][i * 2 + 1];
+				}
+				history_idx[collar] = (history_idx[collar] + 1) % SIG_LENGTH;
+				fwrite(convolution[collar], sizeof(float), 2, out_file[collar]);
 			}
-			history_idx = (history_idx + 1) % SIG_LENGTH;
-			fwrite(convolution, sizeof(float), 2, out_file);
 		}
 		int num_bytes_read = fread((void*)buffer, sizeof(uint8_t), 2, in_file);
 		if(num_bytes_read == 0 && feof(in_file)){
@@ -151,7 +172,15 @@ int process(const char* run_dir, const char* ofile, const int freq_bin, const in
 	fftw_destroy_plan(p);
 	fftw_cleanup();
 	free(ifile);
-	fclose(out_file);
+	for(i = 0; i < num_freqs; ++i){
+		fclose(out_file[i]);
+		free(history[i]);
+	}
+
+	free(out_file);
+
+	free(history);
+
 #ifdef __unix__
 	printf("\n");
 	free(progress_bar);
@@ -164,13 +193,14 @@ int process(const char* run_dir, const char* ofile, const int freq_bin, const in
 static PyObject* fft_detect(PyObject* self, PyObject* args){
 	char* ifile_cstr;
 	char* ofile_cstr;
-	int freq_bin;
+	int num_freqs;
+	int* freq_bins;
 	int run_num;
 	int retval;
-	if(!PyArg_ParseTuple(args, "ssii", &ifile_cstr, &ofile_cstr, &freq_bin, &run_num)){
+	if(!PyArg_ParseTuple(args, "ssii", &ifile_cstr, &ofile_cstr, &num_freqs, &freq_bins, &run_num)){
 		return NULL;
 	}
-	retval = process(ifile_cstr, ofile_cstr, freq_bin, run_num);
+	retval = process(ifile_cstr, ofile_cstr,num_freqs, freq_bins, run_num);
 	return Py_BuildValue("i", retval);
 }
 #endif
