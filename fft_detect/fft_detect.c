@@ -10,7 +10,7 @@
 #include <Python.h>
 #endif
 
-#ifdef __unix__
+#if defined (__unix__) || (__MACH__)
 #include <dirent.h>
 #endif
 
@@ -50,7 +50,7 @@ int process(const char* run_dir, const char* ofile, const int num_freqs, const i
 	// 	return -1;
 	// }
 
-#ifdef __unix__
+#if defined (__unix__) || (__MACH__)
 	int num_files = 0;
 	DIR* dirp;
 	struct dirent* entry;
@@ -107,7 +107,7 @@ int process(const char* run_dir, const char* ofile, const int num_freqs, const i
 	}
 
 
-#ifdef __unix__
+#if defined (__unix__) || (__MACH__)
 	char* progress_bar = (char*) calloc(sizeof(char), PROGRESS_BAR_LEN + 1);
 	char* format_string = malloc(sizeof(char) * 17);
 	sprintf(format_string, "%s%d%s", "\r[%-", PROGRESS_BAR_LEN, "s]%3.0f%%");
@@ -144,7 +144,7 @@ int process(const char* run_dir, const char* ofile, const int num_freqs, const i
 			sprintf(ifile, "%s/RAW_DATA_%06d_%06d", run_dir, run_num, ++file_num);
 			fclose(in_file);
 			in_file = fopen(ifile, "rb");
-#ifdef __unix__
+#if defined (__unix__) || (__MACH__)
 			int j;
 			for(j = 0; j < (int)round((float)PROGRESS_BAR_LEN * file_num / num_files); ++j){
 				progress_bar[j] = '#';
@@ -181,7 +181,7 @@ int process(const char* run_dir, const char* ofile, const int num_freqs, const i
 
 	free(history);
 
-#ifdef __unix__
+#if defined (__unix__) || (__MACH__)
 	printf("\n");
 	free(progress_bar);
 	free(format_string);
