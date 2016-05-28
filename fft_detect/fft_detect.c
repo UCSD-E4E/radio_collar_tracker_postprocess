@@ -40,7 +40,7 @@ int process(const char* run_dir, const char* ofile, const int num_freqs, const i
 	int i;
 	for(i = 0; i < num_freqs; ++i){
 		char* filename = calloc(sizeof(char), 1024);
-		sprintf(filename, "RUN_%06d_%06d.raw", run_num, i + 1);
+		sprintf(filename, "%s/RUN_%06d_%06d.raw", ofile, run_num, i + 1);
 		out_file[i] = fopen(filename, "wb");
     	free(filename);
 	}
