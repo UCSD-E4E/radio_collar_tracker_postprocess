@@ -19,7 +19,7 @@ fft_detect = ""
 if platform.system() == "Windows":
 	config_dir = os.path.join("C:", os.sep, "Users", "e4e", ".rct", "")
 	fft_detect = os.path.join("C:", os.sep, "Users", "e4e", "fft_detect", "fft_detect.exe")
-elif platform.system() == "Linux":
+elif platform.system() == "Linux" or platform.system() == 'Darwin':
 	config_dir = os.path.join(os.sep, "usr", "local", "etc", "rct", "")
 	fft_detect = os.path.join(os.sep, "usr", "local", "bin", "fft_detect")
 
