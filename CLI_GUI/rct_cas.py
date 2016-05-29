@@ -11,6 +11,7 @@ import get_beat_frequency
 import subprocess
 import raw_gps_analysis
 import display_data
+import fileinput
 
 # Constants
 config_dir = ""
@@ -24,22 +25,27 @@ elif platform.system() == "Linux":
 
 parser = argparse.ArgumentParser(description='Processes Radio Collar Tracker Data')
 
-parser.add_argument('-s', '--signal-distance', action = 'store_true', default = false, help = 'Enables distance to signal plots', dest = 'signal_dist')
-parser.add_argument('-r', '--record', action = 'store_true', default = false, help = 'Records the current run configuration', dest = 'record')
-parser.add_argument('-c', '--clear', action = 'store_true', default = false, help = 'Clears the existing run configuration', dest = 'clear_run')
+parser.add_argument('-s', '--signal-distance', action = 'store_true', default = False, help = 'Enables distance to signal plots', dest = 'signal_dist')
+parser.add_argument('-r', '--record', action = 'store_true', default = False, help = 'Records the current run configuration', dest = 'record')
+parser.add_argument('-c', '--clear', action = 'store_true', default = False, help = 'Clears the existing run configuration', dest = 'clear_run')
+parser.add_argument('-i', '--input', help = 'Input Directory', metavar = 'data_dir', dest = 'data_dir', default = None)
 
 args = parser.parse_args()
 signal_dist_output = args.signal_dist
 record = args.record
 clean_run = args.clear_run
-data_dir = fileChooser.getFileName()
-if data_dir == "":
-	exit
+data_dir = ""
+if args.data_dir is None:
+	data_dir = fileChooser.getFileName()
+	if data_dir == "":
+		exit
+else:
+	data_dir = args.data_dir
 
 runFileName = os.path.join(data_dir, 'RUN')
 altFileName = os.path.join(data_dir, 'ALT')
 colFileName = os.path.join(data_dir, 'COL')
-collarDefinitionFilename = os.path.join(config_dir, 'COL"')
+collarDefinitionFilename = os.path.join(".", 'COL"')
 
 # clear run if needed
 if clean_run is True:
@@ -59,7 +65,7 @@ if clean_run is True:
 # Get run number
 run = -1
 if os.path.isfile(runFileName):
-	run = read_meta_file.read_meta_file(runFileName, 'run_num')
+	run = int(read_meta_file.read_meta_file(runFileName, 'run_num'))
 else:
 	runString = getRunNum.getRunNum()
 	if runString is None:
@@ -70,13 +76,13 @@ else:
 # record run
 if record:
 	runFile = open(runFileName, 'w')
-	runFile.write("run_num: %s", run)
+	runFile.write("run: %s", run)
 	runFile.close()
 
 # Get Altitude
 alt = -1
 if os.path.isfile(altFileName):
-	alt = read_meta_file.read_meta_file(altFileName, 'flt_alt')
+	alt = int(read_meta_file.read_meta_file(altFileName, 'flt_alt'))
 else:
 	altString = getFltAlt.getFltAlt()
 	if altString is None:
@@ -92,8 +98,12 @@ if record:
 
 # Get collar definition
 hasCollarDefinitions = os.path.isfile(colFileName)
+collars = []
 if hasCollarDefinitions:
 	shutil.copyfile(colFileName, collarDefinitionFilename)
+	for line in fileinput.input(collarDefinitionFilename):
+		collars.append(int(line.strip().split(':')[1].strip()))
+	fileinput.close()
 else:
 	collars = getCollars.getCollars()
 	if len(collars) == 0:
@@ -116,11 +126,11 @@ for file in fileList:
 # count the number of collars
 numCollars = len(collars)
 # Generate collar file prefix
-collar_file_prefix = "%s/RUN_%06d_" % (data_dir, run_num)
+collar_file_prefix = "%s/RUN_%06d_" % (data_dir, run)
 # Find meta file and get data
-meta_file_name = "%s/META_%06d" % (data_dir, run_num)
-sdr_center_freq = read_meta_file.read_meta_file(meta_file_name, "center_freq")
-sdr_ppm = read_meta_file.read_meta_file(os.path.join(config_dir, "SDR.cfg"), "sdr_ppm")
+meta_file_name = "%s/META_%06d" % (data_dir, run)
+sdr_center_freq = int(read_meta_file.read_meta_file(meta_file_name, "center_freq"))
+sdr_ppm = float(read_meta_file.read_meta_file(os.path.join(config_dir, "SDR.cfg"), "sdr_ppm"))
 
 # Generate fixed frequencies
 beat_frequencies = [get_beat_frequency.getBeatFreq(sdr_center_freq, freq, sdr_ppm) for freq in collars]
@@ -129,12 +139,14 @@ beat_frequencies = [get_beat_frequency.getBeatFreq(sdr_center_freq, freq, sdr_pp
 args = ""
 args += " -i %s " % (data_dir)
 args += " -o %s " % (data_dir)
-args += " -r %d " % (run_num)
+args += " -r %d " % (run)
 for freq in beat_frequencies:
 	args += " %s " % (freq)
-subprocess.call(fft_detect, args, shell = True)
+subprocess.call(fft_detect + args, shell=True)
 
 for i in xrange(len(collars)):
-	raw_gps_analysis.process(data_dir, data_dir, run_num, i, flt_alt)
-	data_file = '%s/RUN_%06d_COL_%06d.csv' % (data_dir, run_num, i)
-	display_data.generateGraph(run_num, i, data_file, data_dir, collarDefinitionFilename)
+	raw_gps_analysis.process(data_dir, data_dir, run, i + 1, alt)
+	data_file = '%s/RUN_%06d_COL_%06d.csv' % (data_dir, run, i + 1)
+	display_data.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename)
+
+os.remove(collarDefinitionFilename)

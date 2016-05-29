@@ -14,10 +14,8 @@ install: fft_detect/fft_detect raw_gps_analysis/raw_gps_analysis.py\
 	ppm_adjust/get_beat_frequency.py config/SDR.cfg\
 	python_dialogs/fileChooser.py python_dialogs/getRunNum.py\
 	python_dialogs/getCollars.py CLI_GUI/cat_relevant.py\
-	python_dialogs/getFltAlt.py CLI_GUI/cas2.sh rct_bin_ref.sh
+	python_dialogs/getFltAlt.py CLI_GUI/cas2.sh
 
-	# cp rct_bin_ref.sh /usr/bin/rct_bin_ref.sh
-	# chmod +x /usr/bin/rct_bin_ref.sh
 	cp CLI_GUI/rct_cas.py /usr/local/bin/rct_cas
 	chmod +x /usr/local/bin/rct_cas
 	cp raw_gps_analysis/raw_gps_analysis.py /usr/local/bin/
@@ -30,6 +28,7 @@ install: fft_detect/fft_detect raw_gps_analysis/raw_gps_analysis.py\
 	cp python_dialogs/getRunNum.py /usr/local/bin/
 	cp python_dialogs/getCollars.py /usr/local/bin/
 	cp python_dialogs/getFltAlt.py /usr/local/bin/
+	cp fft_detect/fft_detect /usr/local/bin/fft_detect
 
 rct_bin_ref.sh:
 	echo "#!/bin/bash" > rct_bin_ref.sh
