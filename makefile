@@ -16,10 +16,20 @@ install: fft_detect/fft_detect raw_gps_analysis/raw_gps_analysis.py\
 	python_dialogs/getCollars.py CLI_GUI/cat_relevant.py\
 	python_dialogs/getFltAlt.py CLI_GUI/cas2.sh rct_bin_ref.sh
 
-	cp rct_bin_ref.sh /usr/bin/rct_bin_ref.sh
-	chmod +x /usr/bin/rct_bin_ref.sh
-	cp CLI_GUI/cas2.sh /usr/bin/rct_cas
-	chmod +x /usr/bin/rct_cas
+	# cp rct_bin_ref.sh /usr/bin/rct_bin_ref.sh
+	# chmod +x /usr/bin/rct_bin_ref.sh
+	cp CLI_GUI/rct_cas.py /usr/local/bin/rct_cas
+	chmod +x /usr/local/bin/rct_cas
+	cp raw_gps_analysis/raw_gps_analysis.py /usr/local/bin/
+	cp collarDisplay/display_data.py /usr/local/bin/
+	cp meta_file_reader/read_meta_file.py /usr/local/bin/
+	cp ppm_adjust/get_beat_frequency.py /usr/local/bin/
+	-mkdir /usr/local/etc/rct/
+	cp config/SDR.cfg /usr/local/etc/rct/
+	cp python_dialogs/filechooser.py /usr/local/bin/
+	cp python_dialogs/getRunNum.py /usr/local/bin/
+	cp python_dialogs/getCollars.py /usr/local/bin/
+	cp python_dialogs/getFltAlt.py /usr/local/bin/
 
 rct_bin_ref.sh:
 	echo "#!/bin/bash" > rct_bin_ref.sh
@@ -36,6 +46,11 @@ rct_bin_ref.sh:
 	echo CAT_RELEVANT=\'$(CURDIR)/CLI_GUI/cat_relevant.py\' >> rct_bin_ref.sh
 	echo FLT_ALT=\'$(CURDIR)/python_dialogs/getFltAlt.py\' >> rct_bin_ref.sh
 
+rct_bin_ref.py:
+	echo "#!/usr/bin/env python" > rct_bin_ref.py
+	echo GNU_RADIO_PIPELINE=\'$(CURDIR)/fft_detect/fft_detect\' >> rct_bin_ref.py
+	echo CONFIG_DIR=\'$(CURDIR)/config/\' >> rct_bin_ref.py
+
 clean:
 	make -C fft_detect clean
 	-rm -f rct_bin_ref.sh
@@ -44,13 +59,11 @@ clean:
 	-rm -rf config
 
 uninstall:
-	-rm config/SDR.cfg
-	-rm config/COL
-	-rmdir config
+	-rm -rf /usr/local/etc/rct/
 	make -C fft_detect clean
-	-rm rct_bin_ref.sh
-	-rm /usr/bin/rct_bin_ref.sh
-	-rm /usr/bin/rct_cas
+	-rm rct_bin_ref.*
+	# -rm /usr/local/bin/rct_bin_ref.sh
+	-rm /usr/local/bin/rct_cas
 
 fft_detect/fft_detect:
 	make -C fft_detect

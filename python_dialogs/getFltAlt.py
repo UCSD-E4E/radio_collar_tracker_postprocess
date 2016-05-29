@@ -2,6 +2,10 @@
 import Tkinter as tk
 import tkSimpleDialog
 
-root = tk.Tk()
-root.withdraw()
-print(tkSimpleDialog.askinteger("RCT Post-Processing Pipeline", "Flight Altitude:"))
+def getFltAlt():
+	root = tk.Tk()
+	root.withdraw()
+	return tkSimpleDialog.askinteger("RCT Post-Processing Pipeline", "Flight Altitude:")
+
+if __name__ == "__main__":
+	print(getFltAlt())

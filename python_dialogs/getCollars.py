@@ -2,18 +2,20 @@
 import Tkinter as tk
 import tkSimpleDialog
 
-root = tk.Tk()
-root.withdraw()
-counter = 1
-hasOutput = False
-while True:
-	frequency = tkSimpleDialog.askinteger("RCT Post-Processing Pipeline", "Collar Frequency, press Cancel to finish:")
-	if frequency is not None:
-		print("%d: %d" % (counter, frequency))
-		counter += 1
-		hasOutput = True
-	else:
-		if not hasOutput:
-			exit(1)
+def getCollars():
+	root = tk.Tk()
+	root.withdraw()
+	retval = []
+	hasOutput = False
+	while True:
+		frequency = tkSimpleDialog.askinteger("RCT Post-Processing Pipeline", "Collar Frequency, press Cancel to finish:")
+		if frequency is not None:
+			retval.append(frequency)
+			hasOutput = True
 		else:
-			exit()
+			return retval
+
+if __name__ == '__main__':
+	collars = getCollars()
+	for i in xrange(len(collars)):
+		print("%d: %d" % (i + 1, collars[i]))
