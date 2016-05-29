@@ -29,6 +29,7 @@ def process(input_dir, output_dir, run_num, col_num, tar_alt):
 
 	# Initialize output stream
 	out_stream = open(output_dir + output_file, 'w')
+	out_stream.write("time, latitude, longitude, value")
 
 	signal_index = 0
 	done = False
