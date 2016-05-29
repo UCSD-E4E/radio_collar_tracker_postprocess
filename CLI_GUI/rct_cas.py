@@ -76,7 +76,7 @@ else:
 # record run
 if record:
 	runFile = open(runFileName, 'w')
-	runFile.write("run: %s", run)
+	runFile.write("run: %s" % run)
 	runFile.close()
 
 # Get Altitude
@@ -93,7 +93,7 @@ else:
 # record altitude
 if record:
 	altFile = open(altFileName, 'w')
-	altFile.write("flt_alt: %s", alt)
+	altFile.write("flt_alt: %s" % alt)
 	altFile.close()
 
 # Get collar definition
