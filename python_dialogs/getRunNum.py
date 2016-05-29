@@ -5,6 +5,7 @@ import tkSimpleDialog
 def getRunNum():
 	root = tk.Tk()
 	root.withdraw()
+	root.update()
 	return tkSimpleDialog.askinteger("RCT Post-Processing Pipeline", "Run Number:")
 
 if __name__ == "__main__":

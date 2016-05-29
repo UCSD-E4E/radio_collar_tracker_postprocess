@@ -5,7 +5,8 @@ import tkFileDialog
 def getFileName():
 	root = tk.Tk()
 	root.withdraw()
-	file_path = tkFileDialog.askdirectory()
+	root.update()
+	file_path = tkFileDialog.askdirectory(parent=root)
 	return file_path
 
 if __name__ == "__main__":

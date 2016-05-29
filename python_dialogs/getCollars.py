@@ -5,6 +5,7 @@ import tkSimpleDialog
 def getCollars():
 	root = tk.Tk()
 	root.withdraw()
+	root.update()
 	retval = []
 	hasOutput = False
 	while True:

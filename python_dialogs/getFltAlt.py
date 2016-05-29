@@ -5,6 +5,7 @@ import tkSimpleDialog
 def getFltAlt():
 	root = tk.Tk()
 	root.withdraw()
+	root.update()
 	return tkSimpleDialog.askinteger("RCT Post-Processing Pipeline", "Flight Altitude:")
 
 if __name__ == "__main__":
