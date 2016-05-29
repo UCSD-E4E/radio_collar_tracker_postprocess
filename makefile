@@ -60,6 +60,20 @@ clean:
 	-rm config/COL
 	-rm config/SDR.cfg
 	-rm -rf config
+	-rm /usr/local/bin/rct_cas
+	-rm /usr/local/bin/raw_gps_analysis.py
+	-rm /usr/local/bin/display_data.py
+	-rm /usr/local/bin/read_meta_file.py
+	-rm /usr/local/bin/get_beat_frequency.py
+	-rm /usr/local/etc/rct/SDR.cfg
+	-rm -rf /usr/local/etc/rct/
+	-rm /usr/local/bin/fileChooser.py
+	-rm /usr/local/bin/getRunNum.py
+	-rm /usr/local/bin/getCollars.py
+	-rm /usr/local/bin/getFltAlt.py
+	-rm /usr/local/bin/fft_detect
+	-rm /usr/local/bin/makeShapefile
+	-rm /usr/local/bin/csvToShp.py
 
 uninstall:
 	-rm -rf /usr/local/etc/rct/
