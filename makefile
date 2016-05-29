@@ -60,6 +60,11 @@ clean:
 	-rm config/COL
 	-rm config/SDR.cfg
 	-rm -rf config
+
+uninstall:
+	-rm -rf /usr/local/etc/rct/
+	make -C fft_detect clean
+	-rm rct_bin_ref.*
 	-rm /usr/local/bin/rct_cas
 	-rm /usr/local/bin/raw_gps_analysis.py
 	-rm /usr/local/bin/display_data.py
@@ -74,13 +79,6 @@ clean:
 	-rm /usr/local/bin/fft_detect
 	-rm /usr/local/bin/makeShapefile
 	-rm /usr/local/bin/csvToShp.py
-
-uninstall:
-	-rm -rf /usr/local/etc/rct/
-	make -C fft_detect clean
-	-rm rct_bin_ref.*
-	# -rm /usr/local/bin/rct_bin_ref.sh
-	-rm /usr/local/bin/rct_cas
 
 fft_detect/fft_detect:
 	make -C fft_detect
