@@ -15,4 +15,4 @@ if __name__ == '__main__':
 	outputFile = tkFileDialog.asksaveasfilename(**saveOptions)
 	outputDir = os.path.dirname(outputFile)
 	outputName = os.path.basename(outputFile)
-	create_shapefile(file = inputFile, outdir = outputDir, outname = outputName)
+	csvToShp.create_shapefile(file = inputFile, outdir = outputDir, outname = outputName)
