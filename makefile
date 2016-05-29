@@ -12,7 +12,7 @@ config:
 install: fft_detect/fft_detect raw_gps_analysis/raw_gps_analysis.py\
 	collarDisplay/display_data.py meta_file_reader/read_meta_file.py\
 	ppm_adjust/get_beat_frequency.py config/SDR.cfg\
-	python_dialogs/filechooser.py python_dialogs/getRunNum.py\
+	python_dialogs/fileChooser.py python_dialogs/getRunNum.py\
 	python_dialogs/getCollars.py CLI_GUI/cat_relevant.py\
 	python_dialogs/getFltAlt.py CLI_GUI/cas2.sh rct_bin_ref.sh
 
@@ -26,7 +26,7 @@ install: fft_detect/fft_detect raw_gps_analysis/raw_gps_analysis.py\
 	cp ppm_adjust/get_beat_frequency.py /usr/local/bin/
 	-mkdir /usr/local/etc/rct/
 	cp config/SDR.cfg /usr/local/etc/rct/
-	cp python_dialogs/filechooser.py /usr/local/bin/
+	cp python_dialogs/fileChooser.py /usr/local/bin/
 	cp python_dialogs/getRunNum.py /usr/local/bin/
 	cp python_dialogs/getCollars.py /usr/local/bin/
 	cp python_dialogs/getFltAlt.py /usr/local/bin/
