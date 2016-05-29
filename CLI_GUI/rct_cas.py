@@ -65,7 +65,15 @@ if clean_run is True:
 # Get run number
 run = -1
 if os.path.isfile(runFileName):
-	run = int(read_meta_file.read_meta_file(runFileName, 'run_num'))
+	runString = read_meta_file.read_meta_file(runFileName, 'run_num')
+	if runString is None:
+		runString = getRunNum.getRunNum()
+		if runString is None:
+			exit
+	run = int(runString)
+	runFile = open(runFileName, 'w')
+	runFile.write("run: %s" % run)
+	runFile.close()
 else:
 	runString = getRunNum.getRunNum()
 	if runString is None:
@@ -82,7 +90,15 @@ if record:
 # Get Altitude
 alt = -1
 if os.path.isfile(altFileName):
-	alt = int(read_meta_file.read_meta_file(altFileName, 'flt_alt'))
+	altString = read_meta_file.read_meta_file(altFileName, 'flt_alt')
+	if altString is None:
+		altString = getFltAlt.getFltAlt()
+		if altString is None:
+			exit
+	alt = int(altString)
+	altFile = open(altFileName, 'w')
+	altFile.write("flt_alt: %s" % alt)
+	altFile.close()
 else:
 	altString = getFltAlt.getFltAlt()
 	if altString is None:
