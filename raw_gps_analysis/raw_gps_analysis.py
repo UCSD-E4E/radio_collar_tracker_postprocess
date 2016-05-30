@@ -57,10 +57,10 @@ def process(input_dir, output_dir, run_num, col_num, tar_alt):
 			continue
 
 		# throw out if not within 20% of target altitude
-		if math.fabs(gps_alt - tar_alt) / tar_alt > 0.2:
-			line = gps_stream.readline()
-			line_counter += 1
-			continue
+		# if math.fabs(gps_alt - tar_alt) / tar_alt > 0.2:
+		# 	line = gps_stream.readline()
+		# 	line_counter += 1
+		# 	continue
 
 		# Extract position
 		latitude = int(line.split(',')[1].strip())
@@ -96,7 +96,7 @@ def process(input_dir, output_dir, run_num, col_num, tar_alt):
 		if done:
 			break
 		max_amplitude = 10 * math.log10(max_amplitude)
-		out_stream.write("%f,%d,%d,%f\n" % (gps_time, latitude, longitude, max_amplitude))
+		out_stream.write("%f,%d,%d,%f,%f\n" % (gps_time, latitude, longitude, max_amplitude, gps_alt))
 		line = gps_stream.readline()
 		line_counter += 1
 

@@ -12,6 +12,7 @@ import subprocess
 import raw_gps_analysis
 import display_data
 import fileinput
+import getFltAlt
 
 # Constants
 config_dir = ""
@@ -38,7 +39,7 @@ data_dir = ""
 if args.data_dir is None:
 	data_dir = fileChooser.getFileName()
 	if data_dir == "":
-		exit
+		exit()
 else:
 	data_dir = args.data_dir
 
@@ -69,22 +70,22 @@ if os.path.isfile(runFileName):
 	if runString is None:
 		runString = getRunNum.getRunNum()
 		if runString is None:
-			exit
+			exit()
 	run = int(runString)
 	runFile = open(runFileName, 'w')
-	runFile.write("run: %s" % run)
+	runFile.write("run_num: %s" % run)
 	runFile.close()
 else:
 	runString = getRunNum.getRunNum()
 	if runString is None:
-		exit
+		exit()
 	else:
 		run = int(runString)
 
 # record run
 if record:
 	runFile = open(runFileName, 'w')
-	runFile.write("run: %s" % run)
+	runFile.write("run_num: %s" % run)
 	runFile.close()
 
 # Get Altitude
@@ -94,7 +95,7 @@ if os.path.isfile(altFileName):
 	if altString is None:
 		altString = getFltAlt.getFltAlt()
 		if altString is None:
-			exit
+			exit()
 	alt = int(altString)
 	altFile = open(altFileName, 'w')
 	altFile.write("flt_alt: %s" % alt)
@@ -102,7 +103,7 @@ if os.path.isfile(altFileName):
 else:
 	altString = getFltAlt.getFltAlt()
 	if altString is None:
-		exit
+		exit()
 	else:
 		alt = int(altString)
 
@@ -123,7 +124,7 @@ if hasCollarDefinitions:
 else:
 	collars = getCollars.getCollars()
 	if len(collars) == 0:
-		exit
+		exit()
 	colFile = open(collarDefinitionFilename, 'w')
 	for i in xrange(len(collars)):
 		colFile.write("%d: %d" % (i + 1, collars[i]))
@@ -131,7 +132,7 @@ else:
 
 # record collar definitions
 if record and not hasCollarDefinitions:
-	shutil.copyfile(colFileName, collarDefinitionFilename)
+	shutil.copyfile(collarDefinitionFilename, colFileName)
 
 fileList = os.listdir(data_dir)
 # Count the number of raw data files
