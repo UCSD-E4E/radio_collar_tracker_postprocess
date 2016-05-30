@@ -13,6 +13,4 @@ if __name__ == '__main__':
 	saveOptions = {}
 	saveOptions['filetypes'] = [('SHP file', '.shp')]
 	outputFile = tkFileDialog.asksaveasfilename(**saveOptions)
-	outputDir = os.path.dirname(outputFile)
-	outputName = os.path.basename(outputFile)
-	csvToShp.create_shapefile(file = inputFile, outdir = outputDir, outname = outputName)
+	csvToShp.create_shapefile(inputFile, outputFile)
