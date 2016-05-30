@@ -1,0 +1,13 @@
+{
+	"folders":
+	[
+		{
+			"path": "."
+		}
+	],
+	"build_systems":
+	[{
+			"name": "PDFLaTeX",
+			"cmd": "./mkdoc.sh"
+		}]
+}
