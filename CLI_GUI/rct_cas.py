@@ -127,7 +127,7 @@ else:
 		exit()
 	colFile = open(collarDefinitionFilename, 'w')
 	for i in xrange(len(collars)):
-		colFile.write("%d: %d" % (i + 1, collars[i]))
+		colFile.write("%d: %d\n" % (i + 1, collars[i]))
 	colFile.close()
 
 # record collar definitions
