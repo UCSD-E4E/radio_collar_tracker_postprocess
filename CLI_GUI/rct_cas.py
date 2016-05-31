@@ -46,7 +46,7 @@ else:
 runFileName = os.path.join(data_dir, 'RUN')
 altFileName = os.path.join(data_dir, 'ALT')
 colFileName = os.path.join(data_dir, 'COL')
-collarDefinitionFilename = os.path.join(".", 'COL"')
+collarDefinitionFilename = os.path.join(data_dir, 'COLdef')
 
 # clear run if needed
 if clean_run is True:
