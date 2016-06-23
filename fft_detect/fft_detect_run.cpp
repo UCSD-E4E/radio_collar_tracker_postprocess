@@ -63,6 +63,9 @@ int main(int argc, char** argv) {
 	for(int i = optind; i < argc; ++i){
 		beat_freq = atoi(argv[i]);
 		frequencies[i - optind] = beat_freq * ((float)FFT_LENGTH / 2048000);
+		if(frequencies[i - optind] < 0 && frequencies[i - optind] > -1 * FFT_LENGTH / 2){
+			frequencies[i - optind] = FFT_LENGTH + frequencies[i - optind];
+		}
 		if(frequencies[i - optind] < 0 || frequencies[i - optind] > FFT_LENGTH){
 			return -1;
 		}
