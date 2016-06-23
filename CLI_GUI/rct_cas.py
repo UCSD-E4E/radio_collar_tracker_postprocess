@@ -157,6 +157,7 @@ args = ""
 args += " -i %s " % (data_dir)
 args += " -o %s " % (data_dir)
 args += " -r %d " % (run)
+args += " -- "
 for freq in beat_frequencies:
 	args += " %s " % (freq)
 subprocess.call(fft_detect + args, shell=True)
