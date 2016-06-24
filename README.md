@@ -14,6 +14,7 @@ Installing the Post-Process Code
 	* numpy (python-numpy)
 	* matplotlib (python-matplotlib)
 	* utm 0.4.0 (https://pypi.python.org/pypi/utm)
+	* pyshp 1.2.3 (https://pypi.python.org/pypi/pyshp)
 2.	Make and install rct_cas
 	```sh
 	make all

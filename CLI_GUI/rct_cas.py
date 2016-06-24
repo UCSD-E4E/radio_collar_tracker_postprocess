@@ -62,6 +62,13 @@ if clean_run is True:
 		os.remove(colFileName)
 	except Exception, e:
 		pass
+	for curFile in os.listdir(data_dir):
+		if any(currentFile.lower().endswith(ext) for ext in ['.csv', '.png', '.raw'])
+			try:
+				os.remove(os.path.join(data_dir, currentFile))
+			except Exception, e:
+				pass
+
 
 # Get run number
 run = -1
