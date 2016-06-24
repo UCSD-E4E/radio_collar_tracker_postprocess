@@ -63,7 +63,7 @@ if clean_run is True:
 	except Exception, e:
 		pass
 for curFile in os.listdir(data_dir):
-	if any(currentFile.lower().endswith(ext) for ext in ['.csv', '.png', '.raw'])
+	if any(currentFile.lower().endswith(ext) for ext in ['.csv', '.png', '.raw']):
 		try:
 			os.remove(os.path.join(data_dir, currentFile))
 		except Exception, e:
