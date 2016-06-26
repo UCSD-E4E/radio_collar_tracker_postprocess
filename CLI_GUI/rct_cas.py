@@ -13,6 +13,17 @@ import raw_gps_analysis
 import display_data
 import fileinput
 import getFltAlt
+import itertools
+
+from multiprocessing import Pool
+
+def processRaw(data_dir, run, alt, collarDefinitionFilename, i):
+	raw_gps_analysis.process(data_dir, data_dir, run, i + 1, alt)
+	data_file = '%s/RUN_%06d_COL_%06d.csv' % (data_dir, run, i + 1)
+	display_data.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename)
+
+def processRawPool(args):
+	processRaw(args[0], args[1], args[2], args[3], args[4])
 
 # Constants
 config_dir = ""
@@ -169,9 +180,9 @@ for freq in beat_frequencies:
 	args += " %s " % (freq)
 subprocess.call(fft_detect + args, shell=True)
 
-for i in xrange(len(collars)):
-	raw_gps_analysis.process(data_dir, data_dir, run, i + 1, alt)
-	data_file = '%s/RUN_%06d_COL_%06d.csv' % (data_dir, run, i + 1)
-	display_data.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename)
-
+pool = Pool()
+iterArgs = zip(itertools.repeat(data_dir), itertools.repeat(run), itertools.repeat(alt), itertools.repeat(collarDefinitionFilename), xrange(len(collars)))
+pool.map(processRawPool, iterArgs)
 os.remove(collarDefinitionFilename)
+
+
