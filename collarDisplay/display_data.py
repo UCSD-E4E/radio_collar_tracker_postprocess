@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import sys
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plot
 # USING utm 0.4.0 from https://pypi.python.org/pypi/utm
 import utm
