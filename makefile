@@ -32,6 +32,7 @@ install: fft_detect/fft_detect raw_gps_analysis/raw_gps_analysis.py\
 	cp fft_detect/fft_detect /usr/local/bin/
 	cp utilities/makeShapefile.py /usr/local/bin/makeShapefile
 	cp collarDisplay/csvToShp.py /usr/local/bin/
+	rm -rf config
 
 
 rct_bin_ref.sh:
