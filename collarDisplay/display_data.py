@@ -9,6 +9,8 @@ import utm
 import os
 import argparse
 import fileinput
+from osgeo import gdal
+import osr
 
 def read_meta_file(filename, tag):
     retval = None
@@ -38,7 +40,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     data = np.genfromtxt(filename, delimiter=',', names=names)
     # Modify values
     lat = [x / 1e7 for x in data['lat']]
-    lon = [x / 1e7 for x in data['lon']]
+    lon = [y / 1e7 for y in data['lon']]
     col = data['col']
 
     # convert deg to utm
@@ -47,44 +49,69 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     avgCol = np.average(col)
     for i in range(len(data['lat'])):
         utm_coord = utm.from_latlon(lat[i], lon[i])
-        lon[i] = utm_coord[0]
-        lat[i] = utm_coord[1]
+        lat[i] = utm_coord[0]
+        lon[i] = utm_coord[1]
         zonenum = utm_coord[2]
         zone = utm_coord[3]
         if col[i] < avgCol:
             col[i] = avgCol
 
-
-    # Configure plot
-    fig = plot.figure()
-    fig.set_size_inches(plot_width, plot_height)
-    fig.set_dpi(plot_dpi)
-    plot.grid()
-    ax = plot.gca()
-    ax.get_xaxis().get_major_formatter().set_useOffset(False)
-    ax.get_yaxis().get_major_formatter().set_useOffset(False)
-    ax.set_xlabel('Easting')
-    ax.set_ylabel('Northing')
-    ax.set_title('Run %d, Collar %d at %3.4f MHz\nUTM Zone: %d %s' % (run_num, num_col, col_freq, zonenum, zone))
-    ax.set_aspect('equal')
-    plot.xticks(rotation='vertical')
-
-    # Calculate colorplot
-    maxCol = np.amax(data['col'])
-    minCol = np.amin(data['col'])
-    curColMap = plot.cm.get_cmap('jet')
+    # Calculate heatmap
+    tiffXSize = int(max(lat)) - int(min(lat))
+    tiffYSize = int(max(lon)) - int(min(lon))
+    pixelSize = 1
+    heatMapArea = np.zeros((tiffYSize, tiffXSize)) # y, x
+    refLat = min(lat)
+    refLon = max(lon)
 
     # Plot data
-    sc = plot.scatter(lon, lat, c=data['col'], cmap=curColMap, vmin = minCol, vmax = maxCol)
-    colorbar = plot.colorbar(sc)
-    colorbar.set_label('Maximum Signal Amplitude')
+    # Naive solution - 30m radius
+    fallOffConstant = 1
+    radius = 30
+    mask = np.zeros((radius * 2, radius * 2)) # (row, col)
+    for r in xrange(radius):
+        for x in xrange(len(mask[0])):
+            for y in xrange(len(mask)):
+                relX = x - radius
+                relY = y - radius
+                if relX * relX + relY * relY < r * r:
+                    mask[y][x] = 1
+    for i in xrange(len(lat)):
+        for x in xrange(len(mask[0])):
+            for y in xrange(len(mask)):
+                # print('(%d, %d)' % (lat[i] - refLat + (x - radius), refLon - lon[i] + (y - radius)))
+                if refLon - lon[i] + (y - radius) > 0 and refLon - lon[i] + (y - radius) < tiffYSize:
+                    if lat[i] - refLat + (x - radius) > 0 and lat[i] - refLat + (x - radius) < tiffXSize:
+                        heatMapArea[refLon - lon[i] + (y - radius)][lat[i] - refLat + (x - radius)] = max(heatMapArea[refLon - lon[i] + (y - radius)][lat[i] - refLat + (x - radius)], mask[y][x] * (col[i] - avgCol))
+
 
     # Save plot
-    plot.savefig('%s/RUN_%06d_COL_%06d.png' % (output_path, run_num, num_col), bbox_inches = 'tight')
-    print('Collar %d: %s/RUN_%06d_COL_%06d.png' %
-        (num_col, output_path, run_num, num_col))
-    # plot.show(block=False)
-    plot.close()
+    outputFileName = '%s/RUN_%06d_COL_%06d.tiff' % (output_path, run_num, num_col)
+    driver = gdal.GetDriverByName('GTiff')
+    dataset = driver.Create(
+        outputFileName,
+        tiffXSize,
+        tiffYSize,
+        1,
+        gdal.GDT_Float32)
+
+    spatialReference = osr.SpatialReference()
+    spatialReference.SetUTM(zonenum, zone >= 'N')
+    spatialReference.SetWellKnownGeogCS('WGS84')
+    wkt = spatialReference.ExportToWkt()
+    retval = dataset.SetProjection(wkt)
+    dataset.SetGeoTransform((
+        min(lat),    # 0
+        1,  # 1
+        0,                      # 2
+        max(lon),    # 3
+        0,                      # 4
+        -1))
+
+    dataset.GetRasterBand(1).WriteArray(heatMapArea)
+    dataset.FlushCache()
+    dataset = None
+
 
 def generateKML(run_num, num_col, filename, output_path, col_def):
     from PIL import Image
