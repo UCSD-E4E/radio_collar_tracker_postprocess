@@ -11,6 +11,13 @@ import argparse
 import fileinput
 from osgeo import gdal
 import osr
+import math
+
+def normalProbability(x, mean, stdDev):
+    a = 1 / (math.sqrt(2 * stdDev * stdDev * math.pi))
+    b = -1 * (x - mean) * (x - mean)
+    b = b / (2 * stdDev * stdDev)
+    return a * math.pow(math.e, b)
 
 def read_meta_file(filename, tag):
     retval = None
@@ -57,33 +64,52 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
             col[i] = avgCol
 
     # Calculate heatmap
-    tiffXSize = int(max(lat)) - int(min(lat))
-    tiffYSize = int(max(lon)) - int(min(lon))
+    maxRange = 100
+    tiffXSize = int(max(lat)) - int(min(lat)) + maxRange * 2
+    tiffYSize = int(max(lon)) - int(min(lon)) + maxRange * 2
     pixelSize = 1
     heatMapArea = np.zeros((tiffYSize, tiffXSize)) # y, x
-    refLat = min(lat)
-    refLon = max(lon)
+    refLat = min(lat) - maxRange
+    maxLat = max(lat) + maxRange
+    refLon = max(lon) + maxRange
+    minLon = min(lon) - maxRange
+    # print("Lat bounds: [%f, %f]" % (refLat, maxLat))
+    # print("Lon bounds: [%f, %f]" % (minLon, refLon))
 
     # Plot data
     # Naive solution - 30m radius
     fallOffConstant = 1
-    radius = 30
-    mask = np.zeros((radius * 2, radius * 2)) # (row, col)
-    for r in xrange(radius):
-        for x in xrange(len(mask[0])):
-            for y in xrange(len(mask)):
-                relX = x - radius
-                relY = y - radius
-                if relX * relX + relY * relY < r * r:
-                    mask[y][x] = 1
-    for i in xrange(len(lat)):
-        for x in xrange(len(mask[0])):
-            for y in xrange(len(mask)):
-                # print('(%d, %d)' % (lat[i] - refLat + (x - radius), refLon - lon[i] + (y - radius)))
-                if refLon - lon[i] + (y - radius) > 0 and refLon - lon[i] + (y - radius) < tiffYSize:
-                    if lat[i] - refLat + (x - radius) > 0 and lat[i] - refLat + (x - radius) < tiffXSize:
-                        heatMapArea[refLon - lon[i] + (y - radius)][lat[i] - refLat + (x - radius)] = max(heatMapArea[refLon - lon[i] + (y - radius)][lat[i] - refLat + (x - radius)], mask[y][x] * (col[i] - avgCol))
 
+    mean = 0.0306
+    stdDev = 1.1648 * 6
+
+    for i in xrange(len(lat)):
+        collarMeasurement = col[i]
+        if collarMeasurement < -43:
+            continue
+        estimatedRange = math.pow(10, ((-0.715 * collarMeasurement - 14.51) / 10.0))
+        maskLen = 2 * (estimatedRange + 3 * 0.2 * estimatedRange)
+        for x in xrange(int(maskLen)):
+            for y in xrange(int(maskLen)):
+                relX = x - maskLen / 2.0
+                relY = y - maskLen / 2.0
+                coordX = lat[i] + relX
+                coordY = lon[i] + relY
+                if (coordX - refLat < 0) or (coordX - refLat > tiffXSize) or (refLon - coordY < 0) or (refLon - coordY > tiffYSize):
+                    continue
+                posRange = math.sqrt(relX * relX + relY * relY)
+                if heatMapArea[refLon - coordY][coordX - refLat] == 0:
+                    heatMapArea[refLon - coordY][coordX - refLat] = normalProbability(posRange - estimatedRange, mean, 0.2 * estimatedRange)
+                else:
+                    heatMapArea[refLon - coordY][coordX - refLat] = heatMapArea[refLon - coordY][coordX - refLat] + normalProbability(posRange - estimatedRange, mean, 0.2 * estimatedRange)
+                    # heatMapArea[refLon - coordY][coordX - refLat] = max(heatMapArea[refLon - coordY][coordX - refLat], normalProbability(posRange - estimatedRange, mean, stdDev))
+                # print("Pos: %f, %f, %f, %f" % (coordX, coordY, posRange, normalProbability(posRange - estimatedRange, mean, stdDev)))
+
+    # for x in xrange(tiffXSize):
+    #     for y in xrange(tiffYSize):
+    #         # heatMapArea[y][x] = heatMapArea[y][x] * 100
+    #         if heatMapArea[y][x] > 0.001:
+    #             print("%d, %d, %f" % (x, y, heatMapArea[y][x]))
 
     # Save plot
     outputFileName = '%s/RUN_%06d_COL_%06d.tiff' % (output_path, run_num, num_col)
@@ -101,14 +127,16 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     wkt = spatialReference.ExportToWkt()
     retval = dataset.SetProjection(wkt)
     dataset.SetGeoTransform((
-        min(lat),    # 0
+        refLat,    # 0
         1,  # 1
         0,                      # 2
-        max(lon),    # 3
+        refLon,    # 3
         0,                      # 4
         -1))
 
-    dataset.GetRasterBand(1).WriteArray(heatMapArea)
+    band = dataset.GetRasterBand(1)
+    band.WriteArray(heatMapArea)
+    band.SetStatistics(np.amin(heatMapArea), np.amax(heatMapArea), np.mean(heatMapArea), np.std(heatMapArea))
     dataset.FlushCache()
     dataset = None
 
