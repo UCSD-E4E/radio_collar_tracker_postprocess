@@ -1,7 +1,7 @@
 CXX = g++
 CC = gcc
 LD = g++
-LFLAGS = -lfftw3_threads -lfftw3 -lm -O4
+LFLAGS = -lfftw3_threads -lfftw3 -lm -O4 -lpthread
 INC =
 CPPFLAGS = -std=c++11 -c -Wall -g ${INC}
 CFLAGS = -std=gnu99 -c -Wall -g ${INC}
