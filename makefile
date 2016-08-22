@@ -15,7 +15,8 @@ install: fft_detect/fft_detect raw_gps_analysis/raw_gps_analysis.py\
 	python_dialogs/fileChooser.py python_dialogs/getRunNum.py\
 	python_dialogs/getCollars.py CLI_GUI/cat_relevant.py\
 	python_dialogs/getFltAlt.py CLI_GUI/cas2.sh utilities/makeShapefile.py\
-	collarDisplay/csvToShp.py collarDisplay/pos_estimator.py collarDisplay/display_gps.py
+	collarDisplay/csvToShp.py collarDisplay/pos_estimator.py collarDisplay/display_gps.py\
+	collarDisplay/median_filter.py
 
 	cp CLI_GUI/rct_cas.py /usr/local/bin/rct_cas
 	chmod +x /usr/local/bin/rct_cas
@@ -35,6 +36,7 @@ install: fft_detect/fft_detect raw_gps_analysis/raw_gps_analysis.py\
 	cp collarDisplay/csvToShp.py /usr/local/bin/
 	rm -rf config
 	cp collarDisplay/pos_estimator.py /usr/local/bin/
+	cp collarDisplay/median_filter.py /usr/local/bin/
 
 
 rct_bin_ref.sh:
@@ -84,6 +86,7 @@ uninstall:
 	-rm /usr/local/bin/csvToShp.py
 	-rm /usr/local/bin/pos_estimator.py
 	-rm /usr/local/bin/display_gps.py
+	-rm /usr/local/bin/median_filter.py
 
 fft_detect/fft_detect:
 	make -C fft_detect

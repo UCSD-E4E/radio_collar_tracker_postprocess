@@ -16,6 +16,7 @@ import fileinput
 import getFltAlt
 import itertools
 import csvToShp
+import median_filter
 
 from multiprocessing import Pool
 
@@ -23,6 +24,7 @@ def processRaw(data_dir, run, alt, collarDefinitionFilename, i):
 	raw_gps_analysis.process(data_dir, data_dir, run, i + 1, alt)
 	data_file = '%s/RUN_%06d_COL_%06d.csv' % (data_dir, run, i + 1)
 	csvToShp.create_shapefile(data_file, '%s/RUN_%06d_COL_%06d.shp' % (data_dir, run, i + 1))
+	median_filter.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename)
 	res_x = pos_estimator.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename)
 	if res_x is None:
 		return
