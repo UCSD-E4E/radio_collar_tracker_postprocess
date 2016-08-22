@@ -11,16 +11,25 @@ import get_beat_frequency
 import subprocess
 import raw_gps_analysis
 import display_data
+import pos_estimator
 import fileinput
 import getFltAlt
 import itertools
+import csvToShp
 
 from multiprocessing import Pool
 
 def processRaw(data_dir, run, alt, collarDefinitionFilename, i):
 	raw_gps_analysis.process(data_dir, data_dir, run, i + 1, alt)
 	data_file = '%s/RUN_%06d_COL_%06d.csv' % (data_dir, run, i + 1)
-	display_data.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename)
+	csvToShp.create_shapefile(data_file, '%s/RUN_%06d_COL_%06d.shp' % (data_dir, run, i + 1))
+	res_x = pos_estimator.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename)
+	if res_x is None:
+		return
+	if res_x[6]:
+		display_data.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename, res_x[0], res_x[1], res_x[4], res_x[5])
+	# else:
+	# 	display_data.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename, res_x[0], res_x[1])
 
 def processRawPool(args):
 	processRaw(args[0], args[1], args[2], args[3], args[4])
@@ -83,6 +92,7 @@ for curFile in os.listdir(data_dir):
 
 # Get run number
 run = -1
+hasRun = False
 if os.path.isfile(runFileName):
 	runString = read_meta_file.read_meta_file(runFileName, 'run_num')
 	if runString is None:
@@ -93,6 +103,7 @@ if os.path.isfile(runFileName):
 	runFile = open(runFileName, 'w')
 	runFile.write("run_num: %s" % run)
 	runFile.close()
+	hasRun = True
 else:
 	runString = getRunNum.getRunNum()
 	if runString is None:
@@ -101,7 +112,7 @@ else:
 		run = int(runString)
 
 # record run
-if record:
+if record and not hasRun:
 	runFile = open(runFileName, 'w')
 	runFile.write("run_num: %s" % run)
 	runFile.close()
@@ -185,4 +196,6 @@ iterArgs = zip(itertools.repeat(data_dir), itertools.repeat(run), itertools.repe
 pool.map(processRawPool, iterArgs)
 os.remove(collarDefinitionFilename)
 
-
+# Clean up raw files
+for i in range(1, numCollars + 1):
+	os.remove("%s/RUN_%06d_%06d.raw" % (run, i))
