@@ -199,4 +199,4 @@ if __name__ == '__main__':
 
 	# Clean up raw files
 	for i in range(1, numCollars + 1):
-		os.remove("%s/RUN_%06d_%06d.raw" % (run, i))
+		os.remove("%s/RUN_%06d_%06d.raw" % (data_dir, run, i))
