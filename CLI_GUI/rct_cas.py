@@ -53,12 +53,16 @@ if __name__ == '__main__':
 	parser.add_argument('-r', '--record', action = 'store_true', default = False, help = 'Records the current run configuration', dest = 'record')
 	parser.add_argument('-c', '--clear', action = 'store_true', default = False, help = 'Clears the existing run configuration', dest = 'clear_run')
 	parser.add_argument('-i', '--input', help = 'Input Directory', metavar = 'data_dir', dest = 'data_dir', default = None)
+	parser.add_argument('-nf', '--no_fft', action = 'store_const', const = False, default = True, dest = 'fft_flag', help = 'This flag disables running the fft')
+	parser.add_argument('-raw', '--leave_raws', action = 'store_const', const = False, default = True, dest = 'raw_flag', help = 'This flag leaves the concatenated raw files')
 
 	args = parser.parse_args()
 	signal_dist_output = args.signal_dist
 	record = args.record
 	clean_run = args.clear_run
 	data_dir = ""
+	fft_flag = args.fft_flag
+	raw_flag = args.raw_flag
 	if args.data_dir is None:
 		data_dir = fileChooser.getFileName()
 		if data_dir == "":
@@ -185,14 +189,15 @@ if __name__ == '__main__':
 	beat_frequencies = [get_beat_frequency.getBeatFreq(sdr_center_freq, freq, sdr_ppm) for freq in collars]
 
 	# Generate raw files
-	args = ""
-	args += " -i %s " % (data_dir)
-	args += " -o %s " % (data_dir)
-	args += " -r %d " % (run)
-	args += " -- "
-	for freq in beat_frequencies:
-		args += " %s " % (freq)
-	subprocess.call(fft_detect + args, shell=True)
+	if fft_flag:
+		args = ""
+		args += " -i %s " % (data_dir)
+		args += " -o %s " % (data_dir)
+		args += " -r %d " % (run)
+		args += " -- "
+		for freq in beat_frequencies:
+			args += " %s " % (freq)
+		subprocess.call(fft_detect + args, shell=True)
 
 	pool = Pool()
 	iterArgs = zip(itertools.repeat(data_dir), itertools.repeat(run), itertools.repeat(alt), itertools.repeat(collarDefinitionFilename), xrange(len(collars)))
@@ -200,5 +205,6 @@ if __name__ == '__main__':
 	os.remove(collarDefinitionFilename)
 
 	# Clean up raw files
-	for i in range(1, numCollars + 1):
-		os.remove("%s/RUN_%06d_%06d.raw" % (data_dir, run, i))
+	if raw_flag:
+		for i in range(1, numCollars + 1):
+			os.remove("%s/RUN_%06d_%06d.raw" % (data_dir, run, i))
