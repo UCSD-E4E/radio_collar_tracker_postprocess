@@ -15,17 +15,19 @@ Installing the Post-Process Code
 	* matplotlib (python-matplotlib)
 	* utm 0.4.0 (https://pypi.python.org/pypi/utm)
 	* pyshp 1.2.3 (https://pypi.python.org/pypi/pyshp)
+	* gdal 2.1.0 (http://download.osgeo.org/gdal/)
 2.	Make and install rct_cas
 	```sh
 	make all
 	sudo make install
 	```
 
-In all, a typical Debian-based installation might look like this:
+In all, a typical Ubuntu-based installation might look like this:
 ```sh
 sudo apt-get install build-essential python-tk python-numpy python-matplotlib python-pip python-dev git
 wget ftp://ftp.fftw.org/pub/fftw/fftw-3.3.4.tar.gz
 wget https://pypi.python.org/packages/source/u/utm/utm-0.4.0.tar.gz
+wget http://download.osgeo.org/gdal/2.1.0/gdal-2.1.0.tar.gz
 tar -xzf fftw-3.3.4.tar.gz
 cd fftw-3.3.4
 ./configure
@@ -36,6 +38,13 @@ tar -xzf utm-0.4.0.tar.gz
 cd utm-0.4.0
 sudo pip install -e .
 cd ..
+tar -xzf gdal-2.1.0.tar.gz
+cd gdal-2.1.0
+./configure --with-python
+make
+sudo make install
+cd ..
+sudo ldconfig
 git clone https://github.com/UCSD-E4E/radio_collar_tracker
 cd radio_collar_tracker
 make

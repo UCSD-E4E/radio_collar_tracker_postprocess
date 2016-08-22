@@ -91,8 +91,11 @@ int process(const char* run_dir, const char* ofile, const int num_freqs, const i
 		convolution[convolution_row][1] = 0;
 	}
 
+	fftw_init_threads();
+
 	fft_buffer_in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * FFT_LENGTH);
 	fft_buffer_out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * FFT_LENGTH);
+	fftw_plan_with_nthreads(8);
 	p = fftw_plan_dft_1d(FFT_LENGTH, fft_buffer_in, fft_buffer_out, FFTW_FORWARD,
 		FFTW_ESTIMATE);
 
@@ -171,6 +174,7 @@ int process(const char* run_dir, const char* ofile, const int num_freqs, const i
 	fftw_free(fft_buffer_out);
 	fftw_destroy_plan(p);
 	fftw_cleanup();
+	fftw_cleanup_threads();
 	free(ifile);
 	for(i = 0; i < num_freqs; ++i){
 		fclose(out_file[i]);
