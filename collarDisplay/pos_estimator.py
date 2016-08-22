@@ -13,10 +13,12 @@ from osgeo import gdal
 import osr
 import math
 from scipy.optimize import leastsq
+import shapefile
 
-def normalProbability(x, mean, stdDev):
+
+def normalProbability(d, mean, stdDev):
     a = 1 / (math.sqrt(2 * stdDev * stdDev * math.pi))
-    b = -1 * (x - mean) * (x - mean)
+    b = -1 * (d - mean) * (d - mean)
     b = b / (2 * stdDev * stdDev)
     return a * math.pow(math.e, b)
 
@@ -29,12 +31,12 @@ def read_meta_file(filename, tag):
     fileinput.close()
     return retval
 
-def residuals(x, col, lat, lon):
+def residuals(v, col, x, y):
     residual = np.zeros(len(col))
     for i in xrange(len(col)):
         if col[i] < -43:
             continue
-        residual[i] = 10 ** (((x[0] * col[i] + x[1]) / 10.0)) - math.sqrt((lat[i] - x[2]) ** 2 + (lon[i] - x[3]) ** 2)
+        residual[i] = 10 ** (((v[0] * col[i] + v[1]) / 10.0)) - math.sqrt((x[i] - v[2]) ** 2 + (y[i] - v[3]) ** 2)
     return residual
 
 
@@ -51,7 +53,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
 
     # make list of columns
     # Expects the csv to have the following columns: time, lat, lon, [collars]
-    names = ['time', 'lat', 'lon', 'col']
+    names = ['time', 'lat', 'lon', 'col', 'alt']
 
     # Read CSV
     data = np.genfromtxt(filename, delimiter=',', names=names)
@@ -59,94 +61,110 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     lat = [x / 1e7 for x in data['lat']]
     lon = [y / 1e7 for y in data['lon']]
     col = data['col']
+    alt = data['alt']
 
     # convert deg to utm
     zone = "X"
     zonenum = 60
     avgCol = np.average(col)
+    stdDevCol = np.std(col)
+    maxCol = np.amax(col)
+    avgAlt = np.average(alt)
+    stdAlt = np.std(alt)
     finalCol = []
-    finalLat = []
-    finalLon = []
+    finalNorthing = []
+    finalEasting = []
     for i in range(len(data['lat'])):
-        if col[i] < -43:
+        # if col[i] < avgCol + stdDevCol:
+        if col[i] < (avgCol + maxCol) / 2:
+            continue
+        if math.fabs(alt[i] - avgAlt) > stdAlt:
             continue
         finalCol.append(col[i])
         utm_coord = utm.from_latlon(lat[i], lon[i])
-        finalLat.append(utm_coord[0])
-        finalLon.append(utm_coord[1])
+        finalEasting.append(utm_coord[0])
+        finalNorthing.append(utm_coord[1])
         zonenum = utm_coord[2]
         zone = utm_coord[3]
 
+
+    if len(finalCol) < 4:
+        print("Collar %d: No collars detected!" % num_col)
+        print("Collar %d: Only %d detections!" % (num_col, len(finalCol)))
+        print("Collar %d: Average Collar Measurement: %d" % (num_col, avgCol))
+        return
+
+    writer = shapefile.Writer(shapefile.POINT)
+    writer.autoBalance = 1
+    writer.field("lat", "F", 20, 18)
+    writer.field("lon", "F", 20, 18)
+    writer.field("measurement", "F", 18, 18)
+
+    for i in xrange(len(finalCol)):
+        #Latitude, longitude, elevation, measurement
+        lat, lon = utm.to_latlon(finalEasting[i], finalNorthing[i], zonenum, zone)
+        writer.point(lon, lat, finalCol[i])
+        writer.record(lon, lat, finalCol[i])
+
+
+    writer.save('%s/RUN_%06d_%06d_pos.shp' % (output_path, run_num, num_col))
+    proj = open('%s/RUN_%06d_%06d_pos.prj' % (output_path, run_num, num_col), "w")
+    epsg1 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
+    proj.write(epsg1)
+    proj.close()
+
     # Data Analysis
-    x0 = [-0.715, -14.51, finalLat[0], finalLon[0]]
-    res_x, res_cov_x, res_infodict, res_msg, res_ler = leastsq(residuals, x0, args=(finalCol, finalLat, finalLon), full_output=1)
+    print("Collar %d: running estimation..." % num_col)
+    x0 = [-0.715, -14.51, finalEasting[0], finalNorthing[0]]
+    res_x, res_cov_x, res_infodict, res_msg, res_ier = leastsq(residuals, x0, args=(finalCol, finalEasting, finalNorthing), full_output=1)
     easting = res_x[2]
     northing = res_x[3]
+    # print("easting: %f" % easting)
+    # print("northing: %f" % northing)
     lat_lon = utm.to_latlon(easting, northing, zonenum, zone_letter=zone)
-    s_sq = (residuals(res_x, finalCol, finalLat, finalLon) ** 2).sum() / (len(finalCol) - len(x0))
+
+    print("Collar %d: ier %d; %s" % (num_col, res_ier, res_msg))
+
+    if res_ier == 4:
+        print("Collar %d: No collar detected - falloff not found!" % (num_col))
+        res_x = np.append(res_x, [0, 0, False])
+        return res_x
+
+    print("Collar %d: Saving estimation..." % num_col)
+    w = shapefile.Writer(shapefile.POINT)
+    w.autoBalance = 1
+    w.field("lat", "F", 20, 18)
+    w.field("lon", "F", 20, 18)
+    w.point(lat_lon[1], lat_lon[0]) #x, y (lon, lat)
+    w.record(lat_lon[1], lat_lon[0]) #x, y (lon, lat)
+    w.save('%s/RUN_%06d_%06d.shp' % (output_path, run_num, num_col))
+
+    prj = open('%s/RUN_%06d_%06d.prj' % (output_path, run_num, num_col), "w")
+    epsg = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
+    prj.write(epsg)
+    prj.close()
+
+    if res_cov_x is None:
+        print("Collar %d: Collar position indeterminate! %s" % (num_col, res_msg))
+        res_x = np.append(res_x, [0, 0, True])
+        return res_x
+    s_sq = (residuals(res_x, finalCol, finalEasting, finalNorthing) ** 2).sum() / (len(finalCol) - len(x0))
     pcov = res_cov_x * s_sq
-    print(np.absolute(pcov[0][0])**0.5)
-    print(np.absolute(pcov[1][1])**0.5)
-    print(np.absolute(pcov[2][2])**0.5)
-    print(np.absolute(pcov[3][3])**0.5)
 
-def generateKML(run_num, num_col, filename, output_path, col_def):
-    from PIL import Image
-    fig = plot.figure()
-    fig.patch.set_facecolor('none')
-    fig.patch.set_alpha(0)
-    fig.set_size_inches(8, 6)
-    fig.set_dpi(72)
-    curColMap = plot.cm.get_cmap('jet')
-    sc = plot.scatter(lon, lat, c=coldata[i - 1], cmap=curColMap, vmin = minCol, vmax = maxCol)
-    ax = plot.gca()
-    ax.patch.set_facecolor('none')
-    ax.set_aspect('equal')
-    plot.axis('off')
-    plot.savefig('tmp.png', bbox_inches = 'tight')
-    print('Collar at %0.3f MHz: %s/RUN_%06d_COL_%0.3ftx.png' %
-        (collars[i - 1] / 1000000.0, output_path, run_num,
-        collars[i - 1] / 1000000.0))
-    # plot.show(block=False)
-    plot.close()
 
-    image=Image.open('tmp.png')
-    image.load()
-    image_data = np.asarray(image)
-    image_data_bw = image_data.max(axis=2)
-    non_empty_columns = np.where(image_data_bw.max(axis=0)>0)[0]
-    non_empty_rows = np.where(image_data_bw.max(axis=1)>0)[0]
-    cropBox = (min(non_empty_rows), max(non_empty_rows), min(non_empty_columns), max(non_empty_columns))
+    # Sigma estimation
+    alpha = res_x[0]
+    beta = res_x[1]
+    errors = []
+    for i in xrange(len(finalCol)):
+        rangeToEstimate = math.sqrt((finalEasting[i] - easting) ** 2.0 + (finalNorthing[i] - northing) ** 2.0)
+        modelRange = 10 ** ((alpha * finalCol[i] + beta) / 10.0)
+        errors.append(rangeToEstimate - modelRange)
+    errorSigma = np.std(errors)
+    errorMean = np.average(errors)
+    res_x = np.append(res_x, [errorMean, errorSigma, True])
+    return res_x
 
-    image_data_new = image_data[cropBox[0]:cropBox[1]+1, cropBox[2]:cropBox[3]+1 , :]
-
-    new_image = Image.fromarray(image_data_new)
-    new_image.save('%s/RUN_%06d_COL%06dtx.png' % (output_path, run_num, num_col))
-    os.remove('tmp.png')
-
-    f = open('%s/RUN_%06d_COL%06d.kml' % (output_path, run_num, num_col), 'w')
-    f.write("""<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-        <kml xmlns="http://www.opengis.net/kml/2.2">
-          <Folder>
-            <name>Radio Collar Tracker</name>
-            <description>Radio Collar Tracker, UCSD</description>
-            <GroundOverlay>
-              <name>RUN %d</name>
-              <description>RUN %d, Collar at %0.3f MHz</description>
-              <Icon>
-                <href>%s</href>
-              </Icon>
-              <LatLonBox>
-                <north>%f</north>
-                <south>%f</south>
-                <east>%f</east>
-                <west>%f</west>
-                <rotation>0</rotation>
-              </LatLonBox>
-            </GroundOverlay>
-          </Folder>
-        </kml>""" % (run_num, run_num, collars[i - 1] / 1000000.0, '%s/RUN_%06d_COL%0.3ftx.png' % (output_path, run_num, collars[i - 1] / 1000000.0),north, south, east, west))
-    f.close()
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Processes RUN_XXXXXX.csv files '
@@ -166,4 +184,11 @@ if __name__ == '__main__':
     filename = args.filename
     output_path = args.output_path
     col_def = args.col_def
-    generateGraph(run_num, num_col, filename, output_path, col_def)
+    res_x = generateGraph(run_num, num_col, filename, output_path, col_def)
+    print("alpha: %f" % res_x[0])
+    print("beta: %f" % res_x[1])
+    print("easting: %f" % res_x[2])
+    print("northing: %f" % res_x[3])
+    print("mean: %f" % res_x[4])
+    print("sigma: %f" % res_x[5])
+    print("success: %f" % res_x[6])
