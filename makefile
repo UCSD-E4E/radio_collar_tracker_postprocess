@@ -15,12 +15,13 @@ install: fft_detect/fft_detect raw_gps_analysis/raw_gps_analysis.py\
 	python_dialogs/fileChooser.py python_dialogs/getRunNum.py\
 	python_dialogs/getCollars.py CLI_GUI/cat_relevant.py\
 	python_dialogs/getFltAlt.py CLI_GUI/cas2.sh utilities/makeShapefile.py\
-	collarDisplay/csvToShp.py
+	collarDisplay/csvToShp.py collarDisplay/pos_estimator.py collarDisplay/display_gps.py
 
 	cp CLI_GUI/rct_cas.py /usr/local/bin/rct_cas
 	chmod +x /usr/local/bin/rct_cas
 	cp raw_gps_analysis/raw_gps_analysis.py /usr/local/bin/
 	cp collarDisplay/display_data.py /usr/local/bin/
+	cp collarDisplay/display_gps.py /usr/local/bin/
 	cp meta_file_reader/read_meta_file.py /usr/local/bin/
 	cp ppm_adjust/get_beat_frequency.py /usr/local/bin/
 	-mkdir /usr/local/etc/rct/
@@ -33,6 +34,7 @@ install: fft_detect/fft_detect raw_gps_analysis/raw_gps_analysis.py\
 	cp utilities/makeShapefile.py /usr/local/bin/makeShapefile
 	cp collarDisplay/csvToShp.py /usr/local/bin/
 	rm -rf config
+	cp collarDisplay/pos_estimator.py /usr/local/bin/
 
 
 rct_bin_ref.sh:
@@ -80,6 +82,8 @@ uninstall:
 	-rm /usr/local/bin/fft_detect
 	-rm /usr/local/bin/makeShapefile
 	-rm /usr/local/bin/csvToShp.py
+	-rm /usr/local/bin/pos_estimator.py
+	-rm /usr/local/bin/display_gps.py
 
 fft_detect/fft_detect:
 	make -C fft_detect
