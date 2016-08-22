@@ -17,7 +17,7 @@ def process(input_dir, output_dir, run_num, col_num, tar_alt):
 	# Get start time
 	start_time = float(meta_file_stream.readline().strip().split(':')[1].strip())
 	center_freq = int(meta_file_stream.readline().strip().split(':')[1].strip())
-	fft_length = 4096;
+	fft_length = 4096
 	sampling_freq = int(meta_file_stream.readline().strip().split(':')[1].strip()) / fft_length
 	gain = float(meta_file_stream.readline().strip().split(':')[1].strip())
 
