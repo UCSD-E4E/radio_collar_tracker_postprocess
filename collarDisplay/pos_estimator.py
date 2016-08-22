@@ -88,7 +88,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
         zone = utm_coord[3]
 
 
-    if len(finalCol) < 4:
+    if len(finalCol) < 5:
         print("Collar %d: No collars detected!" % num_col)
         print("Collar %d: Only %d detections!" % (num_col, len(finalCol)))
         print("Collar %d: Average Collar Measurement: %d" % (num_col, avgCol))
