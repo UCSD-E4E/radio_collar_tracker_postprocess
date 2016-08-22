@@ -123,12 +123,12 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     # print("northing: %f" % northing)
     lat_lon = utm.to_latlon(easting, northing, zonenum, zone_letter=zone)
 
-    print("Collar %d: ier %d; %s" % (num_col, res_ier, res_msg))
 
     if res_ier == 4:
         print("Collar %d: No collar detected - falloff not found!" % (num_col))
         res_x = np.append(res_x, [0, 0, False])
         return res_x
+    print("Collar %d: ier %d; %s" % (num_col, res_ier, res_msg))
 
     print("Collar %d: Saving estimation..." % num_col)
     w = shapefile.Writer(shapefile.POINT)
