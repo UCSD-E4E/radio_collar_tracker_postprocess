@@ -12,12 +12,17 @@ import fileinput
 from osgeo import gdal
 import osr
 import math
+import shapefile
 
 def normalProbability(x, mean, stdDev):
-    a = 1 / (math.sqrt(2 * stdDev * stdDev * math.pi))
-    b = -1 * (x - mean) * (x - mean)
-    b = b / (2 * stdDev * stdDev)
-    return a * math.pow(math.e, b)
+    # stdDev = 100
+    a = 1 / (math.sqrt(2 * (stdDev ** 2.0) * math.pi))
+    b = -1 * (x - mean) ** 2.0
+    b = b / (2 * (stdDev ** 2.0))
+    if a * math.pow(math.e, b) < 0.0001:
+        return -4
+    else:
+        return math.log10(a * math.pow(math.e, b))
 
 def read_meta_file(filename, tag):
     retval = None
@@ -28,20 +33,13 @@ def read_meta_file(filename, tag):
     fileinput.close()
     return retval
 
-def generateGraph(run_num, num_col, filename, output_path, col_def):
-    kml_output = False
-    # TODO Fix test case
-    plot_height = 6
-    plot_width = 8
-    plot_dpi = 72
-
-
+def generateGraph(run_num, num_col, filename, output_path, col_def, alpha = -0.715, beta = -14.51, mean = 0.0306, sigma = 6):
     # Get collar frequency
     col_freq = float(read_meta_file(col_def, str(num_col))) / 1.e6
 
     # make list of columns
     # Expects the csv to have the following columns: time, lat, lon, [collars]
-    names = ['time', 'lat', 'lon', 'col']
+    names = ['time', 'lat', 'lon', 'col', 'alt']
 
     # Read CSV
     data = np.genfromtxt(filename, delimiter=',', names=names)
@@ -49,69 +47,71 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     lat = [x / 1e7 for x in data['lat']]
     lon = [y / 1e7 for y in data['lon']]
     col = data['col']
+    alt = data['alt']
 
     # convert deg to utm
     zone = "X"
     zonenum = 60
     avgCol = np.average(col)
+    stdDevCol = np.std(col)
+    maxCol = np.amax(col)
+    avgAlt = np.average(alt)
+    stdAlt = np.std(alt)
+    finalCol = []
+    finalNorthing = []
+    finalEasting = []
+    finalRange = []
     for i in range(len(data['lat'])):
+        # if col[i] < avgCol + stdDevCol:
+        if col[i] < (avgCol + maxCol) / 2:
+            continue
+        if math.fabs(alt[i] - avgAlt) > stdAlt:
+            continue
+        finalCol.append(col[i])
         utm_coord = utm.from_latlon(lat[i], lon[i])
-        lat[i] = utm_coord[0]
-        lon[i] = utm_coord[1]
+        finalEasting.append(utm_coord[0])
+        finalNorthing.append(utm_coord[1])
         zonenum = utm_coord[2]
         zone = utm_coord[3]
-        if col[i] < avgCol:
-            col[i] = avgCol
+        finalRange.append(10 ** ((alpha * col[i] + beta) / 10.0))
 
     # Calculate heatmap
-    maxRange = 100
-    tiffXSize = int(max(lat)) - int(min(lat)) + maxRange * 2
-    tiffYSize = int(max(lon)) - int(min(lon)) + maxRange * 2
+    print("Collar %d: Building heatmap..." % num_col)
+    margin = 50
+    tiffXSize = int(max(finalEasting)) - int(min(finalEasting)) + margin * 2
+    tiffYSize = int(max(finalNorthing)) - int(min(finalNorthing)) + margin * 2
     pixelSize = 1
-    heatMapArea = np.zeros((tiffYSize, tiffXSize)) # y, x
-    refLat = min(lat) - maxRange
-    maxLat = max(lat) + maxRange
-    refLon = max(lon) + maxRange
-    minLon = min(lon) - maxRange
-    # print("Lat bounds: [%f, %f]" % (refLat, maxLat))
-    # print("Lon bounds: [%f, %f]" % (minLon, refLon))
+    heatMapArea = np.zeros((tiffYSize, tiffXSize)) # [y, x]
+    minY = min(finalNorthing) - margin
+    refY = max(finalNorthing) + margin
+    refX = min(finalEasting) - margin
+    maxX = max(finalEasting) + margin
+    # print("min northing: %f" % minY)
+    # print("max northing: %f" % refY)
+    # print("min easting: %f" % refX)
+    # print("max easting: %f" % maxX)
+    # Xgeo = refY + X
+    # Ygeo = refX - Ypix
+
+    # Sort heatmap
+    sortedIndices = np.argsort(finalCol)
+    # for i in xrange(len(sortedIndices)):
+
 
     # Plot data
-    # Naive solution - 30m radius
-    fallOffConstant = 1
+    for x in xrange(tiffXSize):
+        for y in xrange(tiffYSize):
+            for i in xrange(len(finalCol)):
+                posRange = math.sqrt((refX + x - finalEasting[i]) ** 2.0 + (refY - y - finalNorthing[i]) ** 2.0)
+                heatMapArea[y][x] = heatMapArea[y][x] + normalProbability(posRange - finalRange[i], mean, 0.4 * finalRange[i])
 
-    mean = 0.0306
-    stdDev = 1.1648 * 6
-
-    for i in xrange(len(lat)):
-        collarMeasurement = col[i]
-        if collarMeasurement < -43:
-            continue
-        estimatedRange = math.pow(10, ((-0.715 * collarMeasurement - 14.51) / 10.0))
-        maskLen = 2 * (estimatedRange + 3 * 0.2 * estimatedRange)
-        for x in xrange(int(maskLen)):
-            for y in xrange(int(maskLen)):
-                relX = x - maskLen / 2.0
-                relY = y - maskLen / 2.0
-                coordX = lat[i] + relX
-                coordY = lon[i] + relY
-                if (coordX - refLat < 0) or (coordX - refLat > tiffXSize) or (refLon - coordY < 0) or (refLon - coordY > tiffYSize):
-                    continue
-                posRange = math.sqrt(relX * relX + relY * relY)
-                if heatMapArea[refLon - coordY][coordX - refLat] == 0:
-                    heatMapArea[refLon - coordY][coordX - refLat] = normalProbability(posRange - estimatedRange, mean, 0.2 * estimatedRange)
-                else:
-                    heatMapArea[refLon - coordY][coordX - refLat] = heatMapArea[refLon - coordY][coordX - refLat] + normalProbability(posRange - estimatedRange, mean, 0.2 * estimatedRange)
-                    # heatMapArea[refLon - coordY][coordX - refLat] = max(heatMapArea[refLon - coordY][coordX - refLat], normalProbability(posRange - estimatedRange, mean, stdDev))
-                # print("Pos: %f, %f, %f, %f" % (coordX, coordY, posRange, normalProbability(posRange - estimatedRange, mean, stdDev)))
-
-    # for x in xrange(tiffXSize):
-    #     for y in xrange(tiffYSize):
-    #         # heatMapArea[y][x] = heatMapArea[y][x] * 100
-    #         if heatMapArea[y][x] > 0.001:
-    #             print("%d, %d, %f" % (x, y, heatMapArea[y][x]))
+    # Reshift up
+    maxProbability = np.amax(heatMapArea)
+    heatMapArea = heatMapArea - maxProbability
+    heatMapArea = np.power(10, heatMapArea)
 
     # Save plot
+    print("Collar %d: Saving heatmap..." % num_col)
     outputFileName = '%s/RUN_%06d_COL_%06d.tiff' % (output_path, run_num, num_col)
     driver = gdal.GetDriverByName('GTiff')
     dataset = driver.Create(
@@ -119,7 +119,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
         tiffXSize,
         tiffYSize,
         1,
-        gdal.GDT_Float32)
+        gdal.GDT_Float32, ['COMPRESS=LZW'])
 
     spatialReference = osr.SpatialReference()
     spatialReference.SetUTM(zonenum, zone >= 'N')
@@ -127,77 +127,46 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     wkt = spatialReference.ExportToWkt()
     retval = dataset.SetProjection(wkt)
     dataset.SetGeoTransform((
-        refLat,    # 0
-        1,  # 1
-        0,                      # 2
-        refLon,    # 3
-        0,                      # 4
-        -1))
-
+        refX,    # 3
+        1,                      # 4
+        0,
+        refY,    # 0
+        0,  # 1
+        -1))                     # 2
     band = dataset.GetRasterBand(1)
+    # band.SetNoDataValue(100)
+    # print(tiffXSize)
+    # print(tiffYSize)
+    # print(np.amin(heatMapArea))
+    # print(np.amax(heatMapArea))
+    # print(np.mean(heatMapArea))
+    # print(np.std(heatMapArea))
+    # print((heatMapArea > -30).sum())
     band.WriteArray(heatMapArea)
     band.SetStatistics(np.amin(heatMapArea), np.amax(heatMapArea), np.mean(heatMapArea), np.std(heatMapArea))
     dataset.FlushCache()
     dataset = None
 
+    writer = shapefile.Writer(shapefile.POINT)
+    writer.autoBalance = 1
+    writer.field("lat", "F", 20, 18)
+    writer.field("lon", "F", 20, 18)
+    writer.field("measurement", "F", 18, 18)
 
-def generateKML(run_num, num_col, filename, output_path, col_def):
-    from PIL import Image
-    fig = plot.figure()
-    fig.patch.set_facecolor('none')
-    fig.patch.set_alpha(0)
-    fig.set_size_inches(8, 6)
-    fig.set_dpi(72)
-    curColMap = plot.cm.get_cmap('jet')
-    sc = plot.scatter(lon, lat, c=coldata[i - 1], cmap=curColMap, vmin = minCol, vmax = maxCol)
-    ax = plot.gca()
-    ax.patch.set_facecolor('none')
-    ax.set_aspect('equal')
-    plot.axis('off')
-    plot.savefig('tmp.png', bbox_inches = 'tight')
-    print('Collar at %0.3f MHz: %s/RUN_%06d_COL_%0.3ftx.png' %
-        (collars[i - 1] / 1000000.0, output_path, run_num,
-        collars[i - 1] / 1000000.0))
-    # plot.show(block=False)
-    plot.close()
+    for i in xrange(len(finalCol)):
+        #Latitude, longitude, elevation, measurement
+        lat, lon = utm.to_latlon(finalEasting[i], finalNorthing[i], zonenum, zone)
+        writer.point(lon, lat, finalCol[i])
+        writer.record(lon, lat, finalCol[i])
 
-    image=Image.open('tmp.png')
-    image.load()
-    image_data = np.asarray(image)
-    image_data_bw = image_data.max(axis=2)
-    non_empty_columns = np.where(image_data_bw.max(axis=0)>0)[0]
-    non_empty_rows = np.where(image_data_bw.max(axis=1)>0)[0]
-    cropBox = (min(non_empty_rows), max(non_empty_rows), min(non_empty_columns), max(non_empty_columns))
 
-    image_data_new = image_data[cropBox[0]:cropBox[1]+1, cropBox[2]:cropBox[3]+1 , :]
+    writer.save('%s/RUN_%06d_%06d_hpos.shp' % (output_path, run_num, num_col))
+    proj = open('%s/RUN_%06d_%06d_hpos.prj' % (output_path, run_num, num_col), "w")
+    epsg1 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
+    proj.write(epsg1)
+    proj.close()
 
-    new_image = Image.fromarray(image_data_new)
-    new_image.save('%s/RUN_%06d_COL%06dtx.png' % (output_path, run_num, num_col))
-    os.remove('tmp.png')
 
-    f = open('%s/RUN_%06d_COL%06d.kml' % (output_path, run_num, num_col), 'w')
-    f.write("""<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-        <kml xmlns="http://www.opengis.net/kml/2.2">
-          <Folder>
-            <name>Radio Collar Tracker</name>
-            <description>Radio Collar Tracker, UCSD</description>
-            <GroundOverlay>
-              <name>RUN %d</name>
-              <description>RUN %d, Collar at %0.3f MHz</description>
-              <Icon>
-                <href>%s</href>
-              </Icon>
-              <LatLonBox>
-                <north>%f</north>
-                <south>%f</south>
-                <east>%f</east>
-                <west>%f</west>
-                <rotation>0</rotation>
-              </LatLonBox>
-            </GroundOverlay>
-          </Folder>
-        </kml>""" % (run_num, run_num, collars[i - 1] / 1000000.0, '%s/RUN_%06d_COL%0.3ftx.png' % (output_path, run_num, collars[i - 1] / 1000000.0),north, south, east, west))
-    f.close()
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Processes RUN_XXXXXX.csv files '
@@ -209,6 +178,8 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--input', help = 'Input file to be processed', metavar = 'data_file', dest = 'filename', required = True)
     parser.add_argument('-o', '--output_dir', help = 'Output directory', metavar = 'output_dir', dest = 'output_path', required = True)
     parser.add_argument('-c', '--definitions', help = "Collar Definitions", metavar = 'collar_definitions', dest = 'col_def', required = True)
+    parser.add_argument('-a', '--alpha', help = "Alpha paramater", metavar = 'alpha', dest = 'alpha', required = False, type = float)
+    parser.add_argument('-b', '--beta', help = "Beta paramater", metavar = 'beta', dest = 'beta', required = False, type = float)
 
     # Get configuration
     args = parser.parse_args()
@@ -217,4 +188,6 @@ if __name__ == '__main__':
     filename = args.filename
     output_path = args.output_path
     col_def = args.col_def
-    generateGraph(run_num, num_col, filename, output_path, col_def)
+    alpha = (args.alpha)
+    beta = args.beta
+    generateGraph(run_num, num_col, filename, output_path, col_def, alpha, beta)
