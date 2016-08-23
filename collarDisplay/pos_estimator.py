@@ -31,12 +31,12 @@ def read_meta_file(filename, tag):
     fileinput.close()
     return retval
 
-def residuals(v, col, x, y):
+def residuals(v, col, x, y, z):
     residual = np.zeros(len(col))
     for i in xrange(len(col)):
         if col[i] < -43:
             continue
-        residual[i] = 10 ** (((v[0] * col[i] + v[1]) / 10.0)) - math.sqrt((x[i] - v[2]) ** 2 + (y[i] - v[3]) ** 2)
+        residual[i] = 10 ** (((v[0] * col[i] + v[1]) / 10.0)) - math.sqrt((x[i] - v[2]) ** 2 + (y[i] - v[3]) ** 2 + (z[i]) ** 2)
     return residual
 
 
@@ -75,6 +75,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     finalCol = []
     finalNorthing = []
     finalEasting = []
+    finalAlt = []
 
     if stdDevCol < 2.0:
         print("Collar %d: Not enough variation! No collar!" % num_col)
@@ -85,8 +86,8 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     maxInd = np.argmax(histogram)
     threshold = edges[len(edges) - 1]
     for i in xrange(maxInd + 1, len(histogram)):
-        if histogram[i] < 10:
-            threshold = edges[i + 1]
+        if histogram[i - 1] - histogram[i] > 50:
+            threshold = edges[i]
             break
     print("Collar %d: Using %f threshold" % (num_col, threshold))
 
@@ -98,11 +99,12 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
             continue
         utm_coord = utm.from_latlon(lat[i], lon[i])
         if startLocation is not None:
-            if math.fabs(utm_coord[0] - startLocation[0]) > startLocation[2] or math.fabs(utm_coord[1] - startLocation[1]) > startLocation[2]:
+            if math.fabs(utm_coord[0] - startLocation[0]) > startLocation[2] * 2 or math.fabs(utm_coord[1] - startLocation[1]) > startLocation[2] * 2:
                 continue
         finalCol.append(col[i])
         finalEasting.append(utm_coord[0])
         finalNorthing.append(utm_coord[1])
+        finalAlt.append(alt[i])
         zonenum = utm_coord[2]
         zone = utm_coord[3]
 
@@ -114,13 +116,14 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     writer.autoBalance = 1
     writer.field("lat", "F", 20, 18)
     writer.field("lon", "F", 20, 18)
+    writer.field("alt", "F", 20, 18)
     writer.field("measurement", "F", 18, 18)
 
     for i in xrange(len(finalCol)):
         #Latitude, longitude, elevation, measurement
         lat, lon = utm.to_latlon(finalEasting[i], finalNorthing[i], zonenum, zone)
-        writer.point(lon, lat, finalCol[i])
-        writer.record(lon, lat, finalCol[i])
+        writer.point(lon, lat, finalAlt[i], finalCol[i])
+        writer.record(lon, lat, finalAlt[i], finalCol[i])
 
 
     writer.save('%s/RUN_%06d_COL_%06d_pos.shp' % (output_path, run_num, num_col))
@@ -129,7 +132,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     proj.write(epsg1)
     proj.close()
 
-    if len(finalCol) < 5:
+    if len(finalCol) < 6:
         print("Collar %d: No collars detected!" % num_col)
         print("Collar %d: Only %d detections!" % (num_col, len(finalCol)))
         print("Collar %d: Average Collar Measurement: %d" % (num_col, avgCol))
@@ -138,7 +141,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     # Data Analysis
     print("Collar %d: running estimation..." % num_col)
     x0 = [-0.715, -14.51, finalEasting[0], finalNorthing[0]]
-    res_x, res_cov_x, res_infodict, res_msg, res_ier = leastsq(residuals, x0, args=(finalCol, finalEasting, finalNorthing), full_output=1)
+    res_x, res_cov_x, res_infodict, res_msg, res_ier = leastsq(residuals, x0, args=(finalCol, finalEasting, finalNorthing, finalAlt), full_output=1)
     easting = res_x[2]
     northing = res_x[3]
     # print("easting: %f" % easting)
@@ -147,6 +150,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
 
     if res_x[0] > 0:
         print("Collar %d: Collar model is invalid!" % num_col)
+        print(res_x)
         return np.append(res_x, [0, 0, False])
 
 
@@ -155,8 +159,9 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
         res_x = np.append(res_x, [0, 0, False])
         return res_x
     if res_ier == 5:
-        print("Collar %d: No solution found!")
-        res_x = np.append(res_x [0, 0, False])
+        print("Collar %d: No solution found!" % (num_col))
+        print(res_x)
+        res_x = np.append(res_x, [0, 0, False])
         return res_x
     print("Collar %d: ier %d; %s" % (num_col, res_ier, res_msg))
 
@@ -178,7 +183,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
         print("Collar %d: Collar position indeterminate! %s" % (num_col, res_msg))
         res_x = np.append(res_x, [0, 0, True])
         return res_x
-    s_sq = (residuals(res_x, finalCol, finalEasting, finalNorthing) ** 2).sum() / (len(finalCol) - len(x0))
+    s_sq = (residuals(res_x, finalCol, finalEasting, finalNorthing, finalAlt) ** 2).sum() / (len(finalCol) - len(x0))
     pcov = res_cov_x * s_sq
 
 
@@ -187,7 +192,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     beta = res_x[1]
     errors = []
     for i in xrange(len(finalCol)):
-        rangeToEstimate = math.sqrt((finalEasting[i] - easting) ** 2.0 + (finalNorthing[i] - northing) ** 2.0)
+        rangeToEstimate = math.sqrt((finalEasting[i] - easting) ** 2.0 + (finalNorthing[i] - northing) ** 2.0 + finalAlt[i] ** 2.0)
         modelRange = 10 ** ((alpha * finalCol[i] + beta) / 10.0)
         errors.append(rangeToEstimate - modelRange)
     errorSigma = np.std(errors)
