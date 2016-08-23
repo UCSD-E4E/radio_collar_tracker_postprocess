@@ -29,9 +29,9 @@ def processRaw(data_dir, run, alt, collarDefinitionFilename, i):
 	if res_x is None:
 		return
 	if res_x[6]:
-		display_data.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename, res_x[0], res_x[1], res_x[4], res_x[5])
+		display_data.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename, res_x[0], res_x[1], res_x[4], res_x[5], start_location)
 	# else:
-	# 	display_data.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename, res_x[0], res_x[1])
+		# display_data.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename)
 
 def processRawPool(args):
 	processRaw(args[0], args[1], args[2], args[3], args[4])
