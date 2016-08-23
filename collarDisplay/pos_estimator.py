@@ -40,7 +40,7 @@ def residuals(v, col, x, y):
     return residual
 
 
-def generateGraph(run_num, num_col, filename, output_path, col_def):
+def generateGraph(run_num, num_col, filename, output_path, col_def, startLocation = None):
     kml_output = False
     # TODO Fix test case
     plot_height = 6
@@ -64,9 +64,10 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     alt = data['alt']
 
     # convert deg to utm
+    print("Collar %d: Loading data" % num_col)
     zone = "X"
     zonenum = 60
-    avgCol = np.average(col)
+    avgCol = np.median(col)
     stdDevCol = np.std(col)
     maxCol = np.amax(col)
     avgAlt = np.average(alt)
@@ -74,24 +75,39 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     finalCol = []
     finalNorthing = []
     finalEasting = []
+
+    if stdDevCol < 2.0:
+        print("Collar %d: Not enough variation! No collar!" % num_col)
+        return
+
+    # Generate histogram
+    histogram, edges = np.histogram(col)
+    maxInd = np.argmax(histogram)
+    threshold = edges[len(edges) - 1]
+    for i in xrange(maxInd + 1, len(histogram)):
+        if histogram[i] < 10:
+            threshold = edges[i + 1]
+            break
+    print("Collar %d: Using %f threshold" % (num_col, threshold))
+
     for i in range(len(data['lat'])):
         # if col[i] < avgCol + stdDevCol:
-        if col[i] < (avgCol + maxCol) / 2:
+        if col[i] < threshold:
             continue
         if math.fabs(alt[i] - avgAlt) > stdAlt:
             continue
-        finalCol.append(col[i])
         utm_coord = utm.from_latlon(lat[i], lon[i])
+        if startLocation is not None:
+            if math.fabs(utm_coord[0] - startLocation[0]) > startLocation[2] or math.fabs(utm_coord[1] - startLocation[1]) > startLocation[2]:
+                continue
+        finalCol.append(col[i])
         finalEasting.append(utm_coord[0])
         finalNorthing.append(utm_coord[1])
         zonenum = utm_coord[2]
         zone = utm_coord[3]
 
-
-    if len(finalCol) < 5:
-        print("Collar %d: No collars detected!" % num_col)
-        print("Collar %d: Only %d detections!" % (num_col, len(finalCol)))
-        print("Collar %d: Average Collar Measurement: %d" % (num_col, avgCol))
+    if len(finalCol) == 0:
+        print("Collar %d: No matches!" % num_col)
         return
 
     writer = shapefile.Writer(shapefile.POINT)
@@ -113,6 +129,12 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     proj.write(epsg1)
     proj.close()
 
+    if len(finalCol) < 5:
+        print("Collar %d: No collars detected!" % num_col)
+        print("Collar %d: Only %d detections!" % (num_col, len(finalCol)))
+        print("Collar %d: Average Collar Measurement: %d" % (num_col, avgCol))
+        return
+
     # Data Analysis
     print("Collar %d: running estimation..." % num_col)
     x0 = [-0.715, -14.51, finalEasting[0], finalNorthing[0]]
@@ -123,10 +145,18 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     # print("northing: %f" % northing)
     lat_lon = utm.to_latlon(easting, northing, zonenum, zone_letter=zone)
 
+    if res_x[0] > 0:
+        print("Collar %d: Collar model is invalid!" % num_col)
+        return np.append(res_x, [0, 0, False])
+
 
     if res_ier == 4:
         print("Collar %d: No collar detected - falloff not found!" % (num_col))
         res_x = np.append(res_x, [0, 0, False])
+        return res_x
+    if res_ier == 5:
+        print("Collar %d: No solution found!")
+        res_x = np.append(res_x [0, 0, False])
         return res_x
     print("Collar %d: ier %d; %s" % (num_col, res_ier, res_msg))
 
