@@ -63,9 +63,9 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     # Calculate heatmap
     print("Collar %d: Building median map..." % num_col)
     margin = 0
-    pixelSize = 15 # meters per pixel
-    tiffXSize = (int(max(finalEasting)) - int(min(finalEasting)) + margin * 2) / pixelSize + 1
-    tiffYSize = (int(max(finalNorthing)) - int(min(finalNorthing)) + margin * 2) / pixelSize + 1
+    pixelSize = 30 # meters per pixel
+    tiffXSize = (int((max(finalEasting)) - int(min(finalEasting)) + margin * 2) / pixelSize + 1)
+    tiffYSize = (int((max(finalNorthing)) - int(min(finalNorthing)) + margin * 2) / pixelSize + 1)
     heatMapArea = np.zeros((tiffYSize, tiffXSize)) # [y, x]
     refNorthing = max(finalNorthing) + margin
     minNorthing = refNorthing - (tiffYSize) * pixelSize
@@ -79,7 +79,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     # Ygeo = refNorthing - pixelSize / 2- Ypix
 
     # Plot data
-    detectionRadius = 30
+    detectionRadius = 45
     maxLocation = [0, 0, detectionRadius]
     maxA = -100
     for x in xrange(tiffXSize):
