@@ -160,8 +160,8 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, alpha = -0.7
         writer.record(lon, lat, finalCol[i])
 
 
-    writer.save('%s/RUN_%06d_%06d_hpos.shp' % (output_path, run_num, num_col))
-    proj = open('%s/RUN_%06d_%06d_hpos.prj' % (output_path, run_num, num_col), "w")
+    writer.save('%s/RUN_%06d_COL_%06d_hpos.shp' % (output_path, run_num, num_col))
+    proj = open('%s/RUN_%06d_COL_%06d_hpos.prj' % (output_path, run_num, num_col), "w")
     epsg1 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
     proj.write(epsg1)
     proj.close()
