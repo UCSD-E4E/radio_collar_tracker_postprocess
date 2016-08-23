@@ -107,8 +107,8 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
         writer.record(lon, lat, finalCol[i])
 
 
-    writer.save('%s/RUN_%06d_%06d_pos.shp' % (output_path, run_num, num_col))
-    proj = open('%s/RUN_%06d_%06d_pos.prj' % (output_path, run_num, num_col), "w")
+    writer.save('%s/RUN_%06d_COL_%06d_pos.shp' % (output_path, run_num, num_col))
+    proj = open('%s/RUN_%06d_COL_%06d_pos.prj' % (output_path, run_num, num_col), "w")
     epsg1 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
     proj.write(epsg1)
     proj.close()
@@ -137,9 +137,9 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     w.field("lon", "F", 20, 18)
     w.point(lat_lon[1], lat_lon[0]) #x, y (lon, lat)
     w.record(lat_lon[1], lat_lon[0]) #x, y (lon, lat)
-    w.save('%s/RUN_%06d_%06d.shp' % (output_path, run_num, num_col))
+    w.save('%s/RUN_%06d_COL_%06d_est.shp' % (output_path, run_num, num_col))
 
-    prj = open('%s/RUN_%06d_%06d.prj' % (output_path, run_num, num_col), "w")
+    prj = open('%s/RUN_%06d__COL_%06d_est.prj' % (output_path, run_num, num_col), "w")
     epsg = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
     prj.write(epsg)
     prj.close()

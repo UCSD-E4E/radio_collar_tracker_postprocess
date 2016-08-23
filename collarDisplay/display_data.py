@@ -112,7 +112,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, alpha = -0.7
 
     # Save plot
     print("Collar %d: Saving heatmap..." % num_col)
-    outputFileName = '%s/RUN_%06d_COL_%06d.tiff' % (output_path, run_num, num_col)
+    outputFileName = '%s/RUN_%06d_COL_%06d_heatmap.tiff' % (output_path, run_num, num_col)
     driver = gdal.GetDriverByName('GTiff')
     dataset = driver.Create(
         outputFileName,
