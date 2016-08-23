@@ -24,8 +24,8 @@ def processRaw(data_dir, run, alt, collarDefinitionFilename, i):
 	raw_gps_analysis.process(data_dir, data_dir, run, i + 1, alt)
 	data_file = '%s/RUN_%06d_COL_%06d.csv' % (data_dir, run, i + 1)
 	csvToShp.create_shapefile(data_file, '%s/RUN_%06d_COL_%06d.shp' % (data_dir, run, i + 1))
-	median_filter.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename)
-	res_x = pos_estimator.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename)
+	start_location = median_filter.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename)
+	res_x = pos_estimator.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename, start_location)
 	if res_x is None:
 		return
 	if res_x[6]:
@@ -90,7 +90,12 @@ if __name__ == '__main__':
 		except Exception, e:
 			pass
 	for curFile in os.listdir(data_dir):
-		if any(curFile.lower().endswith(ext) for ext in ['.csv', '.png', '.raw']):
+		if any(curFile.lower().endswith(ext) for ext in ['.csv', '.png', '.tif', '.tiff', '.shp', '.shx', '.prj', '.dbf', '.xml']):
+			try:
+				os.remove(os.path.join(data_dir, curFile))
+			except Exception, e:
+				pass
+		if fft_flag and any(curFile.lower().endswith(ext) for ext in ['.raw']):
 			try:
 				os.remove(os.path.join(data_dir, curFile))
 			except Exception, e:
@@ -205,6 +210,7 @@ if __name__ == '__main__':
 	os.remove(collarDefinitionFilename)
 
 	# Clean up raw files
-	if raw_flag:
+	if raw_flag and fft_flag:
+		print("Cleaning raws")
 		for i in range(1, numCollars + 1):
 			os.remove("%s/RUN_%06d_%06d.raw" % (data_dir, run, i))
