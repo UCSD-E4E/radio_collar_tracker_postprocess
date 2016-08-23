@@ -13,6 +13,7 @@ Installing the Post-Process Code
 	* tkinter (python-tk)
 	* numpy (python-numpy)
 	* matplotlib (python-matplotlib)
+	* scipy (python-scipy)
 	* utm 0.4.0 (https://pypi.python.org/pypi/utm)
 	* pyshp 1.2.3 (https://pypi.python.org/pypi/pyshp)
 	* gdal 2.1.0 (http://download.osgeo.org/gdal/)
@@ -24,7 +25,7 @@ Installing the Post-Process Code
 
 In all, a typical Ubuntu-based installation might look like this:
 ```sh
-sudo apt-get install build-essential python-tk python-numpy python-matplotlib python-pip python-dev git
+sudo apt-get install build-essential python-tk python-numpy python-matplotlib python-pip python-dev git python-scipy
 wget ftp://ftp.fftw.org/pub/fftw/fftw-3.3.4.tar.gz
 wget https://pypi.python.org/packages/source/u/utm/utm-0.4.0.tar.gz
 wget http://download.osgeo.org/gdal/2.1.0/gdal-2.1.0.tar.gz
