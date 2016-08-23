@@ -139,7 +139,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     w.record(lat_lon[1], lat_lon[0]) #x, y (lon, lat)
     w.save('%s/RUN_%06d_COL_%06d_est.shp' % (output_path, run_num, num_col))
 
-    prj = open('%s/RUN_%06d__COL_%06d_est.prj' % (output_path, run_num, num_col), "w")
+    prj = open('%s/RUN_%06d_COL_%06d_est.prj' % (output_path, run_num, num_col), "w")
     epsg = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
     prj.write(epsg)
     prj.close()
