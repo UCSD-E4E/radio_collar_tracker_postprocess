@@ -19,10 +19,13 @@ def normalProbability(x, mean, stdDev):
     a = 1 / (math.sqrt(2 * (stdDev ** 2.0) * math.pi))
     b = -1 * (x - mean) ** 2.0
     b = b / (2 * (stdDev ** 2.0))
-    if a * math.pow(math.e, b) < 0.0001:
-        return -4
-    else:
-        return math.log10(a * math.pow(math.e, b))
+    retval = -4
+    probability = a * math.pow(math.e, b)
+    if x < mean:
+        probability = a - (a - probability) / 2
+    if probability > 0.0001:
+        retval = math.log10(probability)
+    return retval
 
 def read_meta_file(filename, tag):
     retval = None
@@ -33,7 +36,7 @@ def read_meta_file(filename, tag):
     fileinput.close()
     return retval
 
-def generateGraph(run_num, num_col, filename, output_path, col_def, alpha = -0.715, beta = -14.51, mean = 0.0306, sigma = 6):
+def generateGraph(run_num, num_col, filename, output_path, col_def, alpha = -0.715, beta = -14.51, mean = 0.0306, sigma = 6, startLocation = None):
     # Get collar frequency
     col_freq = float(read_meta_file(col_def, str(num_col))) / 1.e6
 
@@ -61,14 +64,29 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, alpha = -0.7
     finalNorthing = []
     finalEasting = []
     finalRange = []
+    finalAlt = []
+
+    # Generate histogram
+    histogram, edges = np.histogram(col)
+    maxInd = np.argmax(histogram)
+    threshold = edges[len(edges) - 1]
+    for i in xrange(maxInd + 1, len(histogram)):
+        if histogram[i - 1] - histogram[i] > 50:
+            threshold = edges[i]
+            break
+
     for i in range(len(data['lat'])):
         # if col[i] < avgCol + stdDevCol:
         if col[i] < (avgCol + maxCol) / 2:
             continue
         if math.fabs(alt[i] - avgAlt) > stdAlt:
             continue
-        finalCol.append(col[i])
         utm_coord = utm.from_latlon(lat[i], lon[i])
+        if startLocation is not None:
+            if math.fabs(utm_coord[0] - startLocation[0]) > startLocation[2] * 2 or math.fabs(utm_coord[1] - startLocation[1]) > startLocation[2] * 2:
+                continue
+        finalCol.append(col[i])
+        finalAlt.append(alt[i])
         finalEasting.append(utm_coord[0])
         finalNorthing.append(utm_coord[1])
         zonenum = utm_coord[2]
@@ -93,16 +111,11 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, alpha = -0.7
     # Xgeo = refY + X
     # Ygeo = refX - Ypix
 
-    # Sort heatmap
-    sortedIndices = np.argsort(finalCol)
-    # for i in xrange(len(sortedIndices)):
-
-
     # Plot data
     for x in xrange(tiffXSize):
         for y in xrange(tiffYSize):
             for i in xrange(len(finalCol)):
-                posRange = math.sqrt((refX + x - finalEasting[i]) ** 2.0 + (refY - y - finalNorthing[i]) ** 2.0)
+                posRange = math.sqrt((refX + x - finalEasting[i]) ** 2.0 + (refY - y - finalNorthing[i]) ** 2.0 + finalAlt[i] ** 2.0)
                 heatMapArea[y][x] = heatMapArea[y][x] + normalProbability(posRange - finalRange[i], mean, 0.4 * finalRange[i])
 
     # Reshift up
