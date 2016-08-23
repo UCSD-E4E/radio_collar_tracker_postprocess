@@ -61,9 +61,9 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
         zone = utm_coord[3]
 
     # Calculate heatmap
-    print("Collar %d: Building heatmap..." % num_col)
+    print("Collar %d: Building median map..." % num_col)
     margin = 0
-    pixelSize = 60 # meters per pixel
+    pixelSize = 30 # meters per pixel
     tiffXSize = (int(max(finalEasting)) - int(min(finalEasting)) + margin * 2) / pixelSize + 1
     tiffYSize = (int(max(finalNorthing)) - int(min(finalNorthing)) + margin * 2) / pixelSize + 1
     heatMapArea = np.zeros((tiffYSize, tiffXSize)) # [y, x]
@@ -79,21 +79,27 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     # Ygeo = refNorthing - pixelSize / 2- Ypix
 
     # Plot data
+    detectionRadius = 45
+    maxLocation = [0, 0, detectionRadius]
+    maxA = -100
     for x in xrange(tiffXSize):
         for y in xrange(tiffYSize):
             xgeo = refEasting + pixelSize / 2.0 + x * pixelSize
             ygeo = refNorthing - pixelSize / 2.0 - y * pixelSize
             medianCol = []
             for i in xrange(len(finalCol)):
-                if math.fabs(finalEasting[i] - xgeo) < pixelSize / 2.0 and math.fabs(finalNorthing[i] - ygeo) < pixelSize / 2.0:
+                if math.fabs(finalEasting[i] - xgeo) < detectionRadius and math.fabs(finalNorthing[i] - ygeo) < detectionRadius:
                     medianCol.append(finalCol[i])
             if len(medianCol) > 4:
                 heatMapArea[y][x] = np.median(medianCol)
+                if heatMapArea[y][x] > maxA:
+                    maxLocation = [xgeo, ygeo, detectionRadius]
+                    maxA = heatMapArea[y][x]
             else:
-                heatMapArea[y][x] = -100
+                heatMapArea[y][x] = 100
 
     # Save plot
-    print("Collar %d: Saving heatmap..." % num_col)
+    print("Collar %d: Saving median map..." % num_col)
     outputFileName = '%s/RUN_%06d_COL_%06d_median.tiff' % (output_path, run_num, num_col)
     driver = gdal.GetDriverByName('GTiff')
     dataset = driver.Create(
@@ -116,7 +122,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
         0,  # 1
         -pixelSize))                     # 2
     band = dataset.GetRasterBand(1)
-    band.SetNoDataValue(-100)
+    band.SetNoDataValue(100)
     # print(tiffXSize)
     # print(tiffYSize)
     # print(np.amin(heatMapArea))
@@ -128,6 +134,28 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     band.SetStatistics(np.amin(heatMapArea), np.amax(heatMapArea), np.mean(heatMapArea), np.std(heatMapArea))
     dataset.FlushCache()
     dataset = None
+    if maxA > np.amin(heatMapArea) + 1:
+        print("Collar %d: Estimated location is %f, %f within %.0f meters" % (num_col, maxLocation[0], maxLocation[1], maxLocation[2]))
+        writer = shapefile.Writer(shapefile.POINT)
+        writer.autoBalance = 1
+        writer.field("lat", "F", 20, 18)
+        writer.field("lon", "F", 20, 18)
+        writer.field("radius", "F", 20, 18)
+
+        lat, lon = utm.to_latlon(maxLocation[0], maxLocation[1], zonenum, zone)
+        writer.point(lon, lat, maxLocation[2])
+        writer.record(lon, lat, maxLocation[2])
+
+
+        writer.save('%s/RUN_%06d_COL_%06d_median_pos.shp' % (output_path, run_num, num_col))
+        proj = open('%s/RUN_%06d_COL_%06d_median_pos.prj' % (output_path, run_num, num_col), "w")
+        epsg1 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
+        proj.write(epsg1)
+        proj.close()
+        return maxLocation
+    else:
+        print("Collar %d: no estimated location available!" % (num_col))
+        return None
 
 if __name__ == '__main__':
 
