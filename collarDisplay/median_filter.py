@@ -63,7 +63,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     # Calculate heatmap
     print("Collar %d: Building median map..." % num_col)
     margin = 0
-    pixelSize = 30 # meters per pixel
+    pixelSize = 15 # meters per pixel
     tiffXSize = (int(max(finalEasting)) - int(min(finalEasting)) + margin * 2) / pixelSize + 1
     tiffYSize = (int(max(finalNorthing)) - int(min(finalNorthing)) + margin * 2) / pixelSize + 1
     heatMapArea = np.zeros((tiffYSize, tiffXSize)) # [y, x]
@@ -79,7 +79,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     # Ygeo = refNorthing - pixelSize / 2- Ypix
 
     # Plot data
-    detectionRadius = 45
+    detectionRadius = 30
     maxLocation = [0, 0, detectionRadius]
     maxA = -100
     for x in xrange(tiffXSize):
@@ -90,7 +90,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
             for i in xrange(len(finalCol)):
                 if math.fabs(finalEasting[i] - xgeo) < detectionRadius and math.fabs(finalNorthing[i] - ygeo) < detectionRadius:
                     medianCol.append(finalCol[i])
-            if len(medianCol) > 4:
+            if len(medianCol) > 5:
                 heatMapArea[y][x] = np.median(medianCol)
                 if heatMapArea[y][x] > maxA:
                     maxLocation = [xgeo, ygeo, detectionRadius]
@@ -134,6 +134,24 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     band.SetStatistics(np.amin(heatMapArea), np.amax(heatMapArea), np.mean(heatMapArea), np.std(heatMapArea))
     dataset.FlushCache()
     dataset = None
+    if maxA is not None:
+        writer = shapefile.Writer(shapefile.POINT)
+        writer.autoBalance = 1
+        writer.field("lat", "F", 20, 18)
+        writer.field("lon", "F", 20, 18)
+
+        for i in xrange(len(finalCol)):
+            if math.fabs(finalEasting[i] - maxLocation[0]) < maxLocation[2] and math.fabs(finalNorthing[i] - maxLocation[1]) < maxLocation[2]:
+                lat, lon = utm.to_latlon(finalEasting[i], finalNorthing[i], zonenum, zone)
+                writer.point(lon, lat)
+                writer.record(lon, lat)
+
+
+        writer.save('%s/RUN_%06d_COL_%06d_median_sel.shp' % (output_path, run_num, num_col))
+        proj = open('%s/RUN_%06d_COL_%06d_median_sel.prj' % (output_path, run_num, num_col), "w")
+        epsg1 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
+        proj.write(epsg1)
+        proj.close()
     if maxA > np.amin(heatMapArea) + 1:
         print("Collar %d: Estimated location is %f, %f within %.0f meters" % (num_col, maxLocation[0], maxLocation[1], maxLocation[2]))
         writer = shapefile.Writer(shapefile.POINT)
