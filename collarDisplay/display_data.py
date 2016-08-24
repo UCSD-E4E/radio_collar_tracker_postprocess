@@ -96,6 +96,9 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, alpha = -0.7
         zonenum = utm_coord[2]
         zone = utm_coord[3]
         finalRange.append(10 ** ((alpha * col[i] + beta) / 10.0))
+    if len(finalCol) == 0:
+        print("Collar %d: No matches!" % num_col)
+        return
 
     # Calculate heatmap
     print("Collar %d: Building heatmap..." % num_col)
