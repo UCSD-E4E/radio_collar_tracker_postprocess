@@ -151,7 +151,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     # print("northing: %f" % northing)
     lat_lon = utm.to_latlon(easting, northing, zonenum, zone_letter=zone)
 
-    print("Collar %d: %d iterations" % (num_col, res_infodict[nfev]))
+    print("Collar %d: %d iterations" % (num_col, res_infodict['nfev']))
 
     if res_x[0] > 0:
         print("Collar %d: Collar model is invalid!" % num_col)
