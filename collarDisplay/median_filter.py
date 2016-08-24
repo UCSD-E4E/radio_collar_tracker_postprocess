@@ -154,6 +154,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
         epsg1 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
         proj.write(epsg1)
         proj.close()
+    print("Collar %d: Median Map Stddev: %f" % (num_col, np.std(heatMapArea)))
     if maxA > np.amin(heatMapArea) + 0.5:
         print("Collar %d: Estimated location is %f, %f within %.0f meters" % (num_col, maxLocation[0], maxLocation[1], maxLocation[2]))
         writer = shapefile.Writer(shapefile.POINT)
