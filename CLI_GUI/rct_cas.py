@@ -55,6 +55,7 @@ if __name__ == '__main__':
 	parser.add_argument('-i', '--input', help = 'Input Directory', metavar = 'data_dir', dest = 'data_dir', default = None)
 	parser.add_argument('-nf', '--no_fft', action = 'store_const', const = False, default = True, dest = 'fft_flag', help = 'This flag disables running the fft')
 	parser.add_argument('-raw', '--leave_raws', action = 'store_const', const = False, default = True, dest = 'raw_flag', help = 'This flag leaves the concatenated raw files')
+	parser.add_argument('-C', '--collar', action = 'append', type = int, help = 'Specific collar to run', default = None, dest = 'collars')
 
 	args = parser.parse_args()
 	signal_dist_output = args.signal_dist
@@ -63,6 +64,7 @@ if __name__ == '__main__':
 	data_dir = ""
 	fft_flag = args.fft_flag
 	raw_flag = args.raw_flag
+	collarList = args.collars
 	if args.data_dir is None:
 		data_dir = fileChooser.getFileName()
 		if data_dir == "":
@@ -204,9 +206,13 @@ if __name__ == '__main__':
 			args += " %s " % (freq)
 		subprocess.call(fft_detect + args, shell=True)
 
-	pool = Pool()
-	iterArgs = zip(itertools.repeat(data_dir), itertools.repeat(run), itertools.repeat(alt), itertools.repeat(collarDefinitionFilename), xrange(len(collars)))
-	pool.map(processRawPool, iterArgs)
+	if collarList is None:
+		pool = Pool()
+		iterArgs = zip(itertools.repeat(data_dir), itertools.repeat(run), itertools.repeat(alt), itertools.repeat(collarDefinitionFilename), xrange(len(collars)))
+		pool.map(processRawPool, iterArgs)
+	else:
+		for i in collarList:
+			processRaw(data_dir, run, alt, collarDefinitionFilename, i - 1)
 	os.remove(collarDefinitionFilename)
 
 	# Clean up raw files
