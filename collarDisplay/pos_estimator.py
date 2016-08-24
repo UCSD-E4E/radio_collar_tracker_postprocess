@@ -89,12 +89,17 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     # Generate histogram
     histogram, edges = np.histogram(col)
     maxInd = np.argmax(histogram)
+    maxBin = np.amax(histogram)
+    histogramThreshold = 50
+    if maxBin < 50:
+        histogramThreshold = maxBin * 0.1
     threshold = edges[len(edges) - 1]
     for i in xrange(maxInd + 1, len(histogram)):
-        if histogram[maxInd] - histogram[i] > 50:
-            threshold = edges[i]
+        if histogram[i] < histogramThreshold:
+            threshold = edges[i + 1]
             break
     if threshold < avgCol + stdDevCol:
+        print("Collar %d: Setting threshold to avg + 1 sigma" % num_col)
         threshold = avgCol + stdDevCol
     print("Collar %d: Using %f threshold" % (num_col, threshold))
 
