@@ -74,6 +74,8 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, alpha = -0.7
         if histogram[i - 1] - histogram[i] > 50:
             threshold = edges[i]
             break
+    if threshold < avgCol + stdDevCol:
+        threshold = avgCol + stdDevCol
 
     for i in range(len(data['lat'])):
         # if col[i] < avgCol + stdDevCol:
@@ -97,7 +99,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, alpha = -0.7
         zone = utm_coord[3]
         finalRange.append(10 ** ((alpha * col[i] + beta) / 10.0))
     if len(finalCol) == 0:
-        print("Collar %d: No matches!" % num_col)
+        print("Collar %d: No heatmap matches!" % num_col)
         return
 
     # Calculate heatmap
