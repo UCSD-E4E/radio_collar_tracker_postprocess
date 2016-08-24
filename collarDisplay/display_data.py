@@ -77,11 +77,15 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, alpha = -0.7
 
     for i in range(len(data['lat'])):
         # if col[i] < avgCol + stdDevCol:
-        if col[i] < (avgCol + maxCol) / 2:
-            continue
-        if math.fabs(alt[i] - avgAlt) > stdAlt:
-            continue
         utm_coord = utm.from_latlon(lat[i], lon[i])
+        if col[i] < threshold:
+            continue
+        if stdAlt < 5:
+            if math.fabs(alt[i] - avgAlt) > stdAlt:
+                continue
+        else:
+            if alt[i] < avgAlt - stdAlt:
+                continue
         if startLocation is not None:
             if math.fabs(utm_coord[0] - startLocation[0]) > startLocation[2] * 2 or math.fabs(utm_coord[1] - startLocation[1]) > startLocation[2] * 2:
                 continue
