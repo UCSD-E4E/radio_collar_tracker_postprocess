@@ -101,8 +101,8 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     for i in range(len(data['lat'])):
         # if col[i] < avgCol + stdDevCol:
         utm_coord = utm.from_latlon(lat[i], lon[i])
-        # if col[i] < threshold:
-        #     continue
+        if col[i] < threshold:
+            continue
         if stdAlt < 5:
             if math.fabs(alt[i] - avgAlt) > stdAlt:
                 continue
