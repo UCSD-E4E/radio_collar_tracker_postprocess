@@ -87,10 +87,12 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
             xgeo = refEasting + pixelSize / 2.0 + x * pixelSize
             ygeo = refNorthing - pixelSize / 2.0 - y * pixelSize
             medianCol = []
+            gridCol = []
             for i in xrange(len(finalCol)):
+                # if math.fabs(finalEasting[i] - xgeo) < detectionRadius and math.fabs(finalNorthing[i] - ygeo) < detectionRadius:
                 if math.fabs(finalEasting[i] - xgeo) < detectionRadius and math.fabs(finalNorthing[i] - ygeo) < detectionRadius:
                     medianCol.append(finalCol[i])
-            if len(medianCol) > 10:
+            if len(medianCol) > 15:
                 heatMapArea[y][x] = np.median(medianCol)
                 if heatMapArea[y][x] > maxA:
                     maxLocation = [xgeo, ygeo, detectionRadius]
