@@ -72,6 +72,8 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     maxCol = np.amax(col)
     avgAlt = np.average(alt)
     stdAlt = np.std(alt)
+    if stdAlt > 5:
+        print("Collar %d: Warning! Extremely large altitude variance!" % (num_col))
     finalCol = []
     finalNorthing = []
     finalEasting = []
@@ -98,8 +100,12 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
         # if col[i] < avgCol + stdDevCol:
         if col[i] < threshold:
             continue
-        if math.fabs(alt[i] - avgAlt) > stdAlt:
-            continue
+        if stdAlt < 5:
+            if math.fabs(alt[i] - avgAlt) > stdAlt:
+                continue
+        else:
+            if alt[i] < avgAlt - stdAlt:
+                continue
         utm_coord = utm.from_latlon(lat[i], lon[i])
         if startLocation is not None:
             if math.fabs(utm_coord[0] - startLocation[0]) > startLocation[2] * 1.6 or math.fabs(utm_coord[1] - startLocation[1]) > startLocation[2] * 1.6:
