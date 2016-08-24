@@ -110,7 +110,8 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
             if alt[i] < avgAlt - stdAlt:
                 continue
         if startLocation is not None:
-            if math.fabs(utm_coord[0] - startLocation[0]) > startLocation[2] * 1.7 or math.fabs(utm_coord[1] - startLocation[1]) > startLocation[2] * 1.7:
+            rangeToMedian = math.sqrt((utm_coord[0] - startLocation[0]) ** 2.0 + (utm_coord[1] - startLocation[1]) ** 2.0)
+            if rangeToMedian > startLocation[2] * 1.7:
                 altRejectEasting.append(utm_coord[0])
                 altRejectNorthing.append(utm_coord[1])
                 continue
@@ -124,6 +125,11 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     if len(finalCol) == 0:
         print("Collar %d: No matches!" % num_col)
         return
+
+    if np.amax(finalCol) - np.amin(finalCol) < 1:
+        print("Collar %d: Not enough variation! No collar!" % num_col)
+        return
+    print("Collar %d: Collar data range: %f" % (num_col, np.amax(finalCol) - np.amin(finalCol)))
 
     writer = shapefile.Writer(shapefile.POINT)
     writer.autoBalance = 1
