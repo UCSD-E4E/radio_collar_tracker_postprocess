@@ -36,7 +36,7 @@ def residuals(v, col, x, y, z):
     for i in xrange(len(col)):
         if col[i] < -43:
             continue
-        residual[i] = 10 ** (((v[0] * col[i] + v[1]) / 10.0)) - math.sqrt((x[i] - v[2]) ** 2 + (y[i] - v[3]) ** 2 + (z[i]) ** 2)
+        residual[i] = 10 ** (((v[0] * col[i] + v[1]) / 10.0)) - math.sqrt((x[i] - v[3]) ** 2 + (y[i] - v[4]) ** 2 + (z[i]) ** 2)
     return residual
 
 
@@ -67,7 +67,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     print("Collar %d: Loading data" % num_col)
     zone = "X"
     zonenum = 60
-    avgCol = np.median(col)
+    avgCol = np.average(col)
     stdDevCol = np.std(col)
     maxCol = np.amax(col)
     avgAlt = np.average(alt)
@@ -77,7 +77,8 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     finalEasting = []
     finalAlt = []
 
-    if stdDevCol < 2.0:
+    # if stdDevCol < 2.0:
+    if maxCol - (stdDevCol + avgCol) < 1.0:
         print("Collar %d: Not enough variation! No collar!" % num_col)
         return
 
@@ -86,9 +87,11 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     maxInd = np.argmax(histogram)
     threshold = edges[len(edges) - 1]
     for i in xrange(maxInd + 1, len(histogram)):
-        if histogram[i - 1] - histogram[i] > 50:
+        if histogram[maxInd] - histogram[i] > 50:
             threshold = edges[i]
             break
+    if threshold < avgCol + stdDevCol:
+        threshold = avgCol + stdDevCol
     print("Collar %d: Using %f threshold" % (num_col, threshold))
 
     for i in range(len(data['lat'])):
@@ -99,7 +102,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
             continue
         utm_coord = utm.from_latlon(lat[i], lon[i])
         if startLocation is not None:
-            if math.fabs(utm_coord[0] - startLocation[0]) > startLocation[2] * 2 or math.fabs(utm_coord[1] - startLocation[1]) > startLocation[2] * 2:
+            if math.fabs(utm_coord[0] - startLocation[0]) > startLocation[2] * 1.6 or math.fabs(utm_coord[1] - startLocation[1]) > startLocation[2] * 1.6:
                 continue
         finalCol.append(col[i])
         finalEasting.append(utm_coord[0])
@@ -140,10 +143,10 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
 
     # Data Analysis
     print("Collar %d: running estimation..." % num_col)
-    x0 = [-0.715, -14.51, finalEasting[0], finalNorthing[0]]
+    x0 = [-0.715, -14.51, avgCol, finalEasting[0], finalNorthing[0]]
     res_x, res_cov_x, res_infodict, res_msg, res_ier = leastsq(residuals, x0, args=(finalCol, finalEasting, finalNorthing, finalAlt), full_output=1)
-    easting = res_x[2]
-    northing = res_x[3]
+    easting = res_x[3]
+    northing = res_x[4]
     # print("easting: %f" % easting)
     # print("northing: %f" % northing)
     lat_lon = utm.to_latlon(easting, northing, zonenum, zone_letter=zone)
@@ -179,12 +182,12 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     prj.write(epsg)
     prj.close()
 
-    if res_cov_x is None:
-        print("Collar %d: Collar position indeterminate! %s" % (num_col, res_msg))
-        res_x = np.append(res_x, [0, 0, True])
-        return res_x
-    s_sq = (residuals(res_x, finalCol, finalEasting, finalNorthing, finalAlt) ** 2).sum() / (len(finalCol) - len(x0))
-    pcov = res_cov_x * s_sq
+    # if res_cov_x is None:
+    #     print("Collar %d: Collar position indeterminate! %s" % (num_col, res_msg))
+    #     res_x = np.append(res_x, [0, 0, True])
+    #     return res_x
+    # s_sq = (residuals(res_x, finalCol, finalEasting, finalNorthing, finalAlt) ** 2).sum() / (len(finalCol) - len(x0))
+    # pcov = res_cov_x * s_sq
 
 
     # Sigma estimation
