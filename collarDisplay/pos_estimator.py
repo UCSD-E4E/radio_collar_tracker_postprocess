@@ -145,23 +145,24 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     proj.write(epsg1)
     proj.close()
 
-    writer = shapefile.Writer(shapefile.POINT)
-    writer.autoBalance = 1
-    writer.field("lat", "F", 20, 18)
-    writer.field("lon", "F", 20, 18)
+    if len(altRejectEasting) > 0:
+        writer = shapefile.Writer(shapefile.POINT)
+        writer.autoBalance = 1
+        writer.field("lat", "F", 20, 18)
+        writer.field("lon", "F", 20, 18)
 
-    for i in xrange(len(altRejectEasting)):
-        #Latitude, longitude
-        lat, lon = utm.to_latlon(altRejectEasting[i], altRejectNorthing[i], zonenum, zone)
-        writer.point(lon, lat)
-        writer.record(lon, lat)
+        for i in xrange(len(altRejectEasting)):
+            #Latitude, longitude
+            lat, lon = utm.to_latlon(altRejectEasting[i], altRejectNorthing[i], zonenum, zone)
+            writer.point(lon, lat)
+            writer.record(lon, lat)
 
 
-    writer.save('%s/RUN_%06d_COL_%06d_alt_reject.shp' % (output_path, run_num, num_col))
-    proj = open('%s/RUN_%06d_COL_%06d_alt_reject.prj' % (output_path, run_num, num_col), "w")
-    epsg1 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
-    proj.write(epsg1)
-    proj.close()
+        writer.save('%s/RUN_%06d_COL_%06d_alt_reject.shp' % (output_path, run_num, num_col))
+        proj = open('%s/RUN_%06d_COL_%06d_alt_reject.prj' % (output_path, run_num, num_col), "w")
+        epsg1 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
+        proj.write(epsg1)
+        proj.close()
 
     if len(finalCol) < 6:
         print("Collar %d: No collars detected!" % num_col)
