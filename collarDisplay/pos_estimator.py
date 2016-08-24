@@ -79,6 +79,8 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     finalEasting = []
     finalAlt = []
 
+    altRejectNorthing = []
+    altRejectEasting = []
     # if stdDevCol < 2.0:
     if maxCol - (stdDevCol + avgCol) < 1.0:
         print("Collar %d: Not enough variation! No collar!" % num_col)
@@ -98,17 +100,19 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
 
     for i in range(len(data['lat'])):
         # if col[i] < avgCol + stdDevCol:
-        if col[i] < threshold:
-            continue
+        utm_coord = utm.from_latlon(lat[i], lon[i])
+        # if col[i] < threshold:
+        #     continue
         if stdAlt < 5:
             if math.fabs(alt[i] - avgAlt) > stdAlt:
                 continue
         else:
             if alt[i] < avgAlt - stdAlt:
                 continue
-        utm_coord = utm.from_latlon(lat[i], lon[i])
         if startLocation is not None:
-            if math.fabs(utm_coord[0] - startLocation[0]) > startLocation[2] * 1.6 or math.fabs(utm_coord[1] - startLocation[1]) > startLocation[2] * 1.6:
+            if math.fabs(utm_coord[0] - startLocation[0]) > startLocation[2] * 1.7 or math.fabs(utm_coord[1] - startLocation[1]) > startLocation[2] * 1.7:
+                altRejectEasting.append(utm_coord[0])
+                altRejectNorthing.append(utm_coord[1])
                 continue
         finalCol.append(col[i])
         finalEasting.append(utm_coord[0])
@@ -141,6 +145,24 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     proj.write(epsg1)
     proj.close()
 
+    writer = shapefile.Writer(shapefile.POINT)
+    writer.autoBalance = 1
+    writer.field("lat", "F", 20, 18)
+    writer.field("lon", "F", 20, 18)
+
+    for i in xrange(len(altRejectEasting)):
+        #Latitude, longitude
+        lat, lon = utm.to_latlon(altRejectEasting[i], altRejectNorthing[i], zonenum, zone)
+        writer.point(lon, lat)
+        writer.record(lon, lat)
+
+
+    writer.save('%s/RUN_%06d_COL_%06d_alt_reject.shp' % (output_path, run_num, num_col))
+    proj = open('%s/RUN_%06d_COL_%06d_alt_reject.prj' % (output_path, run_num, num_col), "w")
+    epsg1 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
+    proj.write(epsg1)
+    proj.close()
+
     if len(finalCol) < 6:
         print("Collar %d: No collars detected!" % num_col)
         print("Collar %d: Only %d detections!" % (num_col, len(finalCol)))
@@ -159,16 +181,16 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
 
     print("Collar %d: %d iterations" % (num_col, res_infodict['nfev']))
 
-    if res_x[0] > 0:
-        print("Collar %d: Collar model is invalid!" % num_col)
-        print(res_x)
-        return np.append(res_x, [0, 0, False])
+    # if res_x[0] > 0:
+    #     print("Collar %d: Collar model is invalid!" % num_col)
+    #     print(res_x)
+    #     return np.append(res_x, [0, 0, False])
 
 
-    if res_ier == 4:
-        print("Collar %d: No collar detected - falloff not found!" % (num_col))
-        res_x = np.append(res_x, [0, 0, False])
-        return res_x
+    # if res_ier == 4:
+    #     print("Collar %d: No collar detected - falloff not found!" % (num_col))
+    #     res_x = np.append(res_x, [0, 0, False])
+    #     return res_x
     if res_ier == 5:
         print("Collar %d: No solution found!" % (num_col))
         print(res_x)
