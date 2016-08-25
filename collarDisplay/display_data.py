@@ -100,8 +100,6 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, alpha = -0.7
         if startLocation is not None:
             rangeToMedian = math.sqrt((lon[i] - startLocation[0]) ** 2.0 + (lat[i] - startLocation[1]) ** 2.0)
             if rangeToMedian > startLocation[2] * 1.7:
-                altRejectEasting.append(lon[i])
-                altRejectNorthing.append(lat[i])
                 continue
         finalCol.append(col[i])
         finalEasting.append(lon[i])
