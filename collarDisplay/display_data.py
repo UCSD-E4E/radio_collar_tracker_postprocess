@@ -65,21 +65,30 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, alpha = -0.7
     finalEasting = []
     finalRange = []
     finalAlt = []
+    for i in xrange(len(col)):
+        utm_coord = utm.from_latlon(lat[i], lon[i])
+        lon[i] = utm_coord[0]
+        lat[i] = utm_coord[1]
+        zonenum = utm_coord[2]
+        zone = utm_coord[3]
 
     # Generate histogram
-    histogram, edges = np.histogram(col)
-    maxInd = np.argmax(histogram)
-    threshold = edges[len(edges) - 1]
-    for i in xrange(maxInd + 1, len(histogram)):
-        if histogram[i - 1] - histogram[i] > 50:
-            threshold = edges[i]
-            break
-    if threshold < avgCol + stdDevCol:
-        threshold = avgCol + stdDevCol
+    knownEmptyCollars = []
+    medianCollars = []
+    for i in xrange(len(col)):
+        if startLocation is not None:
+            rangeToMedian = math.sqrt((lon[i] - startLocation[0]) ** 2.0 + (lat[i] - startLocation[1]) ** 2.0)
+            if rangeToMedian > startLocation[2] * 2:
+                knownEmptyCollars.append(col[i])
+            else:
+                medianCollars.append(col[i])
+    threshold = -43
+    if len(medianCollars) > 0:
+        threshold = np.amax(knownEmptyCollars)
+    print("Collar %d: Using %f threshold" % (num_col, threshold))
 
     for i in range(len(data['lat'])):
         # if col[i] < avgCol + stdDevCol:
-        utm_coord = utm.from_latlon(lat[i], lon[i])
         if col[i] < threshold:
             continue
         if stdAlt < 5:
@@ -89,14 +98,15 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, alpha = -0.7
             if alt[i] < avgAlt - stdAlt:
                 continue
         if startLocation is not None:
-            if math.fabs(utm_coord[0] - startLocation[0]) > startLocation[2] * 2 or math.fabs(utm_coord[1] - startLocation[1]) > startLocation[2] * 2:
+            rangeToMedian = math.sqrt((lon[i] - startLocation[0]) ** 2.0 + (lat[i] - startLocation[1]) ** 2.0)
+            if rangeToMedian > startLocation[2] * 1.7:
+                altRejectEasting.append(lon[i])
+                altRejectNorthing.append(lat[i])
                 continue
         finalCol.append(col[i])
+        finalEasting.append(lon[i])
+        finalNorthing.append(lat[i])
         finalAlt.append(alt[i])
-        finalEasting.append(utm_coord[0])
-        finalNorthing.append(utm_coord[1])
-        zonenum = utm_coord[2]
-        zone = utm_coord[3]
         finalRange.append(10 ** ((alpha * col[i] + beta) / 10.0))
     if len(finalCol) == 0:
         print("Collar %d: No heatmap matches!" % num_col)

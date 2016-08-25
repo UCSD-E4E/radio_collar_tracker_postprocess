@@ -78,6 +78,13 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     finalNorthing = []
     finalEasting = []
     finalAlt = []
+    for i in xrange(len(col)):
+        utm_coord = utm.from_latlon(lat[i], lon[i])
+        lon[i] = utm_coord[0]
+        lat[i] = utm_coord[1]
+        zonenum = utm_coord[2]
+        zone = utm_coord[3]
+
 
     altRejectNorthing = []
     altRejectEasting = []
@@ -86,26 +93,63 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
         print("Collar %d: Not enough variation! No collar!" % num_col)
         return
 
-    # Generate histogram
-    histogram, edges = np.histogram(col)
-    maxInd = np.argmax(histogram)
-    maxBin = np.amax(histogram)
-    histogramThreshold = 50
-    if maxBin < 50:
-        histogramThreshold = maxBin * 0.1
-    threshold = edges[len(edges) - 1]
-    for i in xrange(maxInd + 1, len(histogram)):
-        if histogram[i] < histogramThreshold:
-            threshold = edges[i + 1]
-            break
-    if threshold < avgCol + stdDevCol:
-        print("Collar %d: Setting threshold to avg + 1 sigma" % num_col)
-        threshold = avgCol + stdDevCol
+    # Generate threshold
+    # histogram, edges = np.histogram(col)
+    # maxInd = np.argmax(histogram)
+    # maxBin = np.amax(histogram)
+    # histogramThreshold = 50
+    # if maxBin < 50:
+    #     histogramThreshold = maxBin * 0.1
+    # threshold = edges[len(edges) - 1]
+    # for i in xrange(maxInd + 1, len(histogram)):
+    #     if histogram[i] < histogramThreshold:
+    #         threshold = edges[i + 1]
+    #         break
+    # histogramDensities = []
+    # for i in xrange(len(histogram)):
+    #     binEasting = []
+    #     binNorthing = []
+    #     for j in xrange(len(col)):
+    #         if col[j] > edges[i] and col[j] <= edges[i + 1]:
+    #             binEasting.append(lon[j])
+    #             binNorthing.append(lat[j])
+    #     if len(binEasting) == 0:
+    #         histogramDensities.append(np.inf)
+    #         continue
+    #     xRange = np.amax(binEasting) - np.amin(binEasting)
+    #     yRange = np.amax(binNorthing) - np.amin(binNorthing)
+    #     histogramDensities.append((xRange * yRange))
+    # maxArea = np.argmax(histogramDensities)
+    # for i in xrange(maxArea + 1, len(histogramDensities)):
+    #     if histogramDensities[i] < 5000:
+    #         threshold = edges[i]
+    #         break
+
+    # print("Collar %d: Histogram: %s" % (num_col, str(histogram)))
+    # print("Collar %d: Histogram Edges: %s" % (num_col, str(edges)))
+    # print("Collar %d: Densities %s" % (num_col, str(histogramDensities)))
+
+    # if threshold < avgCol + stdDevCol:
+    #     print("Collar %d: Setting threshold to avg + 1 sigma" % num_col)
+    #     threshold = avgCol + stdDevCol
+
+    knownEmptyCollars = []
+    medianCollars = []
+    for i in xrange(len(col)):
+        if startLocation is not None:
+            rangeToMedian = math.sqrt((lon[i] - startLocation[0]) ** 2.0 + (lat[i] - startLocation[1]) ** 2.0)
+            if rangeToMedian > startLocation[2] * 2:
+                knownEmptyCollars.append(col[i])
+            else:
+                medianCollars.append(col[i])
+    threshold = -43
+    if len(medianCollars) > 0:
+        threshold = np.amax(knownEmptyCollars)
+
     print("Collar %d: Using %f threshold" % (num_col, threshold))
 
     for i in range(len(data['lat'])):
         # if col[i] < avgCol + stdDevCol:
-        utm_coord = utm.from_latlon(lat[i], lon[i])
         if col[i] < threshold:
             continue
         if stdAlt < 5:
@@ -115,17 +159,16 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
             if alt[i] < avgAlt - stdAlt:
                 continue
         if startLocation is not None:
-            rangeToMedian = math.sqrt((utm_coord[0] - startLocation[0]) ** 2.0 + (utm_coord[1] - startLocation[1]) ** 2.0)
+            rangeToMedian = math.sqrt((lon[i] - startLocation[0]) ** 2.0 + (lat[i] - startLocation[1]) ** 2.0)
             if rangeToMedian > startLocation[2] * 1.7:
-                altRejectEasting.append(utm_coord[0])
-                altRejectNorthing.append(utm_coord[1])
+                altRejectEasting.append(lon[i])
+                altRejectNorthing.append(lat[i])
                 continue
         finalCol.append(col[i])
-        finalEasting.append(utm_coord[0])
-        finalNorthing.append(utm_coord[1])
+        finalEasting.append(lon[i])
+        finalNorthing.append(lat[i])
         finalAlt.append(alt[i])
-        zonenum = utm_coord[2]
-        zone = utm_coord[3]
+
 
     if len(finalCol) == 0:
         print("Collar %d: No matches!" % num_col)
@@ -193,21 +236,21 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
 
     print("Collar %d: %d iterations" % (num_col, res_infodict['nfev']))
 
-    # if res_x[0] > 0:
-    #     print("Collar %d: Collar model is invalid!" % num_col)
-    #     print(res_x)
-    #     return np.append(res_x, [0, 0, False])
+    if res_x[0] > 0:
+        print("Collar %d: Collar model is invalid!" % num_col)
+        print(res_x)
+        return np.append(res_x, [0, 0, False])
 
 
     # if res_ier == 4:
     #     print("Collar %d: No collar detected - falloff not found!" % (num_col))
     #     res_x = np.append(res_x, [0, 0, False])
     #     return res_x
-    if res_ier == 5:
-        print("Collar %d: No solution found!" % (num_col))
-        print(res_x)
-        res_x = np.append(res_x, [0, 0, False])
-        return res_x
+    # if res_ier == 5:
+    #     print("Collar %d: No solution found!" % (num_col))
+    #     print(res_x)
+    #     res_x = np.append(res_x, [0, 0, False])
+    #     return res_x
     print("Collar %d: ier %d; %s" % (num_col, res_ier, res_msg))
 
     print("Collar %d: Saving estimation..." % num_col)
