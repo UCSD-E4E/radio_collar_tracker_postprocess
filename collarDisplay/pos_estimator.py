@@ -36,7 +36,7 @@ def residuals(v, col, x, y, z):
     for i in xrange(len(col)):
         if col[i] < -43:
             continue
-        residual[i] = 10 ** (((v[0] * col[i] + v[1]) / 10.0)) - math.sqrt((x[i] - v[3]) ** 2 + (y[i] - v[4]) ** 2 + (z[i]) ** 2)
+        residual[i] = 10 ** (((v[0] * col[i] + v[1]) / 10.0)) - math.sqrt((x[i] - v[2]) ** 2 + (y[i] - v[3]) ** 2 + (z[i]) ** 2)
     return residual
 
 
@@ -70,10 +70,8 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     avgCol = np.average(col)
     stdDevCol = np.std(col)
     maxCol = np.amax(col)
-    avgAlt = np.average(alt)
+    avgAlt = np.median(alt)
     stdAlt = np.std(alt)
-    if stdAlt > 5:
-        print("Collar %d: Warning! Extremely large altitude variance!" % (num_col))
     finalCol = []
     finalNorthing = []
     finalEasting = []
@@ -93,60 +91,42 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
         print("Collar %d: Not enough variation! No collar!" % num_col)
         return
 
-    # Generate threshold
-    # histogram, edges = np.histogram(col)
-    # maxInd = np.argmax(histogram)
-    # maxBin = np.amax(histogram)
-    # histogramThreshold = 50
-    # if maxBin < 50:
-    #     histogramThreshold = maxBin * 0.1
-    # threshold = edges[len(edges) - 1]
-    # for i in xrange(maxInd + 1, len(histogram)):
-    #     if histogram[i] < histogramThreshold:
-    #         threshold = edges[i + 1]
-    #         break
-    # histogramDensities = []
-    # for i in xrange(len(histogram)):
-    #     binEasting = []
-    #     binNorthing = []
-    #     for j in xrange(len(col)):
-    #         if col[j] > edges[i] and col[j] <= edges[i + 1]:
-    #             binEasting.append(lon[j])
-    #             binNorthing.append(lat[j])
-    #     if len(binEasting) == 0:
-    #         histogramDensities.append(np.inf)
-    #         continue
-    #     xRange = np.amax(binEasting) - np.amin(binEasting)
-    #     yRange = np.amax(binNorthing) - np.amin(binNorthing)
-    #     histogramDensities.append((xRange * yRange))
-    # maxArea = np.argmax(histogramDensities)
-    # for i in xrange(maxArea + 1, len(histogramDensities)):
-    #     if histogramDensities[i] < 5000:
-    #         threshold = edges[i]
-    #         break
-
-    # print("Collar %d: Histogram: %s" % (num_col, str(histogram)))
-    # print("Collar %d: Histogram Edges: %s" % (num_col, str(edges)))
-    # print("Collar %d: Densities %s" % (num_col, str(histogramDensities)))
-
-    # if threshold < avgCol + stdDevCol:
-    #     print("Collar %d: Setting threshold to avg + 1 sigma" % num_col)
-    #     threshold = avgCol + stdDevCol
-
-    knownEmptyCollars = []
-    medianCollars = []
-    for i in xrange(len(col)):
-        if startLocation is not None:
+    # Generate collar threshold
+    threshold = 0
+    if startLocation is not None:
+        knownEmptyCollars = []
+        medianCollars = []
+        for i in xrange(len(col)):
             rangeToMedian = math.sqrt((lon[i] - startLocation[0]) ** 2.0 + (lat[i] - startLocation[1]) ** 2.0)
             if rangeToMedian > startLocation[2] * 2:
                 knownEmptyCollars.append(col[i])
             else:
                 medianCollars.append(col[i])
-    threshold = -43
-    if len(medianCollars) > 0:
-        threshold = np.amax(knownEmptyCollars)
+        if len(medianCollars) > 0:
+            threshold = np.amax(knownEmptyCollars)
+    else:
+        histogram, edges = np.histogram(col)
+        maxInd = np.argmax(histogram)
+        maxBin = np.amax(histogram)
+        histogramThreshold = 50
+        if maxBin < 50:
+            histogramThreshold = maxBin * 0.1
+        threshold = edges[len(edges) - 1]
+        for i in xrange(maxInd + 1, len(histogram)):
+            if histogram[i] < histogramThreshold:
+                threshold = edges[i + 1]
+                break
 
     print("Collar %d: Using %f threshold" % (num_col, threshold))
+
+    # Generate altitude threshold
+    altHistogram, altHistEdges = np.histogram(alt)
+    maxAltInd = np.argmax(altHistogram)
+    minAltInd = maxAltInd
+    for i in xrange(maxAltInd, 0, -1):
+        if altHistogram[i] < altHistogram[minAltInd]:
+            minAltInd = i
+
 
     for i in range(len(data['lat'])):
         # if col[i] < avgCol + stdDevCol:
@@ -179,44 +159,44 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
         return
     print("Collar %d: Collar data range: %f" % (num_col, np.amax(finalCol) - np.amin(finalCol)))
 
-    writer = shapefile.Writer(shapefile.POINT)
-    writer.autoBalance = 1
-    writer.field("lat", "F", 20, 18)
-    writer.field("lon", "F", 20, 18)
-    writer.field("alt", "F", 20, 18)
-    writer.field("measurement", "F", 18, 18)
+    # writer = shapefile.Writer(shapefile.POINT)
+    # writer.autoBalance = 1
+    # writer.field("lat", "F", 20, 18)
+    # writer.field("lon", "F", 20, 18)
+    # writer.field("alt", "F", 20, 18)
+    # writer.field("measurement", "F", 18, 18)
 
-    for i in xrange(len(finalCol)):
-        #Latitude, longitude, elevation, measurement
-        lat, lon = utm.to_latlon(finalEasting[i], finalNorthing[i], zonenum, zone)
-        writer.point(lon, lat, finalAlt[i], finalCol[i])
-        writer.record(lon, lat, finalAlt[i], finalCol[i])
-
-
-    writer.save('%s/RUN_%06d_COL_%06d_pos.shp' % (output_path, run_num, num_col))
-    proj = open('%s/RUN_%06d_COL_%06d_pos.prj' % (output_path, run_num, num_col), "w")
-    epsg1 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
-    proj.write(epsg1)
-    proj.close()
-
-    if len(altRejectEasting) > 0:
-        writer = shapefile.Writer(shapefile.POINT)
-        writer.autoBalance = 1
-        writer.field("lat", "F", 20, 18)
-        writer.field("lon", "F", 20, 18)
-
-        for i in xrange(len(altRejectEasting)):
-            #Latitude, longitude
-            lat, lon = utm.to_latlon(altRejectEasting[i], altRejectNorthing[i], zonenum, zone)
-            writer.point(lon, lat)
-            writer.record(lon, lat)
+    # for i in xrange(len(finalCol)):
+    #     #Latitude, longitude, elevation, measurement
+    #     lat, lon = utm.to_latlon(finalEasting[i], finalNorthing[i], zonenum, zone)
+    #     writer.point(lon, lat, finalAlt[i], finalCol[i])
+    #     writer.record(lon, lat, finalAlt[i], finalCol[i])
 
 
-        writer.save('%s/RUN_%06d_COL_%06d_alt_reject.shp' % (output_path, run_num, num_col))
-        proj = open('%s/RUN_%06d_COL_%06d_alt_reject.prj' % (output_path, run_num, num_col), "w")
-        epsg1 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
-        proj.write(epsg1)
-        proj.close()
+    # writer.save('%s/RUN_%06d_COL_%06d_pos.shp' % (output_path, run_num, num_col))
+    # proj = open('%s/RUN_%06d_COL_%06d_pos.prj' % (output_path, run_num, num_col), "w")
+    # epsg1 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
+    # proj.write(epsg1)
+    # proj.close()
+
+    # if len(altRejectEasting) > 0:
+    #     writer = shapefile.Writer(shapefile.POINT)
+    #     writer.autoBalance = 1
+    #     writer.field("lat", "F", 20, 18)
+    #     writer.field("lon", "F", 20, 18)
+
+    #     for i in xrange(len(altRejectEasting)):
+    #         #Latitude, longitude
+    #         lat, lon = utm.to_latlon(altRejectEasting[i], altRejectNorthing[i], zonenum, zone)
+    #         writer.point(lon, lat)
+    #         writer.record(lon, lat)
+
+
+    #     writer.save('%s/RUN_%06d_COL_%06d_alt_reject.shp' % (output_path, run_num, num_col))
+    #     proj = open('%s/RUN_%06d_COL_%06d_alt_reject.prj' % (output_path, run_num, num_col), "w")
+    #     epsg1 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
+    #     proj.write(epsg1)
+    #     proj.close()
 
     if len(finalCol) < 6:
         print("Collar %d: No collars detected!" % num_col)
@@ -226,10 +206,10 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
 
     # Data Analysis
     print("Collar %d: running estimation..." % num_col)
-    x0 = [-0.715, -14.51, avgCol, finalEasting[0], finalNorthing[0]]
+    x0 = [-0.715, -14.51, np.average(finalEasting[0]), np.average(finalNorthing[0])]
     res_x, res_cov_x, res_infodict, res_msg, res_ier = leastsq(residuals, x0, args=(finalCol, finalEasting, finalNorthing, finalAlt), full_output=1)
-    easting = res_x[3]
-    northing = res_x[4]
+    easting = res_x[2]
+    northing = res_x[3]
     # print("easting: %f" % easting)
     # print("northing: %f" % northing)
     lat_lon = utm.to_latlon(easting, northing, zonenum, zone_letter=zone)
