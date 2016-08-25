@@ -219,7 +219,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     if res_x[0] > 0:
         print("Collar %d: Collar model is invalid!" % num_col)
         print(res_x)
-        # return np.append(res_x, [0, 0, False])
+        return np.append(res_x, [0, 0, False])
 
 
     # if res_ier == 4:
