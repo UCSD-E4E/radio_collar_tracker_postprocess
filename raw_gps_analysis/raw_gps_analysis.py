@@ -51,7 +51,7 @@ def process(input_dir, output_dir, run_num, col_num, tar_alt):
 		time_target += period
 
 		# Fast forward if no SDR data.
-		if gps_time < (float(signal_index) / sampling_freq) + start_time:
+		if gps_time <= (float(signal_index) / sampling_freq) + start_time:
 			line = gps_stream.readline()
 			line_counter += 1
 			continue
