@@ -1,1 +1,0 @@
-This program reads the BBB GPIO and triggers the Radio Recorder.
