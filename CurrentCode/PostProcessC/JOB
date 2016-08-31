@@ -1,9 +1,0 @@
-/media/gilberto/RAW_DATA/rct/
-curr_run: 1550
-freq_em: 1000 
-pulse_ms: 20 
-lin_scale: 1
-map_d: 128
-alpha_c_thres: 500
-num_col: 3
-f_drift: -3000

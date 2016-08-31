@@ -1,1 +1,0 @@
-gcc finalAnalysis.c -Wall -O2 -o finalAnalysis -lm -std=c99

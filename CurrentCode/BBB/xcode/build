@@ -1,1 +1,0 @@
-gcc collarTracker.c serialGPS.o -Wall -O2 -o collarTracker -lm `pkg-config --cflags --libs gtk+-2.0 librtlsdr` -std=c99

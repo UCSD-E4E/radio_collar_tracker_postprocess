@@ -1,6 +1,0 @@
-center_freq: 					172600000
-samp_rate: 						2048000 
-timeout_interrupt: 				1550
-goal_signal_amplitude:			96
-controller_coef:				16
-number_frames_per_file:			4
