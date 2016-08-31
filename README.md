@@ -31,7 +31,7 @@ wget https://pypi.python.org/packages/source/u/utm/utm-0.4.0.tar.gz
 wget http://download.osgeo.org/gdal/2.1.0/gdal-2.1.0.tar.gz
 tar -xzf fftw-3.3.4.tar.gz
 cd fftw-3.3.4
-./configure
+./configure --enable-threads
 make
 sudo make install
 cd ..
