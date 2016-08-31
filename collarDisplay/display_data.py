@@ -13,6 +13,7 @@ from osgeo import gdal
 import osr
 import math
 import shapefile
+from read_meta_file import read_meta_file
 
 def normalProbability(x, mean, stdDev):
     # stdDev = 100
@@ -25,15 +26,6 @@ def normalProbability(x, mean, stdDev):
         probability = a - (a - probability) / 2
     if probability > 0.0001:
         retval = math.log10(probability)
-    return retval
-
-def read_meta_file(filename, tag):
-    retval = None
-    for line in fileinput.input(filename):
-        if tag == line.strip().split(':')[0].strip():
-            retval = line.strip().split(':')[1].strip()
-            break
-    fileinput.close()
     return retval
 
 def generateGraph(run_num, num_col, filename, output_path, col_def, alpha = -0.715, beta = -14.51, mean = 0.0306, sigma = 6, startLocation = None):

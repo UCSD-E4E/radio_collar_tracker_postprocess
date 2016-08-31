@@ -13,15 +13,7 @@ from osgeo import gdal
 import osr
 import math
 import shapefile
-
-def read_meta_file(filename, tag):
-    retval = None
-    for line in fileinput.input(filename):
-        if tag == line.strip().split(':')[0].strip():
-            retval = line.strip().split(':')[1].strip()
-            break
-    fileinput.close()
-    return retval
+from read_meta_file import read_meta_file
 
 def generateGraph(run_num, num_col, filename, output_path, col_def):
     # Get collar frequency

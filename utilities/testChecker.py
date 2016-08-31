@@ -2,15 +2,7 @@
 import os
 import sys
 import fileinput
-
-def read_meta_file(filename, tag):
-    retval = None
-    for line in fileinput.input(filename):
-        if tag == line.strip().split(':')[0].strip():
-            retval = line.strip().split(':')[1].strip()
-            break
-    fileinput.close()
-    return retval
+from read_meta_file import read_meta_file
 
 def file_len(fname):
     with open(fname) as f:

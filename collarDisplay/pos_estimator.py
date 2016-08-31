@@ -14,22 +14,13 @@ import osr
 import math
 from scipy.optimize import leastsq
 import shapefile
-
+from read_meta_file import read_meta_file
 
 def normalProbability(d, mean, stdDev):
     a = 1 / (math.sqrt(2 * stdDev * stdDev * math.pi))
     b = -1 * (d - mean) * (d - mean)
     b = b / (2 * stdDev * stdDev)
     return a * math.pow(math.e, b)
-
-def read_meta_file(filename, tag):
-    retval = None
-    for line in fileinput.input(filename):
-        if tag == line.strip().split(':')[0].strip():
-            retval = line.strip().split(':')[1].strip()
-            break
-    fileinput.close()
-    return retval
 
 def residuals(v, col, x, y, z):
     residual = np.zeros(len(col))
