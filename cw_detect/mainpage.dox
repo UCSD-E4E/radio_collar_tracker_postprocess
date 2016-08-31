@@ -1,8 +1,0 @@
-/**
-\mainpage Continuous Wave Detector
-This projet is a subproject of the Radio Collar Tracker.  The purpose of this 
-project is to create a software pipeline that can detect a collar pulse amid
-significant in-band noise.  This project was developed in the summer of 2015
-by Nathan Hui <ntlhui@gmail.com> and Eric Lo <eric.fh.lo@gmail.com> as a part
-of Engineers for Exploration.
-*/
