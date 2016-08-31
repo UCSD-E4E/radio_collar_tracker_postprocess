@@ -13,8 +13,8 @@ install: fft_detect/fft_detect raw_gps_analysis/raw_gps_analysis.py\
 	collarDisplay/display_data.py meta_file_reader/read_meta_file.py\
 	ppm_adjust/get_beat_frequency.py config/SDR.cfg\
 	python_dialogs/fileChooser.py python_dialogs/getRunNum.py\
-	python_dialogs/getCollars.py CLI_GUI/cat_relevant.py\
-	python_dialogs/getFltAlt.py CLI_GUI/cas2.sh utilities/makeShapefile.py\
+	python_dialogs/getCollars.py\
+	python_dialogs/getFltAlt.py CLI_GUI/rct_cas.py utilities/makeShapefile.py\
 	collarDisplay/csvToShp.py collarDisplay/pos_estimator.py collarDisplay/display_gps.py\
 	collarDisplay/median_filter.py
 
@@ -62,8 +62,7 @@ rct_bin_ref.py:
 clean:
 	make -C fft_detect clean
 	-rm -f rct_bin_ref.sh
-	-rm config/COL
-	-rm config/SDR.cfg
+	-rm -f config/SDR.cfg
 	-rm -rf config
 
 uninstall:
