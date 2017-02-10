@@ -7,6 +7,10 @@
 #include <math.h>
 #include <float.h>
 
+#define SAMPLE_T	uint8_t
+#define OFFSET		-1.0
+#define SCALAR		1 / 128.0
+
 int main(int argc, char** argv){
 	// Set up variables
 	// Options variable
@@ -58,7 +62,7 @@ int main(int argc, char** argv){
 	double avg = 0;
 	double squared = 0;
 	uint64_t counter = 0;
-	uint8_t next[2];
+	SAMPLE_T next[2];
 
 	for(int i = 1; i <= num_files; i++){
 		char* filename = malloc(sizeof(char) * (strlen(run_dir) + 24));
@@ -68,9 +72,9 @@ int main(int argc, char** argv){
 			printf("Error!\n");
 			return -1;
 		}
-		while(fread(&next, sizeof(uint8_t) * 2, 1, file)){
-			float i = next[0] / 128.0 - 1.0;
-			float q = next[1] / 128.0 - 1.0;
+		while(fread(&next, sizeof(SAMPLE_T) * 2, 1, file)){
+			float i = next[0] * (SCALAR) + (OFFSET);
+			float q = next[1] * (SCALAR) + (OFFSET);
 			float magnitude = sqrt(i * i + q * q);
 			counter++;
 			if(magnitude > max){
