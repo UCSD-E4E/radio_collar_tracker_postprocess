@@ -6,10 +6,14 @@
 #include <stdint.h>
 #include <math.h>
 #include <float.h>
+#include <complex.h>
 
 #define SAMPLE_T	uint8_t
 #define OFFSET		-1.0
 #define SCALAR		1 / 128.0
+
+#define SAMPLE_PER	1.6
+#define SAMPLE_RATE	2048000
 
 int main(int argc, char** argv){
 	// Set up variables
@@ -60,8 +64,16 @@ int main(int argc, char** argv){
 	float max = FLT_MIN;
 	float min = FLT_MAX;
 	double avg = 0;
+	double complex noise_avg_0 = 0;
+	double complex noise_avg_1 = 0;
+	double max_pwrmag_0 = DBL_MIN;
+	double max_pwr_0 = DBL_MIN;
+	double max_pwrmag_1 = DBL_MIN;
+	double max_pwr_1 = DBL_MIN;
 	double squared = 0;
 	uint64_t counter = 0;
+	uint64_t counter1 = 0;
+	uint64_t counter2 = 0;
 	SAMPLE_T next[2];
 
 	for(int i = 1; i <= num_files; i++){
@@ -76,6 +88,7 @@ int main(int argc, char** argv){
 			float i = next[0] * (SCALAR) + (OFFSET);
 			float q = next[1] * (SCALAR) + (OFFSET);
 			float magnitude = sqrt(i * i + q * q);
+			double complex power = i * i + q * q * I;
 			counter++;
 			if(magnitude > max){
 				max = magnitude;
@@ -85,6 +98,21 @@ int main(int argc, char** argv){
 			}
 			avg += magnitude;
 			squared += magnitude * magnitude;
+			if((int)(counter / (SAMPLE_PER * SAMPLE_RATE / 2)) / 2 % 2 == 1){
+				noise_avg_1 += power;
+				counter2++;
+				if(magnitude > max_pwrmag_1){
+					max_pwrmag_1 = max;
+					max_pwr_1 = power;
+				}
+			}else{
+				noise_avg_0 += power;
+				counter1++;
+				if(magnitude > max_pwrmag_0){
+					max_pwrmag_0 = max;
+					max_pwr_0 = power;
+				}
+			}
 		}
 		fclose(file);
 		free(filename);
@@ -94,5 +122,15 @@ int main(int argc, char** argv){
 	printf("Average amplitude: %f\n", avg / counter);
 	double stddev = sqrt((squared - avg * avg / counter) / counter);
 	printf("Stddev amplitude:  %f\n", stddev);
+
+	noise_avg_0 /= counter1;
+	noise_avg_1 /= counter2;
+
+	if(cabs(noise_avg_0) < cabs(noise_avg_1)){
+		// set 0 is noise, set 1 is signal
+		printf("SNR: %f\n", cabs(10 * clog(max_pwr_1 / noise_avg_0)));
+	}else{
+		printf("SNR: %f\n", cabs(10 * clog(max_pwr_0 / noise_avg_1)));
+	}
 	free(run_dir);
 }
