@@ -15,7 +15,7 @@
 #endif
 
 #define FFT_LENGTH 4096
-#define SAMPLE_RATE 2048000
+#define SAMPLE_RATE 2000000
 #define SIG_LENGTH (int)(0.06 * SAMPLE_RATE / FFT_LENGTH)
 
 #define PROGRESS_BAR_LEN 50
@@ -70,13 +70,14 @@ int process(const char* run_dir, const char* ofile, const int num_freqs, const i
 	fftw_complex *fft_buffer_in, *fft_buffer_out;
 	fftw_plan p;
 	// RAW IQ buffer
-	uint8_t buffer[2];
+	uint16_t buffer[2];
 	// Sample buffer
 	float sbuf[num_freqs][2];
 	// Sample counter
 	int counter = 0;
 	int file_num = 0;
 
+	// Initialize buffers
 	double** history = (double**) malloc(sizeof(double*) * num_freqs);
 	unsigned int history_idx[num_freqs];
 	float convolution[num_freqs][2];
@@ -99,10 +100,10 @@ int process(const char* run_dir, const char* ofile, const int num_freqs, const i
 	p = fftw_plan_dft_1d(FFT_LENGTH, fft_buffer_in, fft_buffer_out, FFTW_FORWARD,
 		FFTW_ESTIMATE);
 
-	char* ifile = (char*) malloc(sizeof(char) * (strlen(run_dir) + 256));
 	// Generate filename
-	sprintf(ifile, "%s/RAW_DATA_%06d_%06d", run_dir, run_num, ++file_num);
-	in_file = fopen(ifile, "rb");
+	char* in_file_name = (char*) malloc(sizeof(char) * (strlen(run_dir) + 256));
+	sprintf(in_file_name, "%s/RAW_DATA_%06d_%06d", run_dir, run_num, ++file_num);
+	in_file = fopen(in_file_name, "rb");
 
 	if(!in_file || !out_file){
 		fprintf(stderr, "Error: Failed to open file!\n");
@@ -142,11 +143,11 @@ int process(const char* run_dir, const char* ofile, const int num_freqs, const i
 				fwrite(convolution[collar], sizeof(float), 2, out_file[collar]);
 			}
 		}
-		int num_bytes_read = fread((void*)buffer, sizeof(uint8_t), 2, in_file);
+		int num_bytes_read = fread((void*)buffer, sizeof(int16_t), 2, in_file);
 		if(num_bytes_read == 0 && feof(in_file)){
-			sprintf(ifile, "%s/RAW_DATA_%06d_%06d", run_dir, run_num, ++file_num);
+			sprintf(in_file_name, "%s/RAW_DATA_%06d_%06d", run_dir, run_num, ++file_num);
 			fclose(in_file);
-			in_file = fopen(ifile, "rb");
+			in_file = fopen(in_file_name, "rb");
 #if defined (__unix__) || (__MACH__)
 			int j;
 			for(j = 0; j < (int)round((float)PROGRESS_BAR_LEN * file_num / num_files); ++j){
@@ -166,8 +167,9 @@ int process(const char* run_dir, const char* ofile, const int num_freqs, const i
 			fprintf(stderr, "Current counter: %d\n", counter);
 			return -1;
 		}
-		fft_buffer_in[counter][0] = buffer[0] / 128.0 - 1.0;
-		fft_buffer_in[counter][1] = buffer[1] / 128.0 - 1.0;
+		// Normalize data
+		fft_buffer_in[counter][0] = buffer[0] / ((double)INT16_MAX) - 1.0;
+		fft_buffer_in[counter][1] = buffer[1] / ((double)INT16_MAX) - 1.0;
 		++counter;
 	}
 	fftw_free(fft_buffer_in);
@@ -175,7 +177,7 @@ int process(const char* run_dir, const char* ofile, const int num_freqs, const i
 	fftw_destroy_plan(p);
 	fftw_cleanup();
 	fftw_cleanup_threads();
-	free(ifile);
+	free(in_file_name);
 	for(i = 0; i < num_freqs; ++i){
 		fclose(out_file[i]);
 		free(history[i]);
