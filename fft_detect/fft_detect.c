@@ -20,6 +20,8 @@
 
 #define PROGRESS_BAR_LEN 50
 
+#define BYTES_PER_SAMPLE	sizeof(int16_t) * 2
+
 ////////////////////////////////
 // Hidden Function Prototypes //
 ////////////////////////////////
@@ -34,6 +36,16 @@ PyMODINIT_FUNC initfft_detect(void){
 }
 #endif
 
+/**
+ * Converts the raw IQ data to a complex floating point form.
+ * @param  buffer    Raw byte data
+ * @param  component 0 for I, 1 for Q
+ * @return           Double-precision floating point representing the component
+ */
+double inline getSample(const void* buffer, const size_t component){
+	return ((int16_t*) buffer)[component] / 4096.0;
+}
+
 int process(const char* run_dir, const char* ofile, const int num_freqs, const int* freq_bins, const int run_num){
 	FILE* in_file;
 	FILE** out_file = malloc(sizeof(FILE*) * num_freqs);
@@ -44,11 +56,6 @@ int process(const char* run_dir, const char* ofile, const int num_freqs, const i
 		out_file[i] = fopen(filename, "wb");
     	free(filename);
 	}
-
-
-	// if(freq_bins < 0 || freq_bins >= FFT_LENGTH){
-	// 	return -1;
-	// }
 
 #if defined (__unix__) || (__MACH__)
 	int num_files = 0;
@@ -70,7 +77,10 @@ int process(const char* run_dir, const char* ofile, const int num_freqs, const i
 	fftw_complex *fft_buffer_in, *fft_buffer_out;
 	fftw_plan p;
 	// RAW IQ buffer
-	uint16_t buffer[2];
+	void* buffer = malloc(BYTES_PER_SAMPLE);
+	if(!buffer){
+		fprintf(stderr, "Error: Failed to allocate raw IQ buffer");
+	}
 	// Sample buffer
 	float sbuf[num_freqs][2];
 	// Sample counter
@@ -143,7 +153,7 @@ int process(const char* run_dir, const char* ofile, const int num_freqs, const i
 				fwrite(convolution[collar], sizeof(float), 2, out_file[collar]);
 			}
 		}
-		int num_bytes_read = fread((void*)buffer, sizeof(int16_t), 2, in_file);
+		int num_bytes_read = fread(buffer, BYTES_PER_SAMPLE, 1, in_file);
 		if(num_bytes_read == 0 && feof(in_file)){
 			sprintf(in_file_name, "%s/RAW_DATA_%06d_%06d", run_dir, run_num, ++file_num);
 			fclose(in_file);
@@ -162,14 +172,14 @@ int process(const char* run_dir, const char* ofile, const int num_freqs, const i
 			}
 			continue;
 		}
-		if(num_bytes_read != 2){
+		if(num_bytes_read != BYTES_PER_SAMPLE){
 			fprintf(stderr, "Error: Read partial sample! %d\n", num_bytes_read);
 			fprintf(stderr, "Current counter: %d\n", counter);
 			return -1;
 		}
 		// Normalize data
-		fft_buffer_in[counter][0] = buffer[0] / ((double)INT16_MAX) - 1.0;
-		fft_buffer_in[counter][1] = buffer[1] / ((double)INT16_MAX) - 1.0;
+		fft_buffer_in[counter][0] = getSample(buffer, 0);
+		fft_buffer_in[counter][1] = getSample(buffer, 1);
 		++counter;
 	}
 	fftw_free(fft_buffer_in);
