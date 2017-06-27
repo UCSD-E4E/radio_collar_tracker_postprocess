@@ -172,7 +172,7 @@ int process(const char* run_dir, const char* ofile, const int num_freqs, const i
 			}
 			continue;
 		}
-		if(num_bytes_read != BYTES_PER_SAMPLE){
+		if(num_bytes_read != 1){
 			fprintf(stderr, "Error: Read partial sample! %d\n", num_bytes_read);
 			fprintf(stderr, "Current counter: %d\n", counter);
 			return -1;
