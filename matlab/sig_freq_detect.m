@@ -2,7 +2,7 @@
 This program is effective for comparing 60ms sample data to 60ms template.
 If some other time amount is used the execution time will vary. Please
 check xcorr() documentation if this is required. The value to be
-manipulated is called 'xclen'.
+manipulated is called 'xcorr_len'.
 
 To run this program using file data instead of a self-made sample, comment
 out block labeled 'Self-made Sample Block' and comment in blocks labeled
@@ -39,8 +39,9 @@ y = zeros(SAMPLE_SIZE,1);
 Manipulating this value will alter the time of the sample data.
 %}
 
-sigfreq = 500000;       % Approximate frequency of signal 
-xclen = 122880;         % 60ms xcorr. Length of cross correlation
+sigfreq = 4000;       % Approximate frequency of signal 
+PING_LEN = 0.060;
+xcorr_len = int16(PING_LEN * SAMPLING_RATE);         % 60ms xcorr. Length of cross correlation
 lenFreqs = 0;           % Length of Freqs array
 lenMAXVals = 0;         % Length of MAXVals array
 deviation = 5000;       % Frequency deviation check sigfreq +/- deviation
@@ -109,17 +110,15 @@ frequency and stores it in the variable y.
 y holds 2 -- 60ms pulses and 0 for all other values.
 y is then altered by adding in a certain amount of noise using awgn().
 %}
-f1 = 505000;
+f1 = 5000;
+sig_len = 2.06;
 w1 = 2*pi*f1;
-len = 0:1/SAMPLING_RATE:2.06;
-y = zeros(length(len),1);
-for i = 0:1/SAMPLING_RATE:0.06
-    y(int32(i*SAMPLING_RATE+1)) = sin(w1*i);
+len = 0:1/SAMPLING_RATE:sig_len;
+y = complex(zeros(length(len),1));
+for i = 1:1/SAMPLING_RATE:1+PING_LEN
+    y(int32(i*SAMPLING_RATE+1)) = cos(w1*i) + j * sin(w1*i);
 end
-for i = 2:1/SAMPLING_RATE:2.06
-    y(int32(i*SAMPLING_RATE+1)) = sin(w1*i);
-end
-y = awgn(y,-14);
+y = awgn(y,10);
 
 %{
 Initializes 2 arrays and sets up the the snr test sequence 0 dB ---> -40 dB
@@ -182,37 +181,19 @@ for j = 1:2
     FInc = 320*snr;                
     
     % (3)
-    if le(sigfreq,deviation)
-        for i = 1:FInc:sigfreq+deviation
-            % Create  60ms template at frequency angular frequency (w)
-            f = i;
-            w = 2*pi*f;
-            for template = 0:1/SAMPLING_RATE:0.06
-                x(int32(template*SAMPLING_RATE+1)) = sin(w*template);
-            end
-            
-            % Compute cross correlation
-            r = xcorr(y,x,xclen);
-            
-            % Set values
-            Freqs(int32(((i-sigfreq+5000)/FInc)+1)+lenFreqs) = f;
-            MAXVals(int32(((i-sigfreq+5000)/FInc)+1)+lenMAXVals) = mean(abs(r));
+    for i = sigfreq-deviation:FInc:sigfreq+deviation
+        f = i;
+        w = 2*pi*f;
+        for template = 0:1/SAMPLING_RATE:PING_LEN
+            x(int32(template*SAMPLING_RATE+1)) = cos(w*template) + j * sin(w*template);
         end
-    else
-        for i = sigfreq-deviation:FInc:sigfreq+deviation
-            f = i;
-            w = 2*pi*f;
-            for template = 0:1/SAMPLING_RATE:0.06
-                x(int32(template*SAMPLING_RATE+1)) = sin(w*template);
-            end
-            
-            r = xcorr(y,x,xclen); 
-            
-            Freqs(int32(((i-sigfreq+5000)/FInc)+1)+lenFreqs) = f;
-            MAXVals(int32(((i-sigfreq+5000)/FInc)+1)+lenMAXVals) = mean(abs(r));
-        end
+        
+        r = xcorr(y,x,xcorr_len); 
+        
+        Freqs(int32(((i-sigfreq+5000)/FInc)+1)+lenFreqs) = f;
+        MAXVals(int32(((i-sigfreq+5000)/FInc)+1)+lenMAXVals) = mean(abs(r));
     end
-    
+   
     %(4)
     meanV = mean(MAXVals);
     estimatesnr = log(meanV/250)/(-0.09);
@@ -244,35 +225,17 @@ end
 snr = 10^(estimatesnr/20);
 FInc = 320*snr;
 if lt(estimatesnr,-5)
-    if le(sigfreq,deviation)
-        for i = 1:FInc:sigfreq+deviation
-            % Create  60ms template at frequency angular frequency (w)
-            f = i;
-            w = 2*pi*f;
-            for template = 0:1/SAMPLING_RATE:0.06
-                x(int32(template*SAMPLING_RATE+1)) = sin(w*template);
-            end
-
-            % Compute cross correlation
-            r = xcorr(y,x,xclen);
-
-            % Set values
-            Freqs(int32(((i-sigfreq+5000)/FInc)+1)+lenFreqs) = f;
-            MAXVals(int32(((i-sigfreq+5000)/FInc)+1)+lenMAXVals) = mean(abs(r));
+    for i = sigfreq-deviation:FInc:sigfreq+deviation
+        f = i;
+        w = 2*pi*f;
+        for template = 0:1/SAMPLING_RATE:PING_LEN
+            x(int32(template*SAMPLING_RATE+1)) = cos(w*template) + j * sin(w*template);
         end
-    else
-        for i = sigfreq-deviation:FInc:sigfreq+deviation
-            f = i;
-            w = 2*pi*f;
-            for template = 0:1/SAMPLING_RATE:0.06
-                x(int32(template*SAMPLING_RATE+1)) = sin(w*template);
-            end
 
-            r = xcorr(y,x,xclen); 
+        r = xcorr(y,x,xcorr_len); 
 
-            Freqs(int32(((i-sigfreq+5000)/FInc)+1)+lenFreqs) = f;
-            MAXVals(int32(((i-sigfreq+5000)/FInc)+1)+lenMAXVals) = mean(abs(r));
-        end
+        Freqs(int32(((i-sigfreq+5000)/FInc)+1)+lenFreqs) = f;
+        MAXVals(int32(((i-sigfreq+5000)/FInc)+1)+lenMAXVals) = mean(abs(r));
     end
 end
 
@@ -296,10 +259,10 @@ for iteration = 1:12
         f = maxF + (i*FInc)/it;
         Freqs(I+1+i) = f;
         w = 2*pi*f;
-        for template = 0:1/SAMPLING_RATE:0.06
-            x(int32(template*SAMPLING_RATE+1)) = sin(w*template);
+        for template = 0:1/SAMPLING_RATE:PING_LEN
+            x(int32(template*SAMPLING_RATE+1)) = cos(w*template) + j * sin(w*template);
         end
-        r = xcorr(y,x,xclen);
+        r = xcorr(y,x,xcorr_len);
         MAXVals(I+1+i) = mean(abs(r));
     end
 end
