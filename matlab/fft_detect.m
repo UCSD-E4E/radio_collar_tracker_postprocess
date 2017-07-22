@@ -1,22 +1,23 @@
 clear all
-close all
+% close all
 
 FFT_LENGTH = 4096;
 SAMPLE_RATE = 2000000;
 OUTPUT_SAMPLE_RATE = SAMPLE_RATE / FFT_LENGTH;
 SIG_LENGTH = int16(0.015 * SAMPLE_RATE / FFT_LENGTH);
+collar_Freq = 172950873;
 
-run_dir = '/home/ntlhui/workspace/2017.06.30.RCT_Test2/RUN_000003';
+run_dir = '/home/ntlhui/workspace/2017.07.06.RCT_Test/RUN_000003';
 ofile = '/tmp/sdr_data';
-freq_bin = 924;
-run_num = 3;
+freq_bin = round((collar_Freq - center_freq) / SAMPLE_RATE * FFT_LENGTH);
+run_num = 4;
 
 raw_files = dir([run_dir, '/RAW_DATA_*']);
 
 output_signal = [];
 leftovers = [];
 
-for file_idx = 1:length(raw_files)
+for file_idx = 1:min(5, length(raw_files))
 	data = [leftovers; raw2complex(fullfile(raw_files(file_idx).folder, raw_files(file_idx).name))];
 	for start_idx = 1:FFT_LENGTH:length(data)
 		fft_buffer_in = data(start_idx:start_idx + FFT_LENGTH - 1);
@@ -28,15 +29,19 @@ for file_idx = 1:length(raw_files)
 end
 
 figure;
+
+% plotting the filtered signal
 plot(1/OUTPUT_SAMPLE_RATE:1/OUTPUT_SAMPLE_RATE:length(output_signal)/OUTPUT_SAMPLE_RATE, 10 * log10(abs(output_signal)))
 hold on;
 collar_candidate = [];
-for i = 1:int64(2 * OUTPUT_SAMPLE_RATE):int64(length(output_signal) / int64(2 * OUTPUT_SAMPLE_RATE)) * int64(2 * OUTPUT_SAMPLE_RATE)
+for i = 1 : int64(2 * OUTPUT_SAMPLE_RATE) : int64(length(output_signal) / int64(2 * OUTPUT_SAMPLE_RATE)) * int64(2 * OUTPUT_SAMPLE_RATE)
 	collar_candidate = [collar_candidate; max(abs(output_signal(i:i+int64(2 * OUTPUT_SAMPLE_RATE) - 1)))];
 end
 
-plot(1:2:length(collar_candidate) * 2 - 1, 10 * log10(abs(collar_candidate)));
+% Plot the collar candidate threshold
+% plot(1:2:length(collar_candidate) * 2 - 1, 10 * log10(abs(collar_candidate)));
 
+% Generate the histogram based threshold
 [counts, edges] = histcounts(10 * log10(abs(collar_candidate)), 15);
 count_threshold = 0;
 for i = length(counts):-1:1
@@ -47,6 +52,7 @@ for i = length(counts):-1:1
 end
 refline(0, count_threshold);
 
+% Find pings based on histogram threshold
 ping_times = find(10 * log10(abs(output_signal)) > count_threshold);
 ping_starts = [ping_times(1)]; % in OUTPUT_SAMPLE_RATE
 for i = 1:length(ping_times) - 1
@@ -90,9 +96,10 @@ periods = periods(periods < 1.1 * median_period);
 periods = periods(periods > 0.9 * median_period);
 period = mean(periods);
 
-
+% Circle all known pings
 t_out = 1/OUTPUT_SAMPLE_RATE:1/OUTPUT_SAMPLE_RATE:length(output_signal) / OUTPUT_SAMPLE_RATE;
 scatter(t_out(ping_starts), 10 * log10(abs(output_signal(ping_starts))));
+
 ping_timing = ping_starts - ping_starts(1);
 ping_indexes = round(ping_timing / period);
 offset = 0;
