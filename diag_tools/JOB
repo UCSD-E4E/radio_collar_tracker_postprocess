@@ -1,0 +1,9 @@
+/Users/e4e/Documents/2015.07.14/RUN_001162/
+curr_run: 1162
+freq_em: 1000
+pulse_ms: 20
+lin_scale: 1
+map_d: 128
+alpha_c_thres: 500
+num_col: 40
+f_drift: -11000
