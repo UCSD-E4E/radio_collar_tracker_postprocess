@@ -11,17 +11,17 @@ function [] = waterfall(file)
 	P2 = abs(fft_out_data / FFT_LEN);
 	P2 = [P2(FFT_LEN/2+1:FFT_LEN,:); P2(1:FFT_LEN/2,:)];
 	waterfall_plot = 10*log10(abs(P2))';
-	figure;
+	figure('units','normalized','outerposition',[0 0 1 1]);
 	% imagesc(x, y, C)
-	x = [(0 + CENTER_FREQ) / 1e6, (1e6 + CENTER_FREQ) / 1e6];
+	y = [(0 + CENTER_FREQ) / 1e6, (1e6 + CENTER_FREQ) / 1e6];
 	% x = [1,FFT_LEN/2];
-	y = [0, data_len / 2000000];
-	C = waterfall_plot(:,FFT_LEN/2+1:FFT_LEN);
+	x = [0, data_len / 2000000];
+	C = waterfall_plot(:,FFT_LEN/2+1:FFT_LEN)';
 	clims = [max(std(waterfall_plot)) + mean(mean(waterfall_plot)), max(max(waterfall_plot))];
 	clims = [mean(mean(waterfall_plot)), max(max(waterfall_plot))];
 	imagesc(x, y, C, clims);
 	c = colorbar;
 	c.Label.String = 'Signal Strength (dBFS)';
-	ylabel('Time (s)');
-	xlabel('Frequency (MHz)');
+	xlabel('Time (s)');
+	ylabel('Frequency (MHz)');
 	title('Signal Waterfall Plot');
