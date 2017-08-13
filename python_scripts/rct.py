@@ -93,8 +93,8 @@ def getfiles(run_folder,run_number):
     import glob
     folder = run_folder + 'RUN_' + run_number.zfill(6) + '/'
     files  = 'RAW_DATA_' + run_number.zfill(6) + '*'
-    meta   = 'META_' + run_number.zfill(6)
-    return glob.glob(folder + files), glob.glob(folder + meta)
+  #  meta   = 'META_' + run_number.zfill(6)
+    return glob.glob(folder + files)#, glob.glob(folder + meta)
 
 #def processMetaFile(metafile):
 #    start_time: 1501855851.174393
@@ -150,18 +150,22 @@ def plotPeriods2(t, periods, color='y', linestyle='--'):
 
 def plotPulses2(t, pulses, color='m'):
     for p in pulses:
-        plt.axvline(t[p], color=color,linewidth=int(0.02*t[0]),alpha=0.1)
+        plt.axvline(t[p], color=color,linewidth=3,alpha=0.1)
         plt.scatter(t[p],0,c=color,marker='X')
 
 def predictPeriods(t,fs,pT,midx=0):
     mt = t[midx]
     rT = []; lT = []
     
-    for i in range(0,int(t[-1]/pT + 1),1):
-        rT.append(mt + pT*(i + 0.5))
-        
-    for i in range(0,int(t[midx]/pT + 1),1):
-        lT.append(mt - pT*(i + 0.5))
+    for i in range( 0, int( ( len(t[midx:]) / fs) / pT ) + 1):
+        print('adding period at {0}'.format(mt + pT*(i + 0.5)))
+        if (mt + pT*(i + 0.5)) <= t[-1]:
+            rT.append(mt + pT*(i + 0.5))
+
+    for i in range( 0, int( t[midx] / pT ) + 1):
+        print('adding period at {0}'.format(mt - pT*(i + 0.5)))
+        if (mt - pT*(i + 0.5)) >= t[0]:
+            lT.append(mt - pT*(i + 0.5))
         
     lrT = np.concatenate((lT[::-1],rT))
     
@@ -177,10 +181,14 @@ def predictPulses(t,fs,pT,midx=0):
     mt = t[midx]
     rP = []; lP = []
             
-    for i in range(0,int(t[-1]/pT + 1),1):
+#    for i in range(0,int(t[-1]/pT + 1/fs),1):
+    for i in range( 0, int( ( len(t[midx:]) / fs) / pT ) + 1):
         rP.append(mt + pT*i)
-    for i in range(0,int(t[midx]/pT + 1),1):
+        print('adding pulse at {0}'.format(mt + pT*i))
+#    for i in range(0,int(t[midx]/pT ),1):
+    for i in range( 0, int( t[midx] / pT ) + 1):
         lP.append(mt - pT*i)
+        print('adding pulse at {0}'.format(mt - pT*i))
 
     lrP = np.concatenate((lP[::-1],rP[1:]))
 
@@ -266,7 +274,7 @@ def fftFromFiles(raw_files, fft_size, target_bin):
                 extra = data[d+fft_size+1:] # THIS WAS MISINDENTED
     return np.array(fdata)
 
-def fftFromFiles2(raw_files, fft_size, target_bin, fs, w='hann'):
+def fftFromFiles2(raw_files, fft_size, target_bin, fs, w='hann',ovlap=None):
     count = 0        
     fdata = []; extra = []
     for rf in raw_files:
@@ -277,7 +285,7 @@ def fftFromFiles2(raw_files, fft_size, target_bin, fs, w='hann'):
         for d in range(0,len(data),fft_size):
             fft_in = np.array(data[d:d+fft_size])
             f,Pxx = sg.welch(fft_in,fs, nperseg=fft_size, window=w,
-                             return_onesided=False)
+                             noverlap=ovlap, return_onesided=False)
             fdata.append(Pxx[target_bin])
             if(d+fft_size > len(data)):
                 extra = data[d+fft_size+1:]
@@ -335,6 +343,8 @@ def findTrueWidth(data, pW, pT, fs):
     hat = sg.convolve(data,sg.ricker(9,1),mode='same')
     
     lside,rside = [m_idx-int(pT*fs/2), m_idx+int(pT*fs/2)]
+    print("left: ".format(lside))
+    print("right: ".format(rside))
     lmin = int(np.argmin(hat[lside:m_idx]) + lside)
     rmin = int(np.argmin(hat[m_idx:rside]) + m_idx)
     
