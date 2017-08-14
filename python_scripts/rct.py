@@ -151,7 +151,7 @@ def plotPeriods2(t, periods, color='y', linestyle='--'):
 def plotPulses2(t, pulses, color='m'):
     for p in pulses:
         plt.axvline(t[p], color=color,linewidth=3,alpha=0.1)
-        plt.scatter(t[p],0,c=color,marker='X')
+        plt.scatter(t[p],0,c=color,marker='X',vmin=0)
 
 def predictPeriods(t,fs,pT,midx=0):
     mt = t[midx]
@@ -222,14 +222,6 @@ def plotPulses(pulses,t,xt):
 #                         (t[int(np.median(pulse.peaks))],
 #                         xt[int(np.median(pulse.peaks))]))
 
-#
-#def movingAverageFilter(x,M):
-#    #y[i] = y[i - 1] + x[i + p] - x[i - q]
-#    #   p = (M - 1) / 2 ; M odd number of points
-#    #   q = p + 1
-#    acc = np.int64()
-#    for i in in x:
-#        acc = acc + x[i]
 
 def trimmedMean(pW, pT, fs, data):
     trim = np.sort(data)
@@ -294,6 +286,7 @@ def fftFromFiles2(raw_files, fft_size, target_bin, fs, w='hann',ovlap=None):
 
 def findTruePeriod(data, pW, pT, fs):
     m_idx = np.argmax(data)
+    flat = sg.convolve(data,sg.flattop(49),mode='same')
     
     pW_idx, pT_idx = [int(pW*fs*2),int(pT*fs)]
     r_idx_a,r_idx_b = [m_idx+pW_idx,m_idx+pW_idx+int(pT_idx*1.5)]
@@ -303,27 +296,27 @@ def findTruePeriod(data, pW, pT, fs):
     if l_idx_a < 0 :
         m_idx_l = m_idx
         m_idx = 0
-        m_idx = np.argmax(data[r_idx_a:r_idx_b]) + r_idx_a
+        m_idx = np.argmax(flat[r_idx_a:r_idx_b]) + r_idx_a
         
         r_idx_a,r_idx_b = [0,0]
         r_idx_a,r_idx_b = [m_idx+pW_idx, m_idx+pW_idx+int(pT_idx*1.5)]
 #        print('Right is from: '+str(r_idx_a)+' to '+str(r_idx_b))
-        m_idx_r = np.argmax(data[r_idx_a:r_idx_b]) + r_idx_a
+        m_idx_r = np.argmax(flat[r_idx_a:r_idx_b]) + r_idx_a
 
 #        print('Moving right, L,M,R = '+str(m_idx_l)+','+str(m_idx)+','+str(m_idx_r))
 
     elif r_idx_b > len(data) :
         m_idx_r = m_idx
-        m_idx = np.argmax(data[l_idx_a:l_idx_b]) + l_idx_a
+        m_idx = np.argmax(flat[l_idx_a:l_idx_b]) + l_idx_a
         
         l_idx_a,l_idx_b = [m_idx-pW_idx-int(pT_idx*1.5),m_idx-pW_idx]
-        m_idx_l = np.argmax(data[l_idx_a:l_idx_b]) + l_idx_a
+        m_idx_l = np.argmax(flat[l_idx_a:l_idx_b]) + l_idx_a
 
 #        print('Moving left, L,M,R = '+str(m_idx_l)+','+str(m_idx)+','+str(m_idx_r))
 
     else:
-        m_idx_r = np.argmax(data[r_idx_a:r_idx_b]) + r_idx_a
-        m_idx_l = np.argmax(data[l_idx_a:l_idx_b]) + l_idx_a
+        m_idx_r = np.argmax(flat[r_idx_a:r_idx_b]) + r_idx_a
+        m_idx_l = np.argmax(flat[l_idx_a:l_idx_b]) + l_idx_a
 #        print('No need to move, L,M,R = '+str(m_idx_l)+','+str(m_idx)+','+str(m_idx_r))
         
         
@@ -342,9 +335,10 @@ def findTrueWidth(data, pW, pT, fs):
     m_idx = np.argmax(data)
     hat = sg.convolve(data,sg.ricker(9,1),mode='same')
     
-    lside,rside = [m_idx-int(pT*fs/2), m_idx+int(pT*fs/2)]
-    print("left: ".format(lside))
-    print("right: ".format(rside))
+    lside = m_idx-int(pT*fs/2)
+    rside = m_idx+int(pT*fs/2)
+    print("left: {0}".format(lside))
+    print("right: {0}".format(rside))
     lmin = int(np.argmin(hat[lside:m_idx]) + lside)
     rmin = int(np.argmin(hat[m_idx:rside]) + m_idx)
     
