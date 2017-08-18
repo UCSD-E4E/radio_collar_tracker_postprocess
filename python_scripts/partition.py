@@ -42,7 +42,7 @@ raw_files   = raw_files[:1]
 
 #%% FFT
 # return the power spectrum (time domain)
-Pxx = rct.fftFromFiles2(raw_files,FFT_LENGTH,xbin,Fsx,w='boxcar')
+Pxx = rct.fftFromFiles2(raw_files,FFT_LENGTH,xbin,Fsx,w='flattop')
 Px = sg.medfilt(Pxx,9)
 Px = sg.convolve(Px, sg.flattop(49), mode='same')
 #Px = Pxx
@@ -61,7 +61,7 @@ half_wid = int(np.ceil(pW/2 * Fsf))
 lT, rT = [midx - half_per, midx + half_per]
 lW, rW = [midx - half_wid, midx + half_wid]
 
-sample = Px[min(lT,0) : min(rT,len(Px))]
+sample = Px[max(lT,0) : min(rT,len(Px))]
 sample_midx = np.argmax(sample)
 
 plt.figure(1)

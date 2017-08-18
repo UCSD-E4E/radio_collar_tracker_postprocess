@@ -16,9 +16,9 @@ import peakutils as pu
 # original tests performed on run10 from canyon series
 #run = '16';
 #series = 'desert'
-run = '31';
-series = 'anechoic2'
-path = 'C:\\Users\\anthony\\Desktop\\e4e\\'+series+'\\' # Inside here should be a RUN_000## folder
+run = '19';
+series = 'desert'
+path = 'C:\\Users\\anthony\\Desktop\\e4e\\rct_runs\\'+series+'\\' # Inside here should be a RUN_000## folder
 
 # TODO: Use META_DATA file for literals and run variables
 Fsx         = 2000000.0       # sampling frequency of input data
@@ -28,12 +28,13 @@ F_FAKE      = 172600000.0   # FAKE COLLAR
 Fx          = F_REAL        # target collar frequency
 Fc          = 172500000.0   # Center frequency
 FFT_LENGTH  = 4096
+
 Fsf         = Fsx/FFT_LENGTH # sampling frquency of fft
 
 pW          = 0.02 # pulse width [seconds]
 pT          = 1.6 # pulse period [seconds]
 
-xbin        = int( np.round( (Fx - Fc) / Fsx * FFT_LENGTH ) )
+xbin        = int( np.round( (Fx - Fc) / Fsx * FFT_LENGTH ) ) - 1
 refbin      = int( np.round( (F_FAKE - Fc) / Fsx * FFT_LENGTH ) )
 raw_files   = rct.getfiles(path,run)
 
@@ -41,7 +42,7 @@ raw_files   = rct.getfiles(path,run)
 
 windows = ['boxcar', 'triang', 'blackman', 'hamming', 'hann', 'bartlett', 
            'flattop', 'parzen', 'bohman', 'blackmanharris', 'nuttall', 'barthann', 
-#           'kaiser (needs beta)', 
+#           ('kaiser',32.0), 
 #           'gaussian (needs std)', 
 #           'general_gaussian (needs power, width)', 
 #           'slepian (needs width)', 
@@ -84,19 +85,19 @@ plt.legend(np.concatenate((['Target Bin','Reference Bin'],w2)))
 plt.xlim(f_Pxx[0][0][xbin-3],f_Pxx[0][0][xbin+3])
 
 #%% Compare window function to uniform in the fft reconstructed time domain
-w0 = np.ones(FFT_LENGTH)
-w1 = 'barthann'
+w0 = 'boxcar'
+w1 = ('kaiser',32.0)
 
-Pxx0 = rct.fftFromFiles2([raw_files[0]],FFT_LENGTH,xbin,Fsx,w0)
-Pxx1 = rct.fftFromFiles2([raw_files[0]],FFT_LENGTH,xbin,Fsx,w1)
+Pxx0 = rct.fftFromFiles2(raw_files[:1],FFT_LENGTH,xbin,Fsx,w0)
+Pxx1 = rct.fftFromFiles2(raw_files[:1],FFT_LENGTH,xbin,Fsx,w1)
 
 ft = np.linspace(1/Fsf,len(Pxx0)/Fsf,len(Pxx0))
 
 plt.figure(2)
 ax3 = plt.subplot(1,2,1)
-plt.title('Frequency filter signal with a uniform window')
-plt.semilogy(ft, abs(Pxx0))
+plt.title('Frequency filter signal with a {0} window'.format(w0))
+plt.plot(ft, Pxx0)
 
 ax4 = plt.subplot(1,2,2, sharex=ax3,sharey=ax3)
-plt.title('Frequency filter signal with a {0}'.format(w1))
-plt.semilogy(ft, abs(Pxx1))
+plt.title('Frequency filter signal with a {0} window'.format(w1))
+plt.plot(ft, Pxx1)

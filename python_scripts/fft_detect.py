@@ -16,8 +16,8 @@ import peakutils as pu
 # original tests performed on run10 from canyon series
 #run = '16';
 #series = 'desert'
-run = '47';
-series = 'canyon2'
+run = '25';
+series = 'canyon'
 path = 'C:\\Users\\anthony\\Desktop\\e4e\\'+series+'\\' # Inside here should be a RUN_000## folder
 
 # TODO: Use META_DATA file for literals and run variables
@@ -32,8 +32,8 @@ pT          = 1.6 # pulse period [seconds]
 rct.Pulse.setPulsePeriod(pT)
 
 xbin               = int( np.round( (Fx - Fc) / Fsx * FFT_LENGTH ) )
-raw_files, meta   = rct.getfiles(path,run)
-raw_files   = raw_files[-12:]
+raw_files         = rct.getfiles(path,run)
+raw_files   = raw_files[-3:]
 
 
 #%% FFT

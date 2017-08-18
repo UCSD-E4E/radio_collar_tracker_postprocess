@@ -178,15 +178,18 @@ def predictPeriods(t,fs,pT,midx=0):
     return periods
 
 def predictPulses(t,fs,pT,midx=0):
+    # Assuming that the provided max index is a pulse, finds the temporal 
+    #   location of each pulse (nT). Then fits the time to the nearest index
     mt = t[midx]
     rP = []; lP = []
-            
-#    for i in range(0,int(t[-1]/pT + 1/fs),1):
+
+    # For how ever many full periods fit in the right half of the data            
     for i in range( 0, int( ( len(t[midx:]) / fs) / pT ) + 1):
-        rP.append(mt + pT*i)
+        rP.append(mt + pT*i)  # Add the time that a pulse should occur
         print('adding pulse at {0}'.format(mt + pT*i))
-#    for i in range(0,int(t[midx]/pT ),1):
-    for i in range( 0, int( t[midx] / pT ) + 1):
+        
+    # For how ever many full periods fit in the left half of the data            
+    for i in range( 0, int( ( len(t[:midx]) / fs) / pT ) + 1):
         lP.append(mt - pT*i)
         print('adding pulse at {0}'.format(mt - pT*i))
 
@@ -201,7 +204,6 @@ def predictPulses(t,fs,pT,midx=0):
     return pulses
 
 def plotPulses(pulses,t,xt):
-    import matplotlib.pyplot as plt
     for pulse in pulses:
         if pulse.isWellDefined():
             med = (t[int(np.median(pulse.peaks))],
@@ -233,8 +235,6 @@ def trimmedMean(pW, pT, fs, data):
 def fftFromFiles(raw_files, fft_size, target_bin):
     # Returns the fft of the data in the target frequency bin over time
 
-#    w = sg.get_window('blackmanharris',fft_size)
-#    once = True
     fdata = []; extra = []; count = 0;
     for rf in raw_files :
         count += 1
@@ -244,21 +244,7 @@ def fftFromFiles(raw_files, fft_size, target_bin):
         data.extend(raw2complex(rf))
         
         for d in range(0,len(data),fft_size):
-            
-#            print('Processing Data from '+str(d)+' to '+str(d+fft_size))
-#            print(str(len(data)-fft_size-d)+' data points remain')
-#            fft_in = np.array(data[d:d+fft_size]) / fft_size
             fft_in = np.array(data[d:d+fft_size])
-            #test
-#            [p,c] = [np.argmax(fft_in),int(np.floor(len(fft_in)/2))]
-#            o = p-c; print(o)
-#            if o > 0 : w = np.concatenate((np.zeros(abs(o)),w[o:]))
-#            elif o < 0 : w = np.concatenate((np.zeros(abs(o)),w[:o]))
-#            if d is 0:
-#                plt.figure(10)
-#                plt.plot(fft_in)
-#                plt.plot(w)
-            
             fft_out = np.fft.fft(fft_in) / fft_size; fft_in=[]
             fdata.append(fft_out[target_bin])
             if(d+fft_size > len(data)):
@@ -266,7 +252,7 @@ def fftFromFiles(raw_files, fft_size, target_bin):
                 extra = data[d+fft_size+1:] # THIS WAS MISINDENTED
     return np.array(fdata)
 
-def fftFromFiles2(raw_files, fft_size, target_bin, fs, w='hann',ovlap=None):
+def fftFromFiles2(raw_files, fft_size, target_bin, fs, w='boxcar',ovlap=None):
     count = 0        
     fdata = []; extra = []
     for rf in raw_files:
@@ -339,16 +325,21 @@ def findTrueWidth(data, pW, pT, fs):
     rside = m_idx+int(pT*fs/2)
     print("left: {0}".format(lside))
     print("right: {0}".format(rside))
-    lmin = int(np.argmin(hat[lside:m_idx]) + lside)
-    rmin = int(np.argmin(hat[m_idx:rside]) + m_idx)
-    
-    return (rmin-lmin)/fs
-    
-    
-    
-    
-    
+    lmin = int(np.argmin(hat[max(lside,0):m_idx]) + max(lside,0))
+    rmin = int(np.argmin(hat[m_idx:min(rside,len(data))]) + m_idx)
     
 
+    return (rmin-lmin)/fs
+    
+
+def readMetaFile(metafile):
+    variables = []; values = [];
+    with open(metafile) as file:
+        for line in file:
+            var,val = line.split(': ')
+            variables.append(str(var))
+            values.append(float(val))
+    return dict( zip( variables, values ) )
+    
     
     

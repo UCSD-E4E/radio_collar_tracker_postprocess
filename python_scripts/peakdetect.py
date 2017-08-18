@@ -14,8 +14,6 @@ import peakutils as pu
 
 #%% Run Variables
 # original tests performed on run10 from canyon series
-#run = '16';
-#series = 'desert'
 run = '19';
 series = 'desert'
 # Inside here should be a RUN_000## folder
@@ -36,7 +34,7 @@ pT          = 1.6 # pulse period [seconds]
 
 xbin        = int( np.round( (Fx - Fc) / Fsx * FFT_LENGTH ) ) -1
 raw_files   = rct.getfiles(path,run)
-#raw_files   = raw_files[:6]
+raw_files   = raw_files[:6]
 
 
 #%% FFT
@@ -46,20 +44,31 @@ Px = sg.medfilt(Pxx,9)
 
 # frequency time axis (length of fft)
 ft = np.linspace(1/Fsf,len(Px)/Fsf,len(Px))
+ft_l,ft_r = np.split(ft,2)
 
 # find the peak sample (most likely to be a near pulse)
-midx = np.argmax(Px)
+Px_l,Px_r = np.split(Px,2)
 
+midx_l = np.argmax(Px_l)
+midx_r = np.argmax(Px_r)
 
-pT = rct.findTruePeriod(Px,pW,pT,Fsf)
-pW = rct.findTrueWidth(Px,pW,pT,Fsf)
+pT_l = rct.findTruePeriod(Px_l,pW,pT,Fsf)
+pT_r = rct.findTruePeriod(Px_r,pW,pT,Fsf)
 
-pulses  = rct.predictPulses(ft, Fsf, pT, midx)
+pW_l = rct.findTrueWidth(Px_l,pW,pT_l,Fsf)
+pW_r = rct.findTrueWidth(Px_r,pW,pT_r,Fsf)
 
+pulses_l = rct.predictPulses(ft_l, Fsf, pT_l, midx_l) 
+pulses_r = rct.predictPulses(ft_r, Fsf, pT_r, midx_r)
 
+pulses_l = np.array(pulses_l)
+pulses_r = np.array(pulses_r) + len(Px_l)
+#pulses_r = len(Px_l)
+
+pulses = np.concatenate((pulses_l,pulses_r))
 #%% Peak detection
-Px = sg.convolve(Px,sg.flattop(49),mode='same')
-peaks = pu.indexes(Px, thres= 0, min_dist=(pT-pW)*Fsf)
+#Px = sg.convolve(Px,sg.flattop(49),mode='same')
+peaks = pu.indexes(sg.convolve(Px,sg.flattop(49),mode='same'), thres= 0, min_dist=(pT-pW)*Fsf)
 
 
 plt.figure(2)
@@ -67,3 +76,11 @@ plt.title('Peak Detection')
 plt.plot(ft,Px)
 rct.plotPulses2(ft, pulses)
 plt.scatter(ft[peaks],Px[peaks],color='r')
+
+
+#%% Second Pass
+# Figure out the detected peak separation
+p0,p1 = peaks[:-1],peaks[1:]
+pdiff = p1-p0
+pmean,pstd = np.mean(pdiff), np.std(pdiff)
+ptruth = [abs(p - pmean) < pstd for p in pdiff]
