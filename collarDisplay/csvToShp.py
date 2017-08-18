@@ -56,6 +56,9 @@ def create_shapefile(csv, output, cutoff = -100):
     # print("min easting: %f" % refLon)
     # print("max easting: %f" % maxLon)
 
+    firstNorthing = finalNorthing[0]
+    firstEasting = finalEasting[0]
+
     w = shapefile.Writer(shapefile.POINT)
     w.autoBalance = 1
     w.field("lat", "F", 20, 18)
@@ -67,6 +70,12 @@ def create_shapefile(csv, output, cutoff = -100):
     i = 0
     while i < length:
         if col[i] < cutoff:
+            i += 1
+            continue
+        if abs(finalNorthing[i] - firstNorthing) < 2:
+            i += 1
+            continue
+        if abs(finalEasting[i] - firstEasting) < 2:
             i += 1
             continue
         #Latitude, longitude, elevation, measurement
