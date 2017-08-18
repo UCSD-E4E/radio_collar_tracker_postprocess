@@ -207,11 +207,14 @@ if __name__ == '__main__':
 		subprocess.call(fft_detect + args, shell=True)
 
 	if collarList is None:
-		pool = Pool()
-		iterArgs = zip(itertools.repeat(data_dir), itertools.repeat(run), itertools.repeat(alt), itertools.repeat(collarDefinitionFilename), xrange(len(collars)))
-		pool.map(processRawPool, iterArgs)
+		if len(collars) == 1:
+			processRaw(data_dir, run, alt, collarDefinitionFilename, 0)
+		else:
+			pool = Pool()
+			iterArgs = zip(itertools.repeat(data_dir), itertools.repeat(run), itertools.repeat(alt), itertools.repeat(collarDefinitionFilename), xrange(len(collars)))
+			pool.map(processRawPool, iterArgs)
 	else:
-		for i in collarList:
+		for i in xrange(len(collarList)):
 			processRaw(data_dir, run, alt, collarDefinitionFilename, i - 1)
 	os.remove(collarDefinitionFilename)
 
