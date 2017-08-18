@@ -86,13 +86,25 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     threshold = 0
     if startLocation is not None:
         knownEmptyCollars = []
+        knownEmptyCollarsE = []
+        knownEmptyCollarsN = []
+        knownEmptyCollarsA = []
         medianCollars = []
+        medianCollarsE = []
+        medianCollarsN = []
+        medianCollarsA = []
         for i in xrange(len(col)):
             rangeToMedian = math.sqrt((lon[i] - startLocation[0]) ** 2.0 + (lat[i] - startLocation[1]) ** 2.0)
             if rangeToMedian > startLocation[2] * 2:
                 knownEmptyCollars.append(col[i])
+                knownEmptyCollarsE.append(lon[i])
+                knownEmptyCollarsN.append(lat[i])
+                knownEmptyCollarsA.append(alt[i])
             else:
                 medianCollars.append(col[i])
+                medianCollarsE.append(lon[i])
+                medianCollarsN.append(lat[i])
+                medianCollarsA.append(alt[i])
         if len(medianCollars) > 0:
             threshold = np.amax(knownEmptyCollars)
     else:
@@ -107,6 +119,26 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
             if histogram[i] < histogramThreshold:
                 threshold = edges[i + 1]
                 break
+
+    # writer = shapefile.Writer(shapefile.POINT)
+    # writer.autoBalance = 1
+    # writer.field("lat", "F", 20, 18)
+    # writer.field("lon", "F", 20, 18)
+    # writer.field("alt", "F", 20, 18)
+    # writer.field("measurement", "F", 18, 18)
+
+    # for i in xrange(len(medianCollars)):
+    #     #Latitude, longitude, elevation, measurement
+    #     llat, llon = utm.to_latlon(medianCollarsE[i], medianCollarsN[i], zonenum, zone)
+    #     writer.point(llon, llat, medianCollarsA[i], medianCollars[i])
+    #     writer.record(llon, llat, medianCollarsA[i], medianCollars[i])
+
+
+    # writer.save('%s/RUN_%06d_COL_%06d_knownEmpty.shp' % (output_path, run_num, num_col))
+    # proj = open('%s/RUN_%06d_COL_%06d_knownEmpty.prj' % (output_path, run_num, num_col), "w")
+    # epsg1 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
+    # proj.write(epsg1)
+    # proj.close()
 
     print("Collar %d: Using %f threshold" % (num_col, threshold))
 
@@ -123,12 +155,12 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
         # if col[i] < avgCol + stdDevCol:
         if col[i] < threshold:
             continue
-        if stdAlt < 5:
-            if math.fabs(alt[i] - avgAlt) > stdAlt:
-                continue
-        else:
-            if alt[i] < avgAlt - stdAlt:
-                continue
+        # if stdAlt < 5:
+        #     if math.fabs(alt[i] - avgAlt) > stdAlt:
+        #         continue
+        # else:
+        #     if alt[i] < avgAlt - stdAlt:
+        #         continue
         if startLocation is not None:
             rangeToMedian = math.sqrt((lon[i] - startLocation[0]) ** 2.0 + (lat[i] - startLocation[1]) ** 2.0)
             if rangeToMedian > startLocation[2] * 1.7:
@@ -146,7 +178,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
         return
 
     if np.amax(finalCol) - np.amin(finalCol) < 1:
-        print("Collar %d: Not enough variation! No collar!" % num_col)
+        print("Collar %d: Not enough variation: %f! No collar!" % (num_col, np.amax(finalCol) - np.amin(finalCol)))
         return
     print("Collar %d: Collar data range: %f" % (num_col, np.amax(finalCol) - np.amin(finalCol)))
 
@@ -171,23 +203,23 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     # proj.close()
 
     # if len(altRejectEasting) > 0:
-    #     writer = shapefile.Writer(shapefile.POINT)
-    #     writer.autoBalance = 1
-    #     writer.field("lat", "F", 20, 18)
-    #     writer.field("lon", "F", 20, 18)
+        # writer = shapefile.Writer(shapefile.POINT)
+        # writer.autoBalance = 1
+        # writer.field("lat", "F", 20, 18)
+        # writer.field("lon", "F", 20, 18)
 
-    #     for i in xrange(len(altRejectEasting)):
-    #         #Latitude, longitude
-    #         lat, lon = utm.to_latlon(altRejectEasting[i], altRejectNorthing[i], zonenum, zone)
-    #         writer.point(lon, lat)
-    #         writer.record(lon, lat)
+        # for i in xrange(len(altRejectEasting)):
+        #     #Latitude, longitude
+        #     lat, lon = utm.to_latlon(altRejectEasting[i], altRejectNorthing[i], zonenum, zone)
+        #     writer.point(lon, lat)
+        #     writer.record(lon, lat)
 
 
-    #     writer.save('%s/RUN_%06d_COL_%06d_alt_reject.shp' % (output_path, run_num, num_col))
-    #     proj = open('%s/RUN_%06d_COL_%06d_alt_reject.prj' % (output_path, run_num, num_col), "w")
-    #     epsg1 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
-    #     proj.write(epsg1)
-    #     proj.close()
+        # writer.save('%s/RUN_%06d_COL_%06d_alt_reject.shp' % (output_path, run_num, num_col))
+        # proj = open('%s/RUN_%06d_COL_%06d_alt_reject.prj' % (output_path, run_num, num_col), "w")
+        # epsg1 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
+        # proj.write(epsg1)
+        # proj.close()
 
     if len(finalCol) < 6:
         print("Collar %d: No collars detected!" % num_col)
@@ -267,7 +299,7 @@ if __name__ == '__main__':
 
     parser.add_argument('-r', '--run', type = int, help = 'Run number for this data file', metavar = 'run_num', dest = 'run_num', default = 1075)
     parser.add_argument('-n', '--collar', type = int, help = 'Collar number for this data file', metavar = 'collar', dest = 'collar', default = 1)
-    parser.add_argument('-i', '--input', help = 'Input file to be processed', metavar = 'data_file', dest = 'filename', required = True)
+    parser.add_argument('-i', '--input', help = 'Input CSV file to be processed', metavar = 'data_file', dest = 'filename', required = True)
     parser.add_argument('-o', '--output_dir', help = 'Output directory', metavar = 'output_dir', dest = 'output_path', required = True)
     parser.add_argument('-c', '--definitions', help = "Collar Definitions", metavar = 'collar_definitions', dest = 'col_def', required = True)
 
