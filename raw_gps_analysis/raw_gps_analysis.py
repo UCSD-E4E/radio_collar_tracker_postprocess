@@ -3,6 +3,7 @@ import math
 import cmath
 import struct
 import argparse
+import utm
 
 def process(input_dir, output_dir, run_num, col_num, tar_alt):
 	# Configure variables
@@ -38,6 +39,11 @@ def process(input_dir, output_dir, run_num, col_num, tar_alt):
 	time_target = float(line.split(',')[0].strip()) - 0.5
 	start_alt = float(line.split(',')[4].strip()) / 1000
 
+	latitude = int(line.split(',')[1].strip())
+	longitude = int(line.split(',')[2].strip())
+	utm_coord = utm.from_latlon(latitude / 1e7, longitude / 1e7)
+	startlon = utm_coord[0]
+	startlat = utm_coord[1]
 	while line != "":
 		# Extract time
 		gps_time = float(line.split(',')[0].strip())
@@ -65,6 +71,17 @@ def process(input_dir, output_dir, run_num, col_num, tar_alt):
 		# Extract position
 		latitude = int(line.split(',')[1].strip())
 		longitude = int(line.split(',')[2].strip())
+		utm_coord = utm.from_latlon(latitude / 1e7, longitude / 1e7)
+		lon = utm_coord[0]
+		lat = utm_coord[1]
+		if abs(lon - startlon) < 2:
+			line = gps_stream.readline()
+			line_counter += 1
+			continue
+		if abs(lat - startlat) < 2:
+			line = gps_stream.readline()
+			line_counter += 1
+			continue
 
 		# Samples prior to this gps point
 		#signal_bring_forward = gps_time - ((float(signal_index) / sampling_freq) + start_time )
