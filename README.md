@@ -35,10 +35,7 @@ cd fftw-3.3.4
 make
 sudo make install
 cd ..
-tar -xzf utm-0.4.0.tar.gz
-cd utm-0.4.0
-sudo pip install -e .
-cd ..
+sudo pip install utm pyshp
 tar -xzf gdal-2.1.0.tar.gz
 cd gdal-2.1.0
 ./configure --with-python
