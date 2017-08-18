@@ -1,23 +1,32 @@
-clear all
-% close all
+	clear all
+close all
 
 FFT_LENGTH = 4096;
 SAMPLE_RATE = 2000000;
 OUTPUT_SAMPLE_RATE = SAMPLE_RATE / FFT_LENGTH;
 SIG_LENGTH = int16(0.015 * SAMPLE_RATE / FFT_LENGTH);
-collar_Freq = 172950873;
+collar_Freq = 172013000;
+center_freq = 172500000;
 
-run_dir = '/home/ntlhui/workspace/2017.07.06.RCT_Test/RUN_000003';
+run_dir = '/home/ntlhui/workspace/2017.08.CI_Deployment/RUN_000003';
 ofile = '/tmp/sdr_data';
 freq_bin = round((collar_Freq - center_freq) / SAMPLE_RATE * FFT_LENGTH);
-run_num = 4;
+if freq_bin < 1
+	freq_bin = FFT_LENGTH + freq_bin
+end
+run_num = 3;
 
 raw_files = dir([run_dir, '/RAW_DATA_*']);
+gps_file = sprintf('%s/GPS_%06d', run_dir, run_num);
+gps_data = csvread(gps_file);
+meta_filename = sprintf('%s/META_%06d', run_dir, run_num);
+meta_fh = fopen(meta_filename, 'r');
+sdr_start_time = textscan(meta_fh, 'start_time: %f');
 
 output_signal = [];
 leftovers = [];
 
-for file_idx = 1:min(5, length(raw_files))
+for file_idx = 1:min(15, length(raw_files))
 	data = [leftovers; raw2complex(fullfile(raw_files(file_idx).folder, raw_files(file_idx).name))];
 	for start_idx = 1:FFT_LENGTH:length(data)
 		fft_buffer_in = data(start_idx:start_idx + FFT_LENGTH - 1);
@@ -27,6 +36,13 @@ for file_idx = 1:min(5, length(raw_files))
 	end
 	leftovers = data(start_idx + FFT_LENGTH:length(data));
 end
+clear fft_buffer_out fft_buffer_in leftovers file_idx;
+
+for i = 1:(length(output_signal) - 9)
+	output_signal(i) = median(output_signal(i:i+9));
+end
+clear i;
+
 
 figure;
 
@@ -34,7 +50,7 @@ figure;
 plot(1/OUTPUT_SAMPLE_RATE:1/OUTPUT_SAMPLE_RATE:length(output_signal)/OUTPUT_SAMPLE_RATE, 10 * log10(abs(output_signal)))
 hold on;
 collar_candidate = [];
-for i = 1 : int64(2 * OUTPUT_SAMPLE_RATE) : int64(length(output_signal) / int64(2 * OUTPUT_SAMPLE_RATE)) * int64(2 * OUTPUT_SAMPLE_RATE)
+for i = 1 : int64(2 * OUTPUT_SAMPLE_RATE) : int64(length(output_signal) / int64(2 * OUTPUT_SAMPLE_RATE) - 2) * int64(2 * OUTPUT_SAMPLE_RATE)
 	collar_candidate = [collar_candidate; max(abs(output_signal(i:i+int64(2 * OUTPUT_SAMPLE_RATE) - 1)))];
 end
 
@@ -51,6 +67,7 @@ for i = length(counts):-1:1
 	end
 end
 refline(0, count_threshold);
+clear i;
 
 % Find pings based on histogram threshold
 ping_times = find(10 * log10(abs(output_signal)) > count_threshold);
@@ -60,6 +77,7 @@ for i = 1:length(ping_times) - 1
 		ping_starts = [ping_starts; ping_times(i + 1)];
 	end
 end
+clear i;
 
 % Eliminate pings that aren't long enough
 pings_to_remove = [];
@@ -74,6 +92,7 @@ for i = 1:length(ping_starts)
 end
 ping_starts(pings_to_remove) = [];
 disp(ping_lengths);
+clear i ping_samples pings_to_remove;
 
 % Get frequency of pings
 ping_frequencies = [];
@@ -85,20 +104,53 @@ for i = 1:length(ping_starts)
 	ping_frequencies = [ping_frequencies; freq];
 end
 probable_frequency = int64(median(ping_frequencies));
+clear i start_time ping_signal guess freq;
 
 % Get periods of pings
 periods = []; %in OUTPUT_SAMPLE_RATE
 for i = 1:length(ping_starts) - 1
 	periods = [periods; ping_starts(i + 1) - ping_starts(i)];
 end
+clear i;
+periods = periods(periods > 0.5 * OUTPUT_SAMPLE_RATE);
+periods = periods ./ round(periods / min(periods));
 median_period = median(periods);
 periods = periods(periods < 1.1 * median_period);
 periods = periods(periods > 0.9 * median_period);
 period = mean(periods);
+clear periods median_period;
 
 % Circle all known pings
 t_out = 1/OUTPUT_SAMPLE_RATE:1/OUTPUT_SAMPLE_RATE:length(output_signal) / OUTPUT_SAMPLE_RATE;
-scatter(t_out(ping_starts), 10 * log10(abs(output_signal(ping_starts))));
+
+% Get GPS data for all pings
+gps_x = [];
+gps_y = [];
+gps_t = [];
+gps_v = [];
+gps_start = gps_data(1, 1);
+ping_window = 8;
+for i = 1:length(ping_starts)
+	max_sample_idx = min(length(output_signal), ping_starts(i) + ping_window);
+	min_sample_idx = max(1, ping_starts(i) - ping_window);
+	[gps_v_raw, gps_v_rIDX] = max(output_signal(min_sample_idx:max_sample_idx));
+	gps_v_rIDX = gps_v_rIDX + ping_starts(i) - ping_window;
+	ping_offset_i = gps_v_rIDX / OUTPUT_SAMPLE_RATE;
+	ping_time_i = ping_offset_i + sdr_start_time{1};
+	gps_idx = abs(gps_data(:,1) - ping_time_i) < 0.5;
+	gps_data_i = gps_data(gps_idx,:);
+	
+	gps_x = [gps_x; gps_data_i(2)];
+	gps_y = [gps_y; gps_data_i(3)];
+	gps_v_i = 10 * log10(abs(gps_v_raw));
+	gps_t = [gps_t; min(gps_data_i(1))];
+	gps_v = [gps_v; gps_v_i];
+end
+% clear i gps_v_i gps_data_i ping_time_i ping_offset_i max_sample_idx min_sample_idx;
+scatter(t_out(round((gps_t - gps_start) * OUTPUT_SAMPLE_RATE)), 10 * log10(abs(output_signal(round((gps_t - gps_start) * OUTPUT_SAMPLE_RATE)))));
+
+output_filename = sprintf('%s/fft_out.csv', ofile);
+dlmwrite(output_filename, [gps_t, gps_x, gps_y, gps_v, zeros(length(gps_t), 1)], 'precision', '%.3f')
 
 ping_timing = ping_starts - ping_starts(1);
 ping_indexes = round(ping_timing / period);
@@ -111,13 +163,13 @@ for i = 0:max(ping_indexes)
 		last_ping = max(ping_indexes(ping_indexes <= i));
 		possible_start = (ping_starts(find(ping_indexes == last_ping)) + period * (i - last_ping));
 		candidate_start = round(possible_start - period * 0.05);
-		% candidate_signal = output_signal(candidate_start:candidate_start + candidate_length);
+		candidate_signal = output_signal(candidate_start:candidate_start + candidate_length);
 		% candidate_signal = getOriginalSignal(run_dir, run_num, candidate_start / OUTPUT_SAMPLE_RATE, candidate_length / OUTPUT_SAMPLE_RATE, SAMPLE_RATE);
-		line([candidate_start / OUTPUT_SAMPLE_RATE, candidate_start / OUTPUT_SAMPLE_RATE], ylim);
-		line([(candidate_start + candidate_length) / OUTPUT_SAMPLE_RATE, (candidate_start + candidate_length) / OUTPUT_SAMPLE_RATE], ylim);
-		lags = [];
-		rs = [];
-		% for j = 1:length(ping_starts)
+		% line([candidate_start / OUTPUT_SAMPLE_RATE, candidate_start / OUTPUT_SAMPLE_RATE], ylim);
+		% line([(candidate_start + candidate_length) / OUTPUT_SAMPLE_RATE, (candidate_start + candidate_length) / OUTPUT_SAMPLE_RATE], ylim);
+		% lags = [];
+		% rs = [];
+		for j = 1:length(ping_starts)
 		% 	start_time = ping_starts(j);
 		% 	% template = output_signal(start_time - round(0.005 * OUTPUT_SAMPLE_RATE): start_time + round(0.030 * OUTPUT_SAMPLE_RATE));
 		% 	template = getOriginalSignal(run_dir, run_num, (start_time - round(0.005 * OUTPUT_SAMPLE_RATE)) / OUTPUT_SAMPLE_RATE, 0.030, SAMPLE_RATE);
@@ -132,7 +184,7 @@ for i = 0:max(ping_indexes)
 		% 	% line([lag(max_ind) / OUTPUT_SAMPLE_RATE, lag(max_ind) / OUTPUT_SAMPLE_RATE], ylim);
 		% 	% refline(0, mean(abs(r(round(length(r) / 2):length(r)))));
 		% 	% refline(0, std(abs(r(round(length(r) / 2):length(r)))) + mean(abs(r(round(length(r) / 2):length(r)))));
-		% end
+		end
 		% ping_location = median(lags) / FFT_LENGTH + candidate_start
 		% new_pings = [new_pings; round(ping_location)];
 	end
