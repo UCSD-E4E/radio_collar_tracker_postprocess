@@ -27,7 +27,7 @@ class collarDB:
 		self.freqMap[key] = item
 
 	def close(self):
-		freqMapFile = open(self._freq_db_name, 'w')
+		freqMapFile = open(self._freq_db_name, 'w+')
 		freqMapString = json.dumps(self.freqMap)
 		freqMapFile.write(freqMapString)
 		freqMapFile.close()
