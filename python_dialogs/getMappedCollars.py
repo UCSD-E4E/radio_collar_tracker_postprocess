@@ -12,10 +12,10 @@ class collarDB:
 			freqMapString = freqMapFile.readline()
 			if freqMapString is None or freqMapString == '':
 				freqMapString = '{}'
+			freqMapFile.close()
 		else:
 			freqMapString = '{}'
 		self.freqMap = json.loads(freqMapString)
-		freqMapFile.close()
 
 	def __getitem__(self, key):
 		if type(key) == str:
