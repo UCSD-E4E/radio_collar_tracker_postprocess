@@ -7,6 +7,8 @@ class collarDB:
 	def __init__(self):
 		userHome = os.environ.data['HOME']
 		self._freq_db_name = os.path.join(userHome, '.rct', 'rct_cas_col')
+		if not os.path.isdir(os.path.join(userHome, '.rct')):
+			os.mkdir(os.path.join(userHome, '.rct'))
 		if os.path.isfile(self._freq_db_name):
 			freqMapFile = open(self._freq_db_name, 'r')
 			freqMapString = freqMapFile.readline()
