@@ -6,7 +6,8 @@ import read_meta_file
 import getRunNum
 import shutil
 import platform
-import getCollars
+import getMappedCollars
+# import getCollars
 import get_beat_frequency
 import subprocess
 import raw_gps_analysis
@@ -165,7 +166,7 @@ if __name__ == '__main__':
 			collars.append(int(line.strip().split(':')[1].strip()))
 		fileinput.close()
 	else:
-		collars = getCollars.getCollars()
+		collars = getMappedCollars.getCollars()
 		if len(collars) == 0:
 			exit()
 		colFile = open(collarDefinitionFilename, 'w')
