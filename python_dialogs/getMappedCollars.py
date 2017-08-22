@@ -36,9 +36,10 @@ class collarDB:
 		freqMapFile.close()
 
 
-class collarWindow(tk.Tk):
+class collarWindow(tk.Toplevel):
+# class collarWindow(tk.Tk):
 	def __init__(self, run_num, altitude, cols):
-		tk.Tk.__init__(self)
+		tk.Toplevel.__init__(self)
 		self.col_db = collarDB()
 		self._selDict = {}
 		self._freqDict = {}
@@ -82,6 +83,7 @@ class collarWindow(tk.Tk):
 		self._selectBtn = tk.Button(self, text="Select", command=self.selectCallback)
 		self._selectBtn.grid(row = self._addRow + 3, column = 1)
 		self.select = None
+		self.protocol("WM_DELETE_WINDOW", self.close)
 	
 	def selectCallback(self):
 		if self._run_txt.get() == "":
@@ -122,7 +124,7 @@ class collarWindow(tk.Tk):
 
 	def close(self):
 		self.col_db.close()
-		self.destroy()
+		self.quit()
 
 def getCollars(run_dir):
 	run_filename = os.path.join(run_dir, 'RUN')

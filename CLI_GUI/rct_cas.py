@@ -106,6 +106,8 @@ if __name__ == '__main__':
 
 	# Get collar definition
 	run_retval = getMappedCollars.getCollars(data_dir)
+	if run_retval is None:
+		exit()
 	run = run_retval['run']
 	col_db = getMappedCollars.collarDB()
 	collars = []
