@@ -104,79 +104,19 @@ if __name__ == '__main__':
 			except Exception, e:
 				pass
 
-
-	# Get run number
-	run = -1
-	hasRun = False
-	if os.path.isfile(runFileName):
-		runString = read_meta_file.read_meta_file(runFileName, 'run_num')
-		if runString is None:
-			runString = getRunNum.getRunNum()
-			if runString is None:
-				exit()
-		run = int(runString)
-		runFile = open(runFileName, 'w')
-		runFile.write("run_num: %s" % run)
-		runFile.close()
-		hasRun = True
-	else:
-		runString = getRunNum.getRunNum()
-		if runString is None:
-			exit()
-		else:
-			run = int(runString)
-
-	# record run
-	if record and not hasRun:
-		runFile = open(runFileName, 'w')
-		runFile.write("run_num: %s" % run)
-		runFile.close()
-
-	# Get Altitude
-	alt = -1
-	if os.path.isfile(altFileName):
-		altString = read_meta_file.read_meta_file(altFileName, 'flt_alt')
-		if altString is None:
-			altString = getFltAlt.getFltAlt()
-			if altString is None:
-				exit()
-		alt = int(altString)
-		altFile = open(altFileName, 'w')
-		altFile.write("flt_alt: %s" % alt)
-		altFile.close()
-	else:
-		altString = getFltAlt.getFltAlt()
-		if altString is None:
-			exit()
-		else:
-			alt = int(altString)
-
-	# record altitude
-	if record:
-		altFile = open(altFileName, 'w')
-		altFile.write("flt_alt: %s" % alt)
-		altFile.close()
-
 	# Get collar definition
-	hasCollarDefinitions = os.path.isfile(colFileName)
+	run_retval = getMappedCollars.getCollars(data_dir)
+	run = run_retval['run']
+	col_db = getMappedCollars.collarDB()
 	collars = []
-	if hasCollarDefinitions:
-		shutil.copyfile(colFileName, collarDefinitionFilename)
-		for line in fileinput.input(collarDefinitionFilename):
-			collars.append(int(line.strip().split(':')[1].strip()))
-		fileinput.close()
-	else:
-		collars = getMappedCollars.getCollars()
-		if len(collars) == 0:
-			exit()
-		colFile = open(collarDefinitionFilename, 'w')
-		for i in xrange(len(collars)):
-			colFile.write("%d: %d\n" % (i + 1, collars[i]))
-		colFile.close()
+	for ch in run_retval['tx']:
+		collars.append(int(col_db[ch]))
+	COLdef = open(collarDefinitionFilename, 'w+')
+	for i in xrange(len(collars)):
+		COLdef.write("%d: %d\n" % (i + 1, collars[i]))
+	COLdef.close()
 
-	# record collar definitions
-	if record and not hasCollarDefinitions:
-		shutil.copyfile(collarDefinitionFilename, colFileName)
+	alt = run_retval['alt']
 
 	fileList = os.listdir(data_dir)
 	# Count the number of raw data files
