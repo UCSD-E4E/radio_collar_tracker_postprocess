@@ -38,7 +38,7 @@ class collarDB:
 
 class collarWindow(tk.Toplevel):
 # class collarWindow(tk.Tk):
-	def __init__(self, run_num, altitude, cols):
+	def __init__(self, run_num, altitude, cols, run_dir):
 		tk.Toplevel.__init__(self)
 		self.col_db = collarDB()
 		self._selDict = {}
@@ -46,6 +46,8 @@ class collarWindow(tk.Toplevel):
 		self._varDict = {}
 		self._runVar = tk.IntVar()
 		self._altVar = tk.IntVar()
+
+		self.title("RTT PostProcessing: %s" % run_dir)
 
 		run_lbl = tk.Label(self, text="Run")
 		run_lbl.grid(row = 0, column = 0)
@@ -82,6 +84,8 @@ class collarWindow(tk.Toplevel):
 		self._updateBtn.grid(row = self._addRow + 3, column = 0)
 		self._selectBtn = tk.Button(self, text="Select", command=self.selectCallback)
 		self._selectBtn.grid(row = self._addRow + 3, column = 1)
+		self._odir = tk.Label(self, text=run_dir)
+		self._odir.grid(row=self._addRow + 4, column = 0, columnspan = 2)
 		self.select = None
 		self.protocol("WM_DELETE_WINDOW", self.close)
 	
@@ -113,6 +117,7 @@ class collarWindow(tk.Toplevel):
 			self._addEntry.grid(row = self._addRow + 3, column = 1)
 			self._updateBtn.grid(row = self._addRow + 4)
 			self._selectBtn.grid(row = self._addRow + 4)
+			self._odir.grid(row=self._addRow + 5, column = 0, columnspan = 2)
 			self._addRow = self._addRow + 1
 		for i in self.col_db.freqMap:
 			var = self._varDict[i]
@@ -152,7 +157,7 @@ def getCollars(run_dir):
 		col_file.close()
 	else:
 		print('COLJ not found')
-	app = collarWindow(run_num, alt, col_s)
+	app = collarWindow(run_num, alt, col_s, os.path.basename(run_dir))
 	app.mainloop()
 	if app.select is None:
 		return None
