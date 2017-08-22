@@ -275,8 +275,8 @@ def findTruePeriod(data, pW, pT, fs):
     flat = sg.convolve(data,sg.flattop(49),mode='same')
     
     pW_idx, pT_idx = [int(pW*fs*2),int(pT*fs)]
-    r_idx_a,r_idx_b = [m_idx+pW_idx,m_idx+pW_idx+int(pT_idx*1.5)]
-    l_idx_a,l_idx_b = [m_idx-pW_idx-int(pT_idx*1.5),m_idx-pW_idx]
+    r_idx_a,r_idx_b = [m_idx+pW_idx,m_idx+pW_idx+int(pT_idx*1)]
+    l_idx_a,l_idx_b = [m_idx-pW_idx-int(pT_idx*1),m_idx-pW_idx]
 #    print(m_idx)
     
     if l_idx_a < 0 :
@@ -295,7 +295,7 @@ def findTruePeriod(data, pW, pT, fs):
         m_idx_r = m_idx
         m_idx = np.argmax(flat[l_idx_a:l_idx_b]) + l_idx_a
         
-        l_idx_a,l_idx_b = [m_idx-pW_idx-int(pT_idx*1.5),m_idx-pW_idx]
+        l_idx_a,l_idx_b = [m_idx-pW_idx-int(pT_idx*1),m_idx-pW_idx]
         m_idx_l = np.argmax(flat[l_idx_a:l_idx_b]) + l_idx_a
 
 #        print('Moving left, L,M,R = '+str(m_idx_l)+','+str(m_idx)+','+str(m_idx_r))
@@ -308,7 +308,7 @@ def findTruePeriod(data, pW, pT, fs):
         
 #    print('LeftT: '+str((m_idx_r-m_idx)/fs)+', RightT: '+str((m_idx-m_idx_l)/fs))
     
-    # For plot testing
+#    # For plot testing
 #    import matplotlib.pyplot as plt
 #    t = np.linspace(1/fs,len(data)/fs,len(data))
 #    plt.scatter(t[m_idx],data[m_idx],c='c')
@@ -341,5 +341,5 @@ def readMetaFile(metafile):
             values.append(float(val))
     return dict( zip( variables, values ) )
     
-    
+
     
