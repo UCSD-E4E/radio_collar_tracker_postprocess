@@ -108,9 +108,9 @@ class collarWindow(tk.Tk):
 			self._varDict['%d' % self._addRow] = var
 			self._addLabel.grid(row=self._addRow + 3, column = 0)
 			self._addEntry = tk.Entry(self)
-			self._addEntry.grid(row = self._addRow + 2, column = 1)
-			self._updateBtn.grid(row = self._addRow + 3)
-			self._selectBtn.grid(row = self._addRow + 3)
+			self._addEntry.grid(row = self._addRow + 3, column = 1)
+			self._updateBtn.grid(row = self._addRow + 4)
+			self._selectBtn.grid(row = self._addRow + 4)
 			self._addRow = self._addRow + 1
 		for i in self.col_db.freqMap:
 			var = self._varDict[i]
