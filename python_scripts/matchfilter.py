@@ -52,7 +52,7 @@ def shift_signal_in_frequency_domain(datin, shift):
 #%% Run Variables
 run = '19';
 series = 'desert'
-path = '/home/anthony/e4e/rct_runs/'+series+'/' 
+path = 'C://Users//anthony//Desktop//E4E//rct_runs//'+series+'//' 
 
 # TODO: Use META_DATA file for literals and run variables
 Fsx         = 2000000.0       # sampling frequency of input data
@@ -70,7 +70,7 @@ pT          = 1.6 # pulse period [seconds]
 
 xbin        = int( np.round( (Fx - Fc) / Fsx * FFT_LENGTH ) ) -1
 raw_files   = rct.getfiles(path,run)
-raw_files   = raw_files[:1]
+#raw_files   = raw_files[:6]
 
 #%% FFT
 # return the power spectrum (time domain)
@@ -122,18 +122,29 @@ shift = shift_signal_in_frequency_domain(Pxx,-(periods[0] + 1))
 ## CONCLUSION: WONT WORK WITH ANECHOIC, NOT IN PHASE
 
 # create one period reference pulse
-ref = np.concatenate( (np.zeros(int((pT_fix-pW_fix)*Fsf/2)), 
-                       np.ones(int(pW_fix*Fsf)), 
-                       np.zeros(int((pT_fix-pW_fix)*Fsf/2))) )
+## This one creates references in between peaks?
+#ref = np.concatenate( (np.zeros(int((pT_fix-pW_fix)*Fsf/2)), 
+#                       np.ones(int(pW_fix*Fsf)), 
+#                       np.zeros(int((pT_fix-pW_fix)*Fsf/2))) )
+
+ref = np.concatenate( (np.ones(int(pW_fix*Fsf)), 
+                       np.zeros(int((pT_fix-pW_fix)*Fsf))) )
 # phase shift
-ref = np.concatenate((np.zeros(periods[0] + 1),ref[:-(periods[0] + 1)]))
+ref = np.concatenate((np.zeros(periods[0]),ref[:-(periods[0])]))
 
 Pxx_ref = []
 for i in range(0,int(len(Pxx)/len(ref)) + 1):
     Pxx_ref.extend(ref)
-Pxx_ref = Pxx_ref[:len(Pxx)]
+Pxx_ref = np.array(Pxx_ref[:len(Pxx)])
 
-conv = sg.xcorr(Pxx,Pxx_ref,mode='same')
+matchfilter = np.conjugate(Pxx_ref[::-1])
+
+match = np.correlate(Pxx,Pxx_ref,mode='same')
+
+base = pu.baseline(match,2)
+match = match - base
+
+match_peaks = pu.peak.indexes(match)
 
 
 plt.figure(1)
@@ -145,4 +156,10 @@ plt.plot(ft,Pxx_ref)
 
 plt.figure(2)
 plt.plot(ft,Pxx)
-plt.plot(ft,conv)
+plt.plot(ft,match)
+plt.scatter(ft[match_peaks],Pxx[match_peaks])
+
+plt.figure(3)
+plt.plot(ft,Px)
+plt.plot(ft,np.correlate(Px,Pxx_ref,mode='same'))
+
