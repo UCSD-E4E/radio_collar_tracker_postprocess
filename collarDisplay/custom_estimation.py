@@ -10,13 +10,25 @@ from scipy.optimize import leastsq
 import shapefile
 import getMappedCollars
 import display_data
+import argparse
 
 run_num = 73
 num_col = 2
 data_dir = '/home/ntlhui/workspace/2017.08.CI_Deployment/2017.08.23/RUN_000073/'
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-i', '--input_dir')
+parser.add_argument('-r', '--run_num')
+parser.add_argument('-n', '--num_ch')
+
+args = parser.parse_args()
+run_num = args.run_num
+data_dir = parser.input_dir
+num_col = parser.num_ch
+
 output_path = data_dir
 col_def = os.path.join(data_dir, 'COLdef')
-filename = os.path.join(data_dir, 'RUN_%06d_COL_%06d.csv' % (run_num, num_col))
+filename = os.path.join(data_dir, 'RUN_%06d_CH_%06d.csv' % (run_num, num_col))
 startLocation = None
 
 run_retval = getMappedCollars.getCollars(data_dir)
@@ -77,8 +89,8 @@ w.field('lat', 'f', 20, 18)
 w.field('lon', 'f', 20, 18)
 w.point(lat_lon[1], lat_lon[0])
 w.record(lat_lon[1], lat_lon[0])
-w.save('%s/RUN_%06d_COL_%06d_est.shp' % (output_path, run_num, num_col))
-proj = open('%s/RUN_%06d_COL_%06d_est.prj' % (output_path, run_num, num_col), 'w')
+w.save('%s/RUN_%06d_CH_%06d_est.shp' % (output_path, run_num, num_col))
+proj = open('%s/RUN_%06d_CH_%06d_est.prj' % (output_path, run_num, num_col), 'w')
 epsg = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
 proj.write(epsg)
 proj.close()
