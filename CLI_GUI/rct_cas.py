@@ -19,6 +19,7 @@ import itertools
 import csvToShp
 import median_filter
 import analyzeError
+import glob
 
 from multiprocessing import Pool
 
@@ -167,6 +168,18 @@ if __name__ == '__main__':
 		print("Cleaning raws")
 		for i in range(1, numCollars + 1):
 			os.remove("%s/RUN_%06d_%06d.raw" % (data_dir, run, i))
-
+	
 	# Generate report
 	analyzeError.generateReport(data_dir, run)
+
+	# Rename files
+	for i in xrange(numCollars):
+		files = glob.glob('RUN_%06d_COL_%06d*' % (run, i + 1))
+		ch = int(run_retval['tx'][i])
+		print('CH %d is %d' % (ch, i + 1))
+		new_prefix = 'RUN_%06d_CH_%06d' % (run, ch)
+		for file in files:
+			print("Rename %s to %s" % (file, new_prefix + file[21:]))
+			os.rename(file, new_prefix + file[21:])
+
+
