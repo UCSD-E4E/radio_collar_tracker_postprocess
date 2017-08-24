@@ -57,7 +57,7 @@ def getError(est_shapefile, tiff):
 					err_dist = distance
 	return err_dist
 
-def generateReport(run_dir, run_num):
+def generateReport(run_dir, run_num, chmode = False):
 	gps_filename = os.path.join(run_dir, 'GPS_%06d' % (run_num))
 	col_filename = os.path.join(run_dir, 'COLJ')
 	note_filename = os.path.join(run_dir, 'Notes')
@@ -76,13 +76,19 @@ def generateReport(run_dir, run_num):
 	for i in col_arr:
 		note_file.write('Iguana %d\n' % (int(i)))
 
-		est_shapefile = os.path.join(run_dir, 'RUN_%06d_COL_%06d_est.shp' % (run_num, col_num))
-		if os.path.isfile(est_shapefile):
+		if chmode:
+			est_shapefile = os.path.join(run_dir, 'RUN_%06d_CH_%06d_est.shp' % (run_num, int(i)))
+		else:
+			est_shapefile = os.path.join(run_dir, 'RUN_%06d_COL_%06d_est.shp' % (run_num, col_num))
+ 		if os.path.isfile(est_shapefile):
 			est_loc = getEstimation(est_shapefile)
 			latlon = utm.to_latlon(est_loc[0], est_loc[1], est_loc[2], zone_letter = est_loc[3])
 			note_file.write('\t%f, %f\n' % (latlon[1], latlon[0]))
 
-			tiff = os.path.join(run_dir, 'RUN_%06d_COL_%06d_heatmap.tiff' % (run_num, col_num))
+			if chmode:
+				tiff = os.path.join(run_dir, 'RUN_%06d_CH_%06d_heatmap.tiff' % (run_num, int(i)))
+			else:
+				tiff = os.path.join(run_dir, 'RUN_%06d_COL_%06d_heatmap.tiff' % (run_num, col_num))
 			if os.path.isfile(tiff):
 				err_dist = getError(est_shapefile, tiff)
 				note_file.write('\t+/- %d m\n' % err_dist)
@@ -98,5 +104,6 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input_dir')
 	parser.add_argument('-r', '--run_num')
+	parser.add_argument('-c', action='store_true')
 	arg = parser.parse_args()
-	generateReport(arg.input_dir, int(arg.run_num))
+	generateReport(arg.input_dir, int(arg.run_num), arg.c)
