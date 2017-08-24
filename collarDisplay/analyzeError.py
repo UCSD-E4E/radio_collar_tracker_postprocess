@@ -10,6 +10,7 @@ import os
 import time
 import getMappedCollars
 import json
+import argparse
 
 def fromPixel(gt, x, y):
 	# Outputs UTM
@@ -34,7 +35,7 @@ def getDistance(c1, c2):
 def getEstimation(est_shapefile):
 	shpfile = shapefile.Reader(est_shapefile)
 	lonlat = shpfile.records()[0]
-	utm_coord = utm.from_latlon(lonlat[1], lonlat[0])
+	utm_coord = utm.from_latlon(float(lonlat[1]), float(lonlat[0]))
 	return utm_coord
 
 def getError(est_shapefile, tiff):
@@ -92,4 +93,10 @@ def generateReport(run_dir, run_num):
 			note_file.write('\tIguana not detected!\n')
 		note_file.write('\t%s\n' % timestr)
 		col_num = col_num + 1
-		
+
+if __name__ == '__main__':
+	parser = argparse.ArgumentParser()
+	parser.add_argument('-i', '--input_dir')
+	parser.add_argument('-r', '--run_num')
+	arg = parser.parse_args()
+	generateReport(arg.input_dir, int(arg.run_num))
