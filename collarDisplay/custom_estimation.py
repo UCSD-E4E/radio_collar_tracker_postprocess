@@ -8,15 +8,30 @@ import fileinput
 import math
 from scipy.optimize import leastsq
 import shapefile
-run_num = 37
-num_col = 2
-output_path = '.'
-filename = 'test.csv'
-# col_def = '/media/ntlhui/942D-5B9B/RUN_000034/COL'
-col_def = '/home/ntlhui/workspace/2017.08.CI_Deployment/2017.08.20/RUN_000037/COL'
-startLocation = None
-col_freq = 172031000
+import getMappedCollars
+import display_data
 
+run_num = 73
+num_col = 2
+data_dir = '/home/ntlhui/workspace/2017.08.CI_Deployment/2017.08.23/RUN_000073/'
+output_path = data_dir
+col_def = os.path.join(data_dir, 'COLdef')
+filename = os.path.join(data_dir, 'RUN_%06d_COL_%06d.csv' % (run_num, num_col))
+startLocation = None
+
+run_retval = getMappedCollars.getCollars(data_dir)
+col_db = getMappedCollars.collarDB()
+collars = []
+for ch in run_retval['tx']:
+	collars.append(int(col_db[ch]))
+collarDefinitionFilename = os.path.join(data_dir, 'COLdef')
+COLdef = open(collarDefinitionFilename, 'w+')
+for i in xrange(len(collars)):
+	COLdef.write("%d: %d\n" % (i + 1, collars[i]))
+COLdef.close()
+
+
+col_freq = int(collars[num_col - 1])
 
 names = ['time', 'lat', 'lon', 'col', 'alt']
 data = np.genfromtxt(filename, delimiter=',', names=names)
@@ -67,3 +82,17 @@ proj = open('%s/RUN_%06d_COL_%06d_est.prj' % (output_path, run_num, num_col), 'w
 epsg = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
 proj.write(epsg)
 proj.close()
+alpha = res_x[0]
+beta = res_x[1]
+errors = []
+for i in xrange(len(finalCol)):
+    rangeToEstimate = math.sqrt((finalEasting[i] - easting) ** 2.0 + (finalNorthing[i] - northing) ** 2.0 + finalAlt[i] ** 2.0)
+    modelRange = 10 ** ((alpha * finalCol[i] + beta) / 10.0)
+    errors.append(rangeToEstimate - modelRange)
+errorSigma = np.std(errors)
+errorMean = np.average(errors)
+res_x = np.append(res_x, [errorMean, errorSigma, True])
+
+
+
+display_data.generateGraph(run_num, num_col, filename, data_dir, collarDefinitionFilename, res_x[0], res_x[1], res_x[4], res_x[5])
