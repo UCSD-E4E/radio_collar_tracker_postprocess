@@ -1,11 +1,7 @@
-#/usr/bin/env python
+#!/usr/bin/env python
 
 import os
 import shapefile
-import numpy as np
-import zipfile
-import platform
-from StringIO import StringIO
 import argparse
 import utm
 
@@ -44,3 +40,9 @@ def create_csv(shp, output):
 		csv_file.write("%d, %d, %d, %.6f, %f\n" % (time[i], lat[i], lon[i], col[i], alt[i]))
 	csv_file.close()
 	
+if __name__ == '__main__':
+	parser = argparse.ArgumentParser()
+	parser.add_argument('-i', '--input')
+	parser.add_argument('-o', '--output')
+	arg = parser.parse_args()
+	create_csv(arg.input, arg.output)
