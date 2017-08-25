@@ -30,7 +30,7 @@ def normalProbability(x, mean, stdDev):
 
 def generateGraph(run_num, num_col, filename, output_path, col_def, alpha = -0.715, beta = -14.51, mean = 0.0306, sigma = 6, startLocation = None):
     # Get collar frequency
-    col_freq = float(read_meta_file(col_def, str(num_col))) / 1.e6
+    # col_freq = float(read_meta_file(col_def, str(num_col))) / 1.e6
 
     # make list of columns
     # Expects the csv to have the following columns: time, lat, lon, [collars]
