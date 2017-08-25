@@ -55,6 +55,8 @@ def getError(est_shapefile, tiff):
 				distance = getDistance(geo_coord, estimated_location)
 				if err_dist < distance:
 					err_dist = distance
+	# 				print('Max distance at ', geo_coord)
+	# print('Max Distance: %f' % err_dist)
 	return err_dist
 
 def generateReport(run_dir, run_num, chmode = False):
@@ -75,20 +77,24 @@ def generateReport(run_dir, run_num, chmode = False):
 	col_num = 1
 	for i in col_arr:
 		note_file.write('Iguana %d\n' % (int(i)))
+		print('Iguana %d' % (int(i)))
 
 		if chmode:
 			est_shapefile = os.path.join(run_dir, 'RUN_%06d_CH_%06d_est.shp' % (run_num, int(i)))
 		else:
 			est_shapefile = os.path.join(run_dir, 'RUN_%06d_COL_%06d_est.shp' % (run_num, col_num))
+		print('Using shapefile %s' % est_shapefile)
  		if os.path.isfile(est_shapefile):
 			est_loc = getEstimation(est_shapefile)
 			latlon = utm.to_latlon(est_loc[0], est_loc[1], est_loc[2], zone_letter = est_loc[3])
+			# print("Estimated location ", latlon)
 			note_file.write('\t%f, %f\n' % (latlon[1], latlon[0]))
 
 			if chmode:
 				tiff = os.path.join(run_dir, 'RUN_%06d_CH_%06d_heatmap.tiff' % (run_num, int(i)))
 			else:
 				tiff = os.path.join(run_dir, 'RUN_%06d_COL_%06d_heatmap.tiff' % (run_num, col_num))
+			print('Using tiff %s' % tiff)
 			if os.path.isfile(tiff):
 				err_dist = getError(est_shapefile, tiff)
 				note_file.write('\t+/- %d m\n' % err_dist)
