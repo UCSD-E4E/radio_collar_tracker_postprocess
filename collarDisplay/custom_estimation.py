@@ -22,9 +22,9 @@ parser.add_argument('-r', '--run_num')
 parser.add_argument('-n', '--num_ch')
 
 args = parser.parse_args()
-run_num = args.run_num
-data_dir = parser.input_dir
-num_col = parser.num_ch
+run_num = int(args.run_num)
+data_dir = args.input_dir
+num_col = int(args.num_ch)
 
 output_path = data_dir
 col_def = os.path.join(data_dir, 'COLdef')
@@ -42,8 +42,7 @@ for i in xrange(len(collars)):
 	COLdef.write("%d: %d\n" % (i + 1, collars[i]))
 COLdef.close()
 
-
-col_freq = int(collars[num_col - 1])
+# col_freq = int(collars[num_col - 1])
 
 names = ['time', 'lat', 'lon', 'col', 'alt']
 data = np.genfromtxt(filename, delimiter=',', names=names)
