@@ -5,6 +5,50 @@ import struct
 import argparse
 import utm
 
+def getLocalTime(line):
+	return float(line.split(',')[0].strip())
+
+def getGPSTime(line):
+	return float(line.split(',')[3].strip())
+
+def getGPSCoord(line):
+	lat = float(line.split(',')[1].strip()) / 1e7
+	lon = float(line.split(',')[2].strip()) / 1e7
+	return (lat, lon)
+
+def getGPS(GPS_filename, time):
+	gps_file = open(GPS_filename, 'r')
+	line = None
+	pre_line = None
+	while True:
+		line = gps_file.readline()
+		if getLocalTime(line) < time:
+			pre_line = line
+		if getLocalTime(line) >= time:
+			break
+	gps_file.close()
+	pre_time = getLocalTime(pre_line)
+	post_time = getLocalTime(line)
+	timespan = post_time - pre_time
+	fraction = (time - pre_time) / timespan
+	
+	pre_gps = getGPSCoord(pre_line)
+	post_gps = getGPSCoord(line)
+	x_dist = post_gps[0] - pre_gps[0]
+	y_dist = post_gps[1] - pre_gps[1]
+	x_offset = fraction * x_dist
+	y_offset = fraction * y_dist
+	x_final = pre_gps[0] + x_offset
+	y_final = pre_gps[1] + y_offset
+	
+	pre_gps_time = getGPSTime(pre_line)
+	post_gps_time = getGPSTime(line)
+	time_dist = post_gps_time - pre_gps_time
+	time_final = fraction * time_dist + pre_gps_time
+	retval = (time_final, x_final, y_final)
+	return retval
+
+
 def process(input_dir, output_dir, run_num, col_num, tar_alt):
 	# Configure variables
 	signal_file = '/RUN_%06d_%06d.raw' % (run_num, col_num)
@@ -44,81 +88,39 @@ def process(input_dir, output_dir, run_num, col_num, tar_alt):
 	utm_coord = utm.from_latlon(latitude / 1e7, longitude / 1e7)
 	startlon = utm_coord[0]
 	startlat = utm_coord[1]
-	while line != "":
-		# Extract time
-		gps_time = float(line.split(',')[0].strip())
-		gps_alt = float(line.split(',')[4].strip()) / 1000 - start_alt
 
-		# Fast forward if less than 1.5 sec prior to previous
-		if gps_time < time_target:
-			line = gps_stream.readline()
-			line_counter += 1
-			continue
-		time_target += period
-
-		# Fast forward if no SDR data.
-		if gps_time <= (float(signal_index) / sampling_freq) + start_time:
-			line = gps_stream.readline()
-			line_counter += 1
-			continue
-
-		# throw out if not within 20% of target altitude
-		# if math.fabs(gps_alt - tar_alt) / tar_alt > 0.2:
-		# 	line = gps_stream.readline()
-		# 	line_counter += 1
-		# 	continue
-
-		# Extract position
-		latitude = int(line.split(',')[1].strip())
-		longitude = int(line.split(',')[2].strip())
-		utm_coord = utm.from_latlon(latitude / 1e7, longitude / 1e7)
-		lon = utm_coord[0]
-		lat = utm_coord[1]
-		if abs(lon - startlon) < 2:
-			line = gps_stream.readline()
-			line_counter += 1
-			continue
-		if abs(lat - startlat) < 2:
-			line = gps_stream.readline()
-			line_counter += 1
-			continue
-
-		# Samples prior to this gps point
-		#signal_bring_forward = gps_time - ((float(signal_index) / sampling_freq) + start_time )
-		#samples_bring_forward = int(signal_bring_forward * sampling_freq)
-
-		# Get max of samples
+	while True:
+		# Read in 1.6 seconds of data
+		target_index = int(signal_index + 1.6 * sampling_freq)
 		max_amplitude = 0
-		avg_amplitude = 0
+		rms_amplitude = 0
 		count = 0
-		while gps_time > (float(signal_index) / sampling_freq + start_time):
-			# Get sample
+		max_idx = signal_index
+		while signal_index < target_index:
 			signal_raw = signal_stream.read(8)
 			if signal_raw == "":
 				done = True
 				break
 			sample_buffer = struct.unpack('ff', signal_raw)
 			sample = sample_buffer[0] + sample_buffer[1] * 1j;
-			# Get amplitude
-			sample_amplitude = abs(sample)
-			# Check max
-			if sample_amplitude > max_amplitude:
-				max_amplitude = sample_amplitude
-			avg_amplitude += sample_amplitude
-			# update index
+			sample_amp = abs(sample)
+			if sample_amp > max_amplitude:
+				max_amplitude = sample_amp
+				max_idx = signal_index
+			rms_amplitude += sample_amp ** 2
 			signal_index += 1
 			count += 1
-		# Output GPS and signal amplitude
-		avg_amplitude /= count
+		rms_amplitude /= count
+		rms_amplitude = math.sqrt(rms_amplitude)
 		if done:
 			break
 		max_amplitude = 10 * math.log10(max_amplitude)
-		out_stream.write("%f,%d,%d,%f,%f\n" % (gps_time, latitude, longitude, max_amplitude, gps_alt))
-		line = gps_stream.readline()
-		line_counter += 1
-
+		signal_time = signal_index / sampling_freq
+		localtime = signal_time + start_time
+		gps_data = getGPS(input_dir + gps_file, localtime)
+		out_stream.write("%f,%d,%d,%f,%f\n" % (gps_data[0], gps_data[1]*1e7, gps_data[2]*1e7, max_amplitude, 0))
+	
 	# Close file
-	print("Read %d lines of GPS data" % line_counter)
 	print("Read %d samples, or %d bytes of signal data" % (signal_index, signal_index * 8))
 	out_stream.close()
 	signal_stream.close()
