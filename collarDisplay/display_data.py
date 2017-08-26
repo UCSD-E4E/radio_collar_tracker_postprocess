@@ -28,7 +28,7 @@ def normalProbability(x, mean, stdDev):
         retval = math.log10(probability)
     return retval
 
-def generateGraph(run_num, num_col, filename, output_path, col_def, alpha = -0.715, beta = -14.51, mean = 0.0306, sigma = 6, startLocation = None):
+def generateGraph(run_num, num_col, filename, output_path, col_def, alpha = -0.715, beta = -14.51, mean = 0.0306, sigma = 6, startLocation = None, collarChannel = False):
     # Get collar frequency
     # col_freq = float(read_meta_file(col_def, str(num_col))) / 1.e6
 
@@ -134,7 +134,10 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, alpha = -0.7
 
     # Save plot
     print("Collar %d: Saving heatmap..." % num_col)
-    outputFileName = '%s/RUN_%06d_COL_%06d_heatmap.tiff' % (output_path, run_num, num_col)
+    if not collarChannel:
+        outputFileName = '%s/RUN_%06d_COL_%06d_heatmap.tiff' % (output_path, run_num, num_col)
+    else:
+        outputFileName = '%s/RUN_%06d_CH_%06d_heatmap.tiff' % (output_path, run_num, num_col)
     driver = gdal.GetDriverByName('GTiff')
     dataset = driver.Create(
         outputFileName,
