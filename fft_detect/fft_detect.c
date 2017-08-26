@@ -150,7 +150,7 @@ int process(const char* run_dir, const char* ofile, const int num_freqs, const i
 					convolution[collar][1] += history[collar][i * 2 + 1];
 				}
 				history_idx[collar] = (history_idx[collar] + 1) % SIG_LENGTH;
-				fwrite(convolution[collar], sizeof(float), 2, out_file[collar]);
+				fwrite(sbuf[collar], sizeof(float), 2, out_file[collar]);
 			}
 		}
 		int num_bytes_read = fread(buffer, BYTES_PER_SAMPLE, 1, in_file);
