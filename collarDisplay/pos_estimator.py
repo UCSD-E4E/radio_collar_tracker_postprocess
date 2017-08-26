@@ -1,20 +1,24 @@
 #!/usr/bin/env python
 import sys
 import numpy as np
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plot
+# import matplotlib
+# matplotlib.use('Agg')
+# import matplotlib.pyplot as plot
 # USING utm 0.4.0 from https://pypi.python.org/pypi/utm
 import utm
 import os
 import argparse
 import fileinput
-from osgeo import gdal
-import osr
+# from osgeo import gdal
+# import osr
 import math
 from scipy.optimize import leastsq
 import shapefile
 from read_meta_file import read_meta_file
+from getMappedCollars import collarDB
+import json
+import time
+
 
 def normalProbability(d, mean, stdDev):
     a = 1 / (math.sqrt(2 * stdDev * stdDev * math.pi))
@@ -30,6 +34,13 @@ def residuals(v, col, x, y, z):
         residual[i] = 10 ** (((v[0] * col[i] + v[1]) / 10.0)) - math.sqrt((x[i] - v[2]) ** 2 + (y[i] - v[3]) ** 2 + (z[i]) ** 2)
     return residual
 
+def getDateTime(run_dir, run_num):
+    gps_file = open(os.path.join(run_dir, 'GPS_%06d' % run_num), 'r')
+    gps_line = gps_file.readline()
+    gps_time = float(gps_line.split(',')[3].strip())
+    localtime = time.localtime(gps_time)
+    return localtime
+    
 
 def generateGraph(run_num, num_col, filename, output_path, col_def, startLocation = None):
     kml_output = False
@@ -261,8 +272,18 @@ def generateGraph(run_num, num_col, filename, output_path, col_def, startLocatio
     w.autoBalance = 1
     w.field("lat", "F", 20, 18)
     w.field("lon", "F", 20, 18)
+    w.field("timestamp", 'C')
+    w.field("channel", 'N')
+
+    # prettify shapefile
+    detection_date = getDateTime(output_path, run_num)
+    # 02 Aug 2014 33:33 DSF
+    timestr = time.strftime('%d %b %Y %H:%M %Z', detection_date)
+    col_db = collarDB()
+    channel_num = int(col_db.freqMap.keys()[col_db.freqMap.values().index(unicode(int(col_freq * 1e6)))])
+
     w.point(lat_lon[1], lat_lon[0]) #x, y (lon, lat)
-    w.record(lat_lon[1], lat_lon[0]) #x, y (lon, lat)
+    w.record(lat_lon[1], lat_lon[0], timestr, channel_num) #x, y (lon, lat)
     w.save('%s/RUN_%06d_COL_%06d_est.shp' % (output_path, run_num, num_col))
 
     prj = open('%s/RUN_%06d_COL_%06d_est.prj' % (output_path, run_num, num_col), "w")
