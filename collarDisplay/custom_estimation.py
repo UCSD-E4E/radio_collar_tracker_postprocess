@@ -28,7 +28,7 @@ num_col = int(args.num_ch)
 
 output_path = data_dir
 col_def = os.path.join(data_dir, 'COLdef')
-filename = os.path.join(data_dir, 'RUN_%06d_CH_%06d.csv' % (run_num, num_col))
+filename = os.path.join(data_dir, 'RUN_%06d_CH_%06d_sel.csv' % (run_num, num_col))
 startLocation = None
 
 run_retval = getMappedCollars.getCollars(data_dir)
@@ -106,4 +106,4 @@ res_x = np.append(res_x, [errorMean, errorSigma, True])
 
 
 
-display_data.generateGraph(run_num, num_col, filename, data_dir, collarDefinitionFilename, res_x[0], res_x[1], res_x[4], res_x[5])
+display_data.generateGraph(run_num, num_col, filename, data_dir, collarDefinitionFilename, res_x[0], res_x[1], res_x[4], res_x[5], collarChannel = True)
