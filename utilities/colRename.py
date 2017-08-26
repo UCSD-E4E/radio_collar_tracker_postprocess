@@ -21,6 +21,7 @@ if __name__ == '__main__':
 	numCollars = len(collars)
 
 	for i in xrange(numCollars):
+		print("Looking for collar %d" % (i + 1))
 		files = glob.glob('RUN_%06d_COL_%06d*' % (run, i + 1))
 		ch = int(run_retval['tx'][i])
 		print('CH %d is %d' % (ch, i + 1))
