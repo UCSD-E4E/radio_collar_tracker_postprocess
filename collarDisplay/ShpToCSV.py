@@ -42,7 +42,12 @@ def create_csv(shp, output):
 	
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-i', '--input')
-	parser.add_argument('-o', '--output')
+	parser.add_argument('-i', '--input', required = True)
+	parser.add_argument('-o', '--output', required = False)
 	arg = parser.parse_args()
-	create_csv(arg.input, arg.output)
+	outfile = arg.output
+	infile = arg.input
+	if arg.output == None:
+		outfile = os.path.splitext(infile)[0]
+		outfile = '%s.csv' % outfile
+	create_csv(infile, outfile)
