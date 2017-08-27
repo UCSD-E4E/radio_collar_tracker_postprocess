@@ -22,6 +22,8 @@ def getGPS(GPS_filename, time):
 	pre_line = None
 	while True:
 		line = gps_file.readline()
+		if line == "" or line is None:
+			return None
 		if getLocalTime(line) < time:
 			pre_line = line
 		if getLocalTime(line) >= time:
@@ -118,6 +120,8 @@ def process(input_dir, output_dir, run_num, col_num, tar_alt):
 		signal_time = signal_index / sampling_freq
 		localtime = signal_time + start_time
 		gps_data = getGPS(input_dir + gps_file, localtime)
+		if gps_data is None:
+			break
 		out_stream.write("%f,%d,%d,%f,%f\n" % (gps_data[0], gps_data[1]*1e7, gps_data[2]*1e7, max_amplitude, 0))
 	
 	# Close file
