@@ -96,6 +96,8 @@ if __name__ == '__main__':
 			pass
 	for curFile in os.listdir(data_dir):
 		if any(curFile.lower().endswith(ext) for ext in ['.csv', '.png', '.tif', '.tiff', '.shp', '.shx', '.prj', '.dbf', '.xml']):
+			if os.path.splitext(curFile.lower())[0].endswith('_sel'):
+				continue
 			try:
 				os.remove(os.path.join(data_dir, curFile))
 			except Exception, e:
