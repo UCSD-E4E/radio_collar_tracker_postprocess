@@ -2,6 +2,7 @@
 import numpy as np
 import utm
 import math
+import shapefile
 
 def strToGPS(line):
 	lat = float(line.split(',')[0].strip())
@@ -28,6 +29,8 @@ def main():
 
 if __name__ == '__main__':
 	main()
+
+iguanaNum = int(raw_input('Iguana Number: '))
 print("Enter lat lon, done when done")
 latlonstr1 = raw_input('Point 1: ')
 bearing1 = float(raw_input('Bearing: '))
@@ -56,6 +59,46 @@ if latlonstr3.lower() == 'done':
 	coord = utm.to_latlon(x[1], x[0], utm1[2], utm1[3])
 	print(coord)
 else:
-	bearing3 = float(raw_input('Bearing:'))
+	bearing3 = float(raw_input('Bearing: '))
 	utm3 = strToGPS(latlonstr3)
+	m1 = 1 / np.tan(math.radians(bearing1))
+	m2 = 1 / np.tan(math.radians(bearing2))
+	m3 = 1 / np.tan(math.radians(bearing3))
+	b1 = utm1[1] - m1 * utm1[0]
+	b2 = utm2[1] - m2 * utm2[0]
+	b3 = utm3[1] - m3 * utm3[0]
+	a = np.array([[1, -1 * m1],[1, -1 * m2], [1, -1 * m3]])
+	b = np.array([b1, b2, b3])
+	x = np.linalg.lstsq(a, b)
+	coord = utm.to_latlon(x[0][1], x[0][0], utm1[2], utm1[3])
 
+	a = np.array([[1, -m1],[1,-m2]])
+	b = np.array([b1, b2])
+	x12 = np.linalg.solve(a, b)
+	a = np.array([[1, -m1], [1, -m3]])
+	b = np.array([b1, b3])
+	x13 = np.linalg.solve(a, b)
+	a = np.array([[1, -m2], [1, -m3]])
+	b = np.array([b2, b3])
+	x23 = np.linalg.solve(a, b)
+	err1 = baseline_distance(x[0], x12)
+	err2 = baseline_distance(x[0], x13)
+	err3 = baseline_distance(x[0], x23)
+	maxErr = max([err1, err2, err3])
+	print('%.6f, %.6f +/- %d m' % (coord[0], coord[1], maxErr))
+
+
+output_path = '.'
+
+w = shapefile.Writer(shapefile.POINT)
+w.autoBalance = 1
+w.field("channel", 'N')
+
+w.point(coord[1], coord[0])
+w.record(iguanaNum)
+w.save('%s/CH_%06d_est.shp' % (output_path, iguanaNum))
+
+prj = open('%s/CH_%06d_est.prj' % (output_path, iguanaNum), "w")
+epsg = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
+prj.write(epsg)
+prj.close()
