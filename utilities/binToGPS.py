@@ -3,6 +3,9 @@
 from pymavlink import mavutil
 import datetime
 import pytz
+import os
+import argparse
+
 def leap(date):
 	"""
 	Return the number of leap seconds since 6/Jan/1980
@@ -24,9 +27,22 @@ def leap(date):
 			return j + 1
 	return len(leap_dates)
 
-binFilename = '/home/ntlhui/workspace/2017.08.CI_Deployment/2017.08.23/flight_logs/141.BIN'
-gpsFilename = '/home/ntlhui/workspace/2017.08.CI_Deployment/2017.08.23/RUN_000077/GPS_000077'
-newGPSFilename = '/home/ntlhui/workspace/2017.08.CI_Deployment/2017.08.23/RUN_000077/GPS_000077.new'
+parser = argparse.ArgumentParser()
+parser.add_argument('bin_log')
+parser.add_argument('run_dir')
+parser.add_argument('run_num', type = int)
+
+binFilename = '/home/ntlhui/workspace/e4e-tools/flight_log_analyzer/logs/2017.08.25/188.BIN'
+gpsFilename = '/media/ntlhui/942D-5B9B/RUN_000113/GPS_000113'
+newGPSFilename = '/media/ntlhui/942D-5B9B/RUN_000113/GPS_000113.new'
+
+args = parser.parse_args()
+
+binFilename = args.bin_log
+gpsFilename = os.path.join(args.run_dir, 'GPS_%06d.old' % args.run_num)
+newGPSFilename = os.path.join(args.run_dir, 'GPS_%06d' % args.run_num)
+if os.path.isfile(newGPSFilename):
+	os.rename(newGPSFilename, gpsFilename)
 
 gps_file = open(gpsFilename, 'r')
 local_gps_start = float(gps_file.readline().split(',')[0])
