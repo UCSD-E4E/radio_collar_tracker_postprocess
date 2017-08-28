@@ -43,6 +43,7 @@ if latlonstr2.lower() == 'done':
 latlonstr3 = raw_input('Point 3: ')
 utm1 = strToGPS(latlonstr1)
 utm2 = strToGPS(latlonstr2)
+output_path = '.'
 if latlonstr3.lower() == 'done':
 	# baseline_dist = baseline_distance(utm1, utm2)
 	# baseline_brng = baseline_bearing(utm1, utm2)
@@ -57,7 +58,14 @@ if latlonstr3.lower() == 'done':
 	b = np.array([b1, b2])
 	x = np.linalg.solve(a, b)
 	coord = utm.to_latlon(x[1], x[0], utm1[2], utm1[3])
-	print(coord)
+	print('%.6f, %.6f' % (coord[0], coord[1]))
+	rpt = open('%s/CH_%06d.rpt' % (output_path, iguanaNum), 'w+')
+	rpt.write('Iguana %d\n' % iguanaNum)
+	rpt.write('\t%.6f, %.6f\n' % (coord[0], coord[1]))
+	rpt.write('\tUnknown Error - 2 measurements\n')
+	est_time = raw_input('Time: ')
+	rpt.write('\t%s Local\n' % est_time)
+	rpt.close()
 else:
 	bearing3 = float(raw_input('Bearing: '))
 	utm3 = strToGPS(latlonstr3)
@@ -87,8 +95,16 @@ else:
 	maxErr = max([err1, err2, err3])
 	print('%.6f, %.6f +/- %d m' % (coord[0], coord[1], maxErr))
 
+	rpt = open('%s/CH_%06d.rpt' % (output_path, iguanaNum), 'w+')
+	rpt.write('Iguana %d\n' % iguanaNum)
+	rpt.write('\t%.6f, %.6f\n' % (coord[0], coord[1]))
+	rpt.write('\t+/- %d m\n' % maxErr)
+	est_time = raw_input('Time: ')
+	rpt.write('\t%s Local\n' % est_time)
+	rpt.close()
 
-output_path = '.'
+
+
 
 w = shapefile.Writer(shapefile.POINT)
 w.autoBalance = 1
