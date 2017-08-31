@@ -112,7 +112,7 @@ if __name__ == '__main__':
 	parser.add_argument('-i', '--input_dir')
 	arg = parser.parse_args()
 	data_dir = arg.input_dir
-	runFile = os.path.join(data_dir, 'RUN')
+	runFile = open(os.path.join(data_dir, 'RUN'), 'r')
 	run_num = int(runFile.readline().split(':')[1].strip())
 
 	chfiles = glob.glob('*_CH_*')
