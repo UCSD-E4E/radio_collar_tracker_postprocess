@@ -11,7 +11,7 @@ config:
 
 install: fft_detect/fft_detect raw_gps_analysis/raw_gps_analysis.py\
 	collarDisplay/display_data.py meta_file_reader/read_meta_file.py\
-	ppm_adjust/get_beat_frequency.py config/SDR.cfg\
+	ppm_adjust/get_beat_frequency.py\
 	python_dialogs/fileChooser.py python_dialogs/getRunNum.py\
 	python_dialogs/getMappedCollars.py\
 	python_dialogs/getFltAlt.py CLI_GUI/rct_cas.py utilities/makeShapefile.py\
@@ -30,7 +30,6 @@ install: fft_detect/fft_detect raw_gps_analysis/raw_gps_analysis.py\
 	cp meta_file_reader/read_meta_file.py /usr/local/bin/
 	cp ppm_adjust/get_beat_frequency.py /usr/local/bin/
 	-mkdir /usr/local/etc/rct/
-	cp config/SDR.cfg /usr/local/etc/rct/
 	cp python_dialogs/fileChooser.py /usr/local/bin/
 	cp python_dialogs/getRunNum.py /usr/local/bin/
 	cp python_dialogs/getMappedCollars.py /usr/local/bin/
@@ -40,7 +39,6 @@ install: fft_detect/fft_detect raw_gps_analysis/raw_gps_analysis.py\
 	cp utilities/oldCOLtonewCOLJ.py /usr/local/bin/oldCOLtonewCOLJ
 	cp collarDisplay/csvToShp.py /usr/local/bin/
 	cp collarDisplay/analyzeError.py /usr/local/bin/
-	rm -rf config
 	cp collarDisplay/pos_estimator.py /usr/local/bin/
 	cp collarDisplay/median_filter.py /usr/local/bin/
 	cp utilities/colRename.py /usr/local/bin

@@ -137,7 +137,7 @@ if __name__ == '__main__':
 	# Find meta file and get data
 	meta_file_name = "%s/META_%06d" % (data_dir, run)
 	sdr_center_freq = int(read_meta_file.read_meta_file(meta_file_name, "center_freq"))
-	sdr_ppm = float(read_meta_file.read_meta_file(os.path.join(config_dir, "SDR.cfg"), "sdr_ppm"))
+	sdr_ppm = 0
 
 	# Generate fixed frequencies
 	beat_frequencies = [get_beat_frequency.getBeatFreq(sdr_center_freq, freq, sdr_ppm) for freq in collars]
