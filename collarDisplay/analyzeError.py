@@ -11,6 +11,7 @@ import time
 import getMappedCollars
 import json
 import argparse
+import glob
 
 def fromPixel(gt, x, y):
 	# Outputs UTM
@@ -109,7 +110,15 @@ def generateReport(run_dir, run_num, chmode = False):
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input_dir')
-	parser.add_argument('-r', '--run_num')
-	parser.add_argument('-c', action='store_true')
 	arg = parser.parse_args()
-	generateReport(arg.input_dir, int(arg.run_num), arg.c)
+	data_dir = arg.input_dir
+	runFile = os.path.join(data_dir, 'RUN')
+	run_num = int(runFile.readline().split(':')[1].strip())
+
+	chfiles = glob.glob('*_CH_*')
+	if len(chfiles) == 0:
+		channelMode = False
+	else:
+		channelMode = True
+
+	generateReport(arg.input_dir, run_num, channelMode)
