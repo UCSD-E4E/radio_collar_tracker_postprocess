@@ -1,5 +1,5 @@
 %% waterfall: Creates a waterfall plot of the input file
-function [] = waterfall(file)
+function [] = waterfall(file, minY, maxY)
 	FFT_LEN = 4096;
 	CENTER_FREQ = 172500000;
 	data = raw2complex(file);
@@ -26,3 +26,5 @@ function [] = waterfall(file)
 	xlabel('Time (s)');
 	ylabel('Frequency (MHz)');
 	title('Signal Waterfall Plot');
+	ylim_old = ylim;
+	set(gca, 'ylim', [minY, maxY]);
