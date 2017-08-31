@@ -182,12 +182,14 @@ if __name__ == '__main__':
 
 	# Rename files
 	for i in xrange(numCollars):
-		files = glob.glob('RUN_%06d_COL_%06d*' % (run, i + 1))
+		files = glob.glob(os.path.join(data_dir, 'RUN_%06d_COL_%06d*' % (run, i + 1)))
 		ch = int(run_retval['tx'][i])
 		print('CH %d is %d' % (ch, i + 1))
-		new_prefix = 'RUN_%06d_CH_%06d' % (run, ch)
+		new_prefix = os.path.join(data_dir, 'RUN_%06d_CH_%06d' % (run, ch))
+		trim_length = len(data_dir) + len('RUN_%06d_COL_%06d*' % (run, i + 1))
 		for file in files:
-			print("Rename %s to %s" % (file, new_prefix + file[21:]))
-			os.rename(file, new_prefix + file[21:])
+
+			print("Rename %s to %s" % (file, new_prefix + file[trim_length:]))
+			os.rename(file, new_prefix + file[trim_length:])
 
 
