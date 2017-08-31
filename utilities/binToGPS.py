@@ -5,6 +5,7 @@ import datetime
 import pytz
 import os
 import argparse
+import pysftp
 
 def leap(date):
 	"""
@@ -28,9 +29,7 @@ def leap(date):
 	return len(leap_dates)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('bin_log')
 parser.add_argument('run_dir')
-parser.add_argument('run_num', type = int)
 
 binFilename = '/home/ntlhui/workspace/e4e-tools/flight_log_analyzer/logs/2017.08.25/188.BIN'
 gpsFilename = '/media/ntlhui/942D-5B9B/RUN_000113/GPS_000113'
@@ -38,15 +37,38 @@ newGPSFilename = '/media/ntlhui/942D-5B9B/RUN_000113/GPS_000113.new'
 
 args = parser.parse_args()
 
-binFilename = args.bin_log
-gpsFilename = os.path.join(args.run_dir, 'GPS_%06d.old' % args.run_num)
-newGPSFilename = os.path.join(args.run_dir, 'GPS_%06d' % args.run_num)
+if not os.path.isfile(os.path.join(args.run_dir, 'RUN')):
+	print("Please create the RUN file!")
+	exit()
+
+runfile = open(os.path.join(args.run_dir, 'RUN'), 'r')
+run_num = int(runfile.readline().split(':')[1].strip())
+runfile.close()
+
+gpsFilename = os.path.join(args.run_dir, 'GPS_%06d.old' % run_num)
+newGPSFilename = os.path.join(args.run_dir, 'GPS_%06d' % run_num)
 if os.path.isfile(newGPSFilename):
 	os.rename(newGPSFilename, gpsFilename)
+
+cnopt = pysftp.CnOpts()
+cnopt.hostkeys = None
+connection = pysftp.Connection('10.1.1.10', username = 'root', password = 'TjSDBkAu', cnopts = cnopt)
+connection.chdir('/log/dataflash')
+files = connection.listdir()
+file_attrs = connection.listdir_attr()
+
 
 gps_file = open(gpsFilename, 'r')
 local_gps_start = float(gps_file.readline().split(',')[0])
 global_gps_start = float(gps_file.readline().split(',')[3])
+found = False
+for i in xrange(len(file_attrs) - 2):
+	if file_attrs[i + 1].st_mtime > global_gps_start and file_attrs[i].st_mtime < global_gps_start:
+		found = True
+if not found:
+	i = len(file_attrs - 2)
+connection.get(files[i], localpath='/tmp/replace.BIN')
+binFilename = '/tmp/replace.BIN'
 mavmaster = mavutil.mavlink_connection(binFilename)
 epoch = datetime.datetime.utcfromtimestamp(0)
 
