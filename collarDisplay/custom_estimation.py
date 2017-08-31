@@ -20,7 +20,7 @@ num_col = 2
 data_dir = '/home/ntlhui/workspace/2017.08.CI_Deployment/2017.08.23/RUN_000073/'
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-i', '--input_dir')
+parser.add_argument('-i', '--input_dir', required = True)
 
 args = parser.parse_args()
 data_dir = args.input_dir
