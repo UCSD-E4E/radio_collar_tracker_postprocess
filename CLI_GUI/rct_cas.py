@@ -110,14 +110,14 @@ if __name__ == '__main__':
 			except Exception, e:
 				pass
 	
-	# Check GPS data
-	binToGPS.generateGPSfile(data_dir)
 
 	# Get collar definition
 	run_retval = getMappedCollars.getCollars(data_dir)
 	if run_retval is None:
 		exit()
 	run = run_retval['run']
+	# Check GPS data
+	binToGPS.generateGPSfile(data_dir)
 	col_db = getMappedCollars.collarDB()
 	collars = []
 	for ch in run_retval['tx']:
