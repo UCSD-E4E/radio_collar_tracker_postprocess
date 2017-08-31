@@ -13,6 +13,7 @@ import display_data
 import argparse
 import glob
 import ShpToCSV
+import analyzeError
 
 run_num = 73
 num_col = 2
@@ -105,3 +106,4 @@ for num_col in cols:
 
 
     display_data.generateGraph(run_num, num_col, csvFilename, data_dir, res_x[0], res_x[1], res_x[4], res_x[5], collarChannel = True)
+analyzeError.generateReport(data_dir, run_num, True)
