@@ -65,18 +65,18 @@ class collarWindow(tk.Toplevel):
 
 		self.frame1 = tk.Frame(self)
 		self.frames = []
-		for i in xrange(int(len(self.col_db.freqMap) / 20) + 1):
+		for i in xrange(int(len(self.col_db.freqMap) / 15) + 1):
 			self.frames.append(tk.Frame(self))
 			self.frames[i].grid(row = 2, column = i)
 		for i in self.col_db.freqMap:
 			var = tk.IntVar()
-			frameNo = int(int(i) / 20)
+			frameNo = int(int(i) / 15)
 			lbl = tk.Checkbutton(self.frames[frameNo], text = '%s' % (i), variable = var)
 			if i in cols:
 				var.set(1)
-			lbl.grid(row = int(i) % 20 + 1, column = 0)
+			lbl.grid(row = int(i) % 15, column = 0)
 			txt = tk.Entry(self.frames[frameNo])
-			txt.grid(row = int(i) % 20 + 1, column = 1)
+			txt.grid(row = int(i) % 15, column = 1)
 			txt.insert(0, self.col_db.freqMap[i])
 			self._selDict[i] = lbl
 			self._freqDict[i] = txt
@@ -123,14 +123,18 @@ class collarWindow(tk.Toplevel):
 			self.col_db.freqMap['%d' % self._addRow] = int(self._addEntry.get())
 		
 			var = tk.IntVar()
-			frameNo = int(int(self._addRow) / 20)
+			frameNo = int(int(self._addRow) / 15)
 			if frameNo == len(self.frames):
 				self.frames.append(tk.Frame(self))
 				self.frames[frameNo].grid(row = 2, column = frameNo)
+			if len(self.frames) > 1:
+				self.frames[0].grid(columnspan = 1)
+			else:
+				self.frames[0].grid(columnspan = 2)
 			chkbx = tk.Checkbutton(self.frames[frameNo], text = '%d' % (self._addRow), variable = var)
-			chkbx.grid(row = int(self._addRow) % 20 + 1, column = 0)
+			chkbx.grid(row = int(self._addRow) % 15, column = 0)
 			txt = tk.Entry(self.frames[frameNo])
-			txt.grid(row = int(self._addRow) % 20 + 1, column = 1)
+			txt.grid(row = int(self._addRow) % 15, column = 1)
 			txt.insert(0, self._entryVar.get())
 			self._selDict['%d' % self._addRow] = chkbx
 			self._varDict['%d' % self._addRow] = var
