@@ -20,6 +20,7 @@ import csvToShp
 import median_filter
 import analyzeError
 import glob
+import binToGPS
 
 from multiprocessing import Pool
 
@@ -29,6 +30,7 @@ def processRaw(data_dir, run, alt, collarDefinitionFilename, i):
 	csvToShp.create_shapefile(data_file, '%s/RUN_%06d_COL_%06d.shp' % (data_dir, run, i + 1))
 	start_location = median_filter.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename)
 	res_x = pos_estimator.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename, start_location)
+	print(res_x)
 	if res_x is None:
 		return
 	if res_x[6]:
@@ -107,6 +109,9 @@ if __name__ == '__main__':
 				os.remove(os.path.join(data_dir, curFile))
 			except Exception, e:
 				pass
+	
+	# Check GPS data
+	binToGPS.generateGPSfile(data_dir)
 
 	# Get collar definition
 	run_retval = getMappedCollars.getCollars(data_dir)
@@ -138,6 +143,7 @@ if __name__ == '__main__':
 	meta_file_name = "%s/META_%06d" % (data_dir, run)
 	sdr_center_freq = int(read_meta_file.read_meta_file(meta_file_name, "center_freq"))
 	sdr_ppm = 0
+
 
 	# Generate fixed frequencies
 	beat_frequencies = [get_beat_frequency.getBeatFreq(sdr_center_freq, freq, sdr_ppm) for freq in collars]
