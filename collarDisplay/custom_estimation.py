@@ -12,6 +12,7 @@ import getMappedCollars
 import display_data
 import argparse
 import glob
+import ShpToCSV
 
 run_num = 73
 num_col = 2
@@ -34,13 +35,15 @@ for num_col in cols:
 
     output_path = data_dir
     col_def = os.path.join(data_dir, 'COLdef')
-    filename = os.path.join(data_dir, 'RUN_%06d_CH_%06d_sel.csv' % (run_num, num_col))
+    shpFilename = os.path.join(data_dir, 'RUN_%06d_CH_%06d_sel.shp' % (run_num, num_col))
+    csvFilename = os.path.join(data_dir, 'RUN_%06d_CH_%06d_sel.csv' % (run_num, num_col))
+    ShpToCSV.create_csv(shpFilename, csvFilename)
     startLocation = None
     
     # col_freq = int(collars[num_col - 1])
 
     names = ['time', 'lat', 'lon', 'col', 'alt']
-    data = np.genfromtxt(filename, delimiter=',', names=names)
+    data = np.genfromtxt(csvFilename, delimiter=',', names=names)
     lat = [x / 1e7 for x in data['lat']]
     lon = [y / 1e7 for y in data['lon']]
     col = data['col']
@@ -101,4 +104,4 @@ for num_col in cols:
 
 
 
-    display_data.generateGraph(run_num, num_col, filename, data_dir, res_x[0], res_x[1], res_x[4], res_x[5], collarChannel = True)
+    display_data.generateGraph(run_num, num_col, csvFilename, data_dir, res_x[0], res_x[1], res_x[4], res_x[5], collarChannel = True)
