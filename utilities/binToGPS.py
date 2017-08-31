@@ -38,12 +38,9 @@ def generateGPSfile(run_dir):
 	gps_file = open(os.path.join(run_dir, 'GPS_%06d' % run_num), 'r')
 	local_gps_start = float(gps_file.readline().split(',')[0])
 	global_gps_start = float(gps_file.readline().split(',')[3])
-	while True:
-		line = gps_file.readline()
-		if line is None or line == '':
-			break
-		else:
-			prevline = line
+	prevline = ''
+	for line in gps_file:
+		prevline = line
 	local_gps_end = float(prevline.split(',')[0])
 	gps_file.close()
 	
