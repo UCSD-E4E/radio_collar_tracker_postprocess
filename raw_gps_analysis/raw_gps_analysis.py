@@ -19,7 +19,7 @@ def getGPSCoord(line):
 def getGPS(GPS_filename, time):
 	gps_file = open(GPS_filename, 'r')
 	line = None
-	pre_line = None
+	pre_line = gps_file.readline()
 	while True:
 		line = gps_file.readline()
 		if line == "" or line is None:
