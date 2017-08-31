@@ -6,6 +6,7 @@ import pytz
 import os
 import argparse
 import pysftp
+import glob
 
 def leap(date):
 	"""
@@ -28,66 +29,93 @@ def leap(date):
 			return j + 1
 	return len(leap_dates)
 
-parser = argparse.ArgumentParser()
-parser.add_argument('run_dir')
 
-binFilename = '/home/ntlhui/workspace/e4e-tools/flight_log_analyzer/logs/2017.08.25/188.BIN'
-gpsFilename = '/media/ntlhui/942D-5B9B/RUN_000113/GPS_000113'
-newGPSFilename = '/media/ntlhui/942D-5B9B/RUN_000113/GPS_000113.new'
+def generateGPSfile(run_dir):
+	runfile = open(os.path.join(run_dir, 'RUN'), 'r')
+	run_num = int(runfile.readline().split(':')[1].strip())
+	runfile.close()
 
-args = parser.parse_args()
+	gps_file = open(os.path.join(run_dir, 'GPS_%06d' % run_num), 'r')
+	local_gps_start = float(gps_file.readline().split(',')[0])
+	global_gps_start = float(gps_file.readline().split(',')[3])
+	while True:
+		line = gps_file.readline()
+		if line is None or line == '':
+			break
+		else:
+			prevline = line
+	local_gps_end = float(prevline.split(',')[0])
+	gps_file.close()
+	
 
-if not os.path.isfile(os.path.join(args.run_dir, 'RUN')):
-	print("Please create the RUN file!")
-	exit()
+	raw_files = glob.glob(os.path.join(run_dir, 'RAW_DATA_*'))
+	raw_files.sort()
+	raw_data_size = (len(raw_files) - 1) * os.stat(raw_files[0]).st_size + os.stat(raw_files[len(raw_files) - 1]).st_size
+	raw_data_length = raw_data_size / 4 / 2000000
 
-runfile = open(os.path.join(args.run_dir, 'RUN'), 'r')
-run_num = int(runfile.readline().split(':')[1].strip())
-runfile.close()
+	meta_file = open(os.path.join(run_dir, 'META_%06d' % run_num), 'r')
+	raw_data_start = float(meta_file.readline().split(':')[1].strip())
+	raw_data_end = raw_data_start + raw_data_length
 
-gpsFilename = os.path.join(args.run_dir, 'GPS_%06d.old' % run_num)
-newGPSFilename = os.path.join(args.run_dir, 'GPS_%06d' % run_num)
-if os.path.isfile(newGPSFilename):
-	os.rename(newGPSFilename, gpsFilename)
+	if raw_data_start > local_gps_start and raw_data_end < local_gps_end:
+		print("Good GPS")
+		return
+	print("Bad GPS, pulling from Solo.  If not connected to Solo, please exit and connect, then try again.")
+		
 
-cnopt = pysftp.CnOpts()
-cnopt.hostkeys = None
-connection = pysftp.Connection('10.1.1.10', username = 'root', password = 'TjSDBkAu', cnopts = cnopt)
-connection.chdir('/log/dataflash')
-files = connection.listdir()
-file_attrs = connection.listdir_attr()
+	gpsFilename = os.path.join(run_dir, 'GPS_%06d.old' % run_num)
+	newGPSFilename = os.path.join(run_dir, 'GPS_%06d' % run_num)
+	if os.path.isfile(newGPSFilename):
+		os.rename(newGPSFilename, gpsFilename)
 
 
-gps_file = open(gpsFilename, 'r')
-local_gps_start = float(gps_file.readline().split(',')[0])
-global_gps_start = float(gps_file.readline().split(',')[3])
-found = False
-for i in xrange(len(file_attrs) - 2):
-	if file_attrs[i + 1].st_mtime > global_gps_start and file_attrs[i].st_mtime < global_gps_start:
-		found = True
-if not found:
-	i = len(file_attrs - 2)
-connection.get(files[i], localpath='/tmp/replace.BIN')
-binFilename = '/tmp/replace.BIN'
-mavmaster = mavutil.mavlink_connection(binFilename)
-epoch = datetime.datetime.utcfromtimestamp(0)
+	cnopt = pysftp.CnOpts()
+	cnopt.hostkeys = None
+	connection = pysftp.Connection('10.1.1.10', username = 'root', password = 'TjSDBkAu', cnopts = cnopt)
+	connection.chdir('/log/dataflash')
+	files = connection.listdir()
+	file_attrs = connection.listdir_attr()
 
-newGPSFile = open(newGPSFilename, 'w+')
-while True:
-	msg = mavmaster.recv_match(blocking = False)
-	if msg is None:
-		break
-	if msg.get_type() == 'GPS':
-		lat = int(msg.to_dict()['Lat'] * 1e7)
-		lon = int(msg.to_dict()['Lng'] * 1e7)
-		gps_time = int(msg.to_dict()['TimeMS'])
-		gps_week = int(msg.to_dict()['Week'])
-		gps_epoch = datetime.datetime(1980, 1, 6, 0, 0, 0)
-		date_before_leaps = (gps_epoch + datetime.timedelta(seconds = gps_week * 604800 + (gps_time) / 1e3))
-		rawdate = (date_before_leaps - datetime.timedelta(seconds = leap(date_before_leaps)))
-		gps_timestamp = (rawdate - epoch).total_seconds()
-		offset = gps_timestamp - global_gps_start
-		local_timestamp = offset + local_gps_start
-		newGPSFile.write('%f, %d, %d, %f, 0, -1, 0, 0, -1, 999\n'% (local_timestamp, lat, lon, gps_timestamp))
+	found = False
+	for i in xrange(len(file_attrs) - 2):
+		if file_attrs[i + 1].st_mtime > global_gps_start and file_attrs[i].st_mtime < global_gps_start:
+			found = True
+	if not found:
+		i = len(file_attrs - 2)
+	connection.get(files[i], localpath='/tmp/replace.BIN')
+	binFilename = '/tmp/replace.BIN'
+	mavmaster = mavutil.mavlink_connection(binFilename)
+	epoch = datetime.datetime.utcfromtimestamp(0)
 
-newGPSFile.close()
+	newGPSFile = open(newGPSFilename, 'w+')
+	while True:
+		msg = mavmaster.recv_match(blocking = False)
+		if msg is None:
+			break
+		if msg.get_type() == 'GPS':
+			lat = int(msg.to_dict()['Lat'] * 1e7)
+			lon = int(msg.to_dict()['Lng'] * 1e7)
+			gps_time = int(msg.to_dict()['TimeMS'])
+			gps_week = int(msg.to_dict()['Week'])
+			gps_epoch = datetime.datetime(1980, 1, 6, 0, 0, 0)
+			date_before_leaps = (gps_epoch + datetime.timedelta(seconds = gps_week * 604800 + (gps_time) / 1e3))
+			rawdate = (date_before_leaps - datetime.timedelta(seconds = leap(date_before_leaps)))
+			gps_timestamp = (rawdate - epoch).total_seconds()
+			offset = gps_timestamp - global_gps_start
+			local_timestamp = offset + local_gps_start
+			newGPSFile.write('%f, %d, %d, %f, 0, -1, 0, 0, -1, 999\n'% (local_timestamp, lat, lon, gps_timestamp))
+
+	newGPSFile.close()
+
+
+if __name__ == '__main__':
+	parser = argparse.ArgumentParser()
+	parser.add_argument('run_dir')
+
+	args = parser.parse_args()
+
+	if not os.path.isfile(os.path.join(args.run_dir, 'RUN')):
+		print("Please create the RUN file!")
+		exit()
+
+	generateGPSfile(args.run_dir)
