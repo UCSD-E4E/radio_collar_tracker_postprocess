@@ -21,6 +21,7 @@ import median_filter
 import analyzeError
 import glob
 import binToGPS
+import Tkinter as tk
 
 from multiprocessing import Pool
 
@@ -43,6 +44,9 @@ def processRawPool(args):
 
 if __name__ == '__main__':
 	# Constants
+	root = tk.Tk()
+	root.withdraw()
+	root.update()
 	config_dir = ""
 	fft_detect = ""
 	if platform.system() == "Windows":
@@ -54,7 +58,7 @@ if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser(description='Processes Radio Collar Tracker Data')
 
-	parser.add_argument('-s', '--signal-distance', action = 'store_true', default = False, help = 'Enables distance to signal plots', dest = 'signal_dist')
+	# parser.add_argument('-s', '--signal-distance', action = 'store_true', default = False, help = 'Enables distance to signal plots', dest = 'signal_dist')
 	parser.add_argument('-r', '--record', action = 'store_true', default = False, help = 'Records the current run configuration', dest = 'record')
 	parser.add_argument('-c', '--clear', action = 'store_true', default = False, help = 'Clears the existing run configuration', dest = 'clear_run')
 	parser.add_argument('-i', '--input', help = 'Input Directory', metavar = 'data_dir', dest = 'data_dir', default = None)
@@ -63,7 +67,8 @@ if __name__ == '__main__':
 	parser.add_argument('-C', '--collar', action = 'append', type = int, help = 'Specific collar to run', default = None, dest = 'collars')
 
 	args = parser.parse_args()
-	signal_dist_output = args.signal_dist
+	signal_dist_output = False
+	# signal_dist_output = args.signal_dist
 	record = args.record
 	clean_run = args.clear_run
 	data_dir = ""
