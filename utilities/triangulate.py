@@ -31,7 +31,7 @@ if __name__ == '__main__':
 	main()
 
 iguanaNum = int(raw_input('Iguana Number: '))
-print("Enter lat lon, done when done")
+print("Enter lat lon (x.xxxx,y.yyyy), done when done")
 latlonstr1 = raw_input('Point 1: ')
 bearing1 = float(raw_input('Bearing: '))
 if latlonstr1.lower() == 'done':
@@ -97,10 +97,11 @@ else:
 
 	rpt = open('%s/CH_%06d.rpt' % (output_path, iguanaNum), 'w+')
 	rpt.write('Iguana %d\n' % iguanaNum)
-	rpt.write('\t%.6f, %.6f\n' % (coord[0], coord[1]))
+	rpt.write('\t%.6f, %.6f\n' % (coord[1], coord[0]))
 	rpt.write('\t+/- %d m\n' % math.ceil(maxErr))
 	est_time = raw_input('Time: ')
 	rpt.write('\t%s Local\n' % est_time)
+	rpt.write('\tTriangulation\n')
 	rpt.close()
 
 
