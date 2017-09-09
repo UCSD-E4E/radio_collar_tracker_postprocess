@@ -1,0 +1,2 @@
+function [snr] = SampleSNR(sample)
+
