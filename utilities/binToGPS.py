@@ -54,16 +54,23 @@ def generateGPSfile(run_dir):
 	raw_data_start = float(meta_file.readline().split(':')[1].strip())
 	raw_data_end = raw_data_start + raw_data_length
 
-	if raw_data_start > local_gps_start and raw_data_end < local_gps_end:
-		print("Good GPS")
+	# if raw_data_start > local_gps_start:
+	# 	print("GPS start preceeds SDR start")
+	# else:
+	# 	print("GPS start lags SDR start by %f" % (local_gps_start - raw_data_start))
+
+	# if raw_data_end < (local_gps_end + 1.6):
+	# 	print("SDR end preceeds GPS end")
+	# else:
+	# 	print('SDR end lags GPS end by %f' % (raw_data_end - local_gps_end))
+	if raw_data_start > local_gps_start and raw_data_end < (local_gps_end + 1.6):
+		# print("Good GPS")
 		return
 	print("Bad GPS, pulling from Solo.  If not connected to Solo, please exit and connect, then try again.")
 		
 
 	gpsFilename = os.path.join(run_dir, 'GPS_%06d.old' % run_num)
 	newGPSFilename = os.path.join(run_dir, 'GPS_%06d' % run_num)
-	if os.path.isfile(newGPSFilename):
-		os.rename(newGPSFilename, gpsFilename)
 
 
 	cnopt = pysftp.CnOpts()
@@ -83,6 +90,9 @@ def generateGPSfile(run_dir):
 	binFilename = '/tmp/replace.BIN'
 	mavmaster = mavutil.mavlink_connection(binFilename)
 	epoch = datetime.datetime.utcfromtimestamp(0)
+
+	if os.path.isfile(newGPSFilename) and not os.path.isfile(gpsFilename):
+		os.rename(newGPSFilename, gpsFilename)
 
 	newGPSFile = open(newGPSFilename, 'w+')
 	while True:
