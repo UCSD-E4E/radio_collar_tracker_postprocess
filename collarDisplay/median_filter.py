@@ -55,10 +55,11 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     # Calculate heatmap
     print("Collar %d: Building median map..." % num_col)
     margin = 0
-    pixelSize = 30 # meters per pixel
+    pixelSize = 50 # meters per pixel
     tiffXSize = (int((max(finalEasting)) - int(min(finalEasting)) + margin * 2) / pixelSize + 1)
     tiffYSize = (int((max(finalNorthing)) - int(min(finalNorthing)) + margin * 2) / pixelSize + 1)
     heatMapArea = np.zeros((tiffYSize, tiffXSize)) # [y, x]
+    heatMapCount = np.zeros((tiffYSize, tiffXSize)) # [y, x]
     refNorthing = max(finalNorthing) + margin
     minNorthing = refNorthing - (tiffYSize) * pixelSize
     refEasting = min(finalEasting) - margin
@@ -71,7 +72,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     # Ygeo = refNorthing - pixelSize / 2- Ypix
 
     # Plot data
-    detectionRadius = 45
+    detectionRadius = 75
     maxLocation = [0, 0, detectionRadius]
     maxA = -100
     for x in xrange(tiffXSize):
@@ -81,10 +82,10 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
             medianCol = []
             gridCol = []
             for i in xrange(len(finalCol)):
-                # if math.fabs(finalEasting[i] - xgeo) < detectionRadius and math.fabs(finalNorthing[i] - ygeo) < detectionRadius:
                 if math.fabs(finalEasting[i] - xgeo) < detectionRadius and math.fabs(finalNorthing[i] - ygeo) < detectionRadius:
                     medianCol.append(finalCol[i])
-            if len(medianCol) > 15:
+            heatMapArea[y][x] = len(medianCol)
+            if len(medianCol) > 60:
                 heatMapArea[y][x] = np.median(medianCol)
                 if heatMapArea[y][x] > maxA:
                     maxLocation = [xgeo, ygeo, detectionRadius]
@@ -128,6 +129,44 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     band.SetStatistics(np.amin(heatMapArea), np.amax(heatMapArea), np.mean(heatMapArea), np.std(heatMapArea))
     dataset.FlushCache()
     dataset = None
+
+
+    outputFileName = '%s/RUN_%06d_COL_%06d_medianCount.tiff' % (output_path, run_num, num_col)
+    driver = gdal.GetDriverByName('GTiff')
+    dataset = driver.Create(
+        outputFileName,
+        tiffXSize,
+        tiffYSize,
+        1,
+        gdal.GDT_Float32, ['COMPRESS=LZW'])
+
+    spatialReference = osr.SpatialReference()
+    spatialReference.SetUTM(zonenum, zone >= 'N')
+    spatialReference.SetWellKnownGeogCS('WGS84')
+    wkt = spatialReference.ExportToWkt()
+    retval = dataset.SetProjection(wkt)
+    dataset.SetGeoTransform((
+        refEasting,    # 3
+        pixelSize,                      # 4
+        0,
+        refNorthing,    # 0
+        0,  # 1
+        -pixelSize))                     # 2
+    band = dataset.GetRasterBand(1)
+    band.SetNoDataValue(100)
+    # print(tiffXSize)
+    # print(tiffYSize)
+    # print(np.amin(heatMapArea))
+    # print(np.amax(heatMapArea))
+    # print(np.mean(heatMapArea))
+    # print(np.std(heatMapArea))
+    # print((heatMapArea > -30).sum())
+    band.WriteArray(heatMapCount)
+    band.SetStatistics(np.amin(heatMapCount), np.amax(heatMapCount), np.mean(heatMapCount), np.std(heatMapCount))
+    dataset.FlushCache()
+    dataset = None
+
+
     # if maxA > np.amin(heatMapArea):
     #     writer = shapefile.Writer(shapefile.POINT)
     #     writer.autoBalance = 1
@@ -146,7 +185,7 @@ def generateGraph(run_num, num_col, filename, output_path, col_def):
     #     epsg1 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
     #     proj.write(epsg1)
     #     proj.close()
-    if maxA > np.amin(heatMapArea) + 0.5:
+    if maxA > np.amin(heatMapArea) + 0.3:
         print("Collar %d: Estimated location is %f, %f within %.0f meters" % (num_col, maxLocation[0], maxLocation[1], maxLocation[2]))
         # writer = shapefile.Writer(shapefile.POINT)
         # writer.autoBalance = 1
