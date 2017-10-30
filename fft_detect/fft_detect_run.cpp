@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
 		if(frequencies[i - optind] < 0 || frequencies[i - optind] > FFT_LENGTH){
 			return -1;
 		}
-		printf("Using %d bin\n", frequencies[i - optind]);
+		// printf("Using %d bin\n", frequencies[i - optind]);
 	}
 
 
