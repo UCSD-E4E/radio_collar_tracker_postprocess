@@ -25,13 +25,13 @@ if __name__ == '__main__':
 		for f in fnames:
 			if f == 'Notes':
 				rpt = open(os.path.join(dirpath, f), 'r')
-				print(rpt)
+				# print(rpt)
 				while True:
 					iguanaline = rpt.readline()
 					if iguanaline == '' or iguanaline is None:
 						break
 					iguana_num = int(iguanaline.split()[1])
-					print(iguana_num)
+					# print(iguana_num)
 					coordline = rpt.readline()
 					try:
 						lon = float(coordline.strip().split(',')[0].strip())
@@ -46,10 +46,10 @@ if __name__ == '__main__':
 				rpt.close()
 			elif f.endswith('.rpt'):
 				rpt = open(os.path.join(dirpath, f), 'r')
-				print(rpt)
+				# print(rpt)
 				iguanaline = rpt.readline()
 				iguana_num = int(iguanaline.split()[1])
-				print(iguana_num)
+				# print(iguana_num)
 				coordline = rpt.readline()
 				try:
 					lon = float(coordline.strip().split(',')[0].strip())

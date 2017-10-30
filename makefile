@@ -18,7 +18,7 @@ install: fft_detect/fft_detect raw_gps_analysis/raw_gps_analysis.py\
 	collarDisplay/csvToShp.py collarDisplay/pos_estimator.py collarDisplay/display_gps.py\
 	collarDisplay/median_filter.py collarDisplay/analyzeError.py utilities/oldCOLtonewCOLJ.py\
 	collarDisplay/ShpToCSV.py collarDisplay/custom_estimation.py utilities/colRename.py\
-	utilities/binToGPS.py
+	utilities/binToGPS.py utilities/rptToCSV.py
 
 	cp collarDisplay/ShpToCSV.py /usr/local/bin/
 	cp collarDisplay/custom_estimation.py /usr/local/bin/
@@ -43,6 +43,7 @@ install: fft_detect/fft_detect raw_gps_analysis/raw_gps_analysis.py\
 	cp collarDisplay/median_filter.py /usr/local/bin/
 	cp utilities/colRename.py /usr/local/bin
 	cp utilities/binToGPS.py /usr/local/bin
+	cp utilities/rptToCSV.py /usr/local/bin
 	
 rct_bin_ref.sh:
 	echo "#!/bin/bash" > rct_bin_ref.sh
