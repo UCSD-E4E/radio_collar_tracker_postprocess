@@ -154,7 +154,7 @@ class collarWindow(tk.Toplevel):
 		self.col_db.close()
 		self.quit()
 
-def getCollars(run_dir):
+def getCollars(run_dir, bypass = False):
 	run_filename = os.path.join(run_dir, 'RUN')
 	alt_filename = os.path.join(run_dir, 'ALT')
 	col_filename = os.path.join(run_dir, 'COLJ')
@@ -180,19 +180,28 @@ def getCollars(run_dir):
 		col_file.close()
 	else:
 		print('COLJ not found')
-	app = collarWindow(run_num, alt, col_s, os.path.basename(run_dir))
-	app.mainloop()
-	if app.select is None:
-		return None
+	if not bypass:
+		app = collarWindow(run_num, alt, col_s, os.path.basename(run_dir))
+		app.mainloop()
+		if app.select is None:
+			return None
+		retval = app.select
+	else:
+		retval = {}
+		retval['tx'] = []
+		retval['run'] = run_num
+		retval['alt'] = alt
+		for i in col_s:
+			retval['tx'].append(i)
 	run_file = open(run_filename, 'w+')
-	run_file.write('run_num: %d\n' % app.select['run'])
+	run_file.write('run_num: %d\n' % retval['run'])
 	run_file.close()
 	alt_file = open(alt_filename, 'w+')
-	alt_file.write('flt_alt: %d\n' % app.select['alt'])
+	alt_file.write('flt_alt: %d\n' % retval['alt'])
 	alt_file.close()
 	col_file = open(col_filename, 'w+')
-	col_str = json.dumps(app.select['tx'])
+	col_str = json.dumps(retval['tx'])
 	col_file.write(col_str)
 	col_file.write('\n')
 	col_file.close()
-	return app.select
+	return retval

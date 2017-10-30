@@ -31,7 +31,7 @@ def processRaw(data_dir, run, alt, collarDefinitionFilename, i):
 	csvToShp.create_shapefile(data_file, '%s/RUN_%06d_COL_%06d.shp' % (data_dir, run, i + 1))
 	start_location = median_filter.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename)
 	res_x = pos_estimator.generateGraph(run, i + 1, data_file, data_dir, collarDefinitionFilename, start_location)
-	print(res_x)
+	# print(res_x)
 	if res_x is None:
 		return
 	if res_x[6]:
@@ -65,12 +65,14 @@ if __name__ == '__main__':
 	parser.add_argument('-nf', '--no_fft', action = 'store_const', const = False, default = True, dest = 'fft_flag', help = 'This flag disables running the fft')
 	parser.add_argument('-raw', '--leave_raws', action = 'store_const', const = False, default = True, dest = 'raw_flag', help = 'This flag leaves the concatenated raw files')
 	parser.add_argument('-C', '--collar', action = 'append', type = int, help = 'Specific collar to run', default = None, dest = 'collars')
+	parser.add_argument('-y', '--yes', action = 'store_true', default = False, help = 'GUI bypass', dest = 'yes')
 
 	args = parser.parse_args()
 	signal_dist_output = False
 	# signal_dist_output = args.signal_dist
 	record = args.record
 	clean_run = args.clear_run
+	yes_flag = args.yes
 	data_dir = ""
 	fft_flag = args.fft_flag
 	raw_flag = args.raw_flag
@@ -117,7 +119,7 @@ if __name__ == '__main__':
 	
 
 	# Get collar definition
-	run_retval = getMappedCollars.getCollars(data_dir)
+	run_retval = getMappedCollars.getCollars(data_dir, yes_flag)
 	if run_retval is None:
 		exit()
 	run = run_retval['run']
@@ -178,7 +180,7 @@ if __name__ == '__main__':
 
 	# Clean up raw files
 	if raw_flag and fft_flag:
-		print("Cleaning raws")
+		# print("Cleaning raws")
 		for i in range(1, numCollars + 1):
 			os.remove("%s/RUN_%06d_%06d.raw" % (data_dir, run, i))
 	
@@ -194,7 +196,7 @@ if __name__ == '__main__':
 		trim_length = len(data_dir) + len('RUN_%06d_COL_%06d*' % (run, i + 1))
 		for file in files:
 
-			print("Rename %s to %s" % (file, new_prefix + file[trim_length:]))
+			# print("Rename %s to %s" % (file, new_prefix + file[trim_length:]))
 			os.rename(file, new_prefix + file[trim_length:])
 
 
