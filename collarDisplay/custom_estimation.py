@@ -15,10 +15,6 @@ import glob
 import ShpToCSV
 import analyzeError
 
-run_num = 73
-num_col = 2
-data_dir = '/home/ntlhui/workspace/2017.08.CI_Deployment/2017.08.23/RUN_000073/'
-
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--input_dir', required = True)
 
@@ -30,9 +26,9 @@ cols = []
 for file in files:
     cols.append(int(file.split('_')[3]))
 
+runFile = open(os.path.join(data_dir, 'RUN'), 'r')
+run_num = int(runFile.readline().split(':')[1].strip())
 for num_col in cols:
-    runFile = open(os.path.join(data_dir, 'RUN'), 'r')
-    run_num = int(runFile.readline().split(':')[1].strip())
 
     output_path = data_dir
     col_def = os.path.join(data_dir, 'COLdef')
