@@ -5,12 +5,12 @@ function [data] = raw2complex(filename)
 fileID = fopen(filename);
 bin = fread(fileID, 'int16');
 
-length = size(bin, 1);
+data_length = length(bin);
 
-real = bin(1:2:length)/4096.0;
-imag = bin(2:2:length)/4096.0;
+reals = bin(1:2:data_length)/4096.0;
+imags = bin(2:2:data_length)/4096.0;
 
-data = complex(real, imag);
+data = complex(reals, imags);
 
 fclose(fileID);
 
