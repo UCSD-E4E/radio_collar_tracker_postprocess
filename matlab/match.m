@@ -1,0 +1,9 @@
+function [signal] = match(input_signal, filter_frequency, num_taps, sampling_freq)
+	filter_length = num_taps / sampling_freq;
+	t = 0:1/sampling_freq:filter_length - 1/sampling_freq;
+	filter_taps = cos(2 * pi * filter_frequency * t) + i * sin(2 * pi * filter_frequency * t);
+	filter_taps = filter_taps(:);
+	input_signal = input_signal(:);
+	conv_output = conv(input_signal, filter_taps);
+	amp = abs(conv_output);
+	signal = 10 * log10(amp);
