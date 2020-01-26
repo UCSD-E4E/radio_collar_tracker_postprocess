@@ -4,10 +4,9 @@ function waterfall(fft_len, center_freq, samp_freq, data)
 	fft_in_data = reshape(data(1:num_ffts * fft_len), [fft_len, num_ffts]);
 	fft_out_data = fft(fft_in_data);
 	shifted_amp_data = abs(fft_out_data / fft_len);
-	amp_data = [shifted_amp_data(fft_len/2+1:fft_len,:); shifted_amp_data(1:fft_len/2,:)];
 	% amp_data = [shifted_amp_data(fft_len / 2 + 1 : fft_len, :); ...
 	% 	shifted_amp_data(1 : fft_len / 2, :)];
-	power_data = fftshift(10 * log10(abs(amp_data))',2);
+	power_data = fftshift(10 * log10(abs(shifted_amp_data))',2);
 	fig = figure;
 	freq_bound = samp_freq / 2;
 	imagesc([(-freq_bound + center_freq) / 1e6, (freq_bound + center_freq) / 1e6], ...
